@@ -1,0 +1,74 @@
+From 512499c304725238c57b3e9ce81cd0dbf0821cf4 Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Tue, 14 Jun 2016 16:25:51 +0200
+Subject: [PATCH virt-viewer] monitor-alignment: Do not crash on NULL display
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Since commit 01b66ef88bc142d6716b40b1e384e94a2629a99f virt-viewer
+does not crash on connection to a guest using an invalid display
+configuration (eg. Cirrus & QXL vga). That commit allowed existence
+of NULL display, however the code handling monitors alignment does
+not expect this and crashes when virt-viewer is shifting/aligning
+its windows.
+
+Avoid crashing by returning early on NULL display.
+
+ #0  0x0000000000411d0a in displays_cmp (p1=p1@entry=0xbad940, p2=p2@entry=0xbad944, user_data=user_data@entry=0x8eb180) at virt-viewer-util.c:544
+ #1  0x00007ffff3f16ac5 in msort_with_tmp (p=0x7fffffffd670, b=0xbad940, n=2) at gqsort.c:93
+ #2  0x00007ffff3f16ded in msort_r (b=b@entry=0xbad940, n=n@entry=2, s=s@entry=4, cmp=cmp@entry=0x411ce0 <displays_cmp>, arg=arg@entry=0x8eb180) at gqsort.c:278
+ #3  0x00007ffff3f16e78 in g_qsort_with_data (pbase=pbase@entry=0xbad940, total_elems=total_elems@entry=2, size=size@entry=4, compare_func=compare_func@entry=0x411ce0 <displays_cmp>, user_data=user_data@entry=0x8eb180) at gqsort.c:303
+ #4  0x000000000041277c in virt_viewer_align_monitors_linear (displays=displays@entry=0x8eb180 = {...}) at virt-viewer-util.c:586
+ #5  0x000000000041a92d in virt_viewer_session_on_monitor_geometry_changed (self=0x8f38a0 [VirtViewerSessionSpice], display=<optimized out>) at virt-viewer-session.c:373
+ #6  0x00007ffff4415908 in g_closure_invoke (closure=0x9306c0, return_value=return_value@entry=0x0, n_param_values=2, param_values=param_values@entry=0x7fffffffd960, invocation_hint=invocation_hint@entry=0x7fffffffd900)  at gclosure.c:801
+ #7  0x00007ffff4427a1d in signal_emit_unlocked_R (node=node@entry=0x668f80, detail=detail@entry=1551, instance=instance@entry=0x930440, emission_return=emission_return@entry=0x0, instance_and_params=instance_and_params@entry=0x7fffffffd960) at gsignal.c:3627
+ #8  0x00007ffff442fab1 in g_signal_emit_valist (instance=<optimized out>, signal_id=<optimized out>, detail=<optimized out>, var_args=var_args@entry=0x7fffffffdaf0) at gsignal.c:3383
+ #9  0x00007ffff442fd9f in <emit signal notify:agent-connected on instance 0x930440 [SpiceMainChannel]> (instance=instance@entry=0x930440, signal_id=<optimized out>, detail=<optimized out>) at gsignal.c:3439
+ #10 0x00007ffff4419fd4 in g_object_dispatch_properties_changed (object=0x930440 [SpiceMainChannel], n_pspecs=<optimized out>, pspecs=<optimized out> at gobject.c:1061
+ #11 0x00007ffff441c4f9 in g_object_notify (pspec=<optimized out>, object=0x930440 [SpiceMainChannel]) at gobject.c:1155
+ #12 0x00007ffff441c4f9 in g_object_notify (object=0x930440 [SpiceMainChannel], property_name=<optimized out>) at gobject.c:1202
+ #13 0x00007ffff5a63dd0 in notify_main_context (opaque=0x7fffd6fde990) at gio-coroutine.c:240
+ #14 0x00007ffff3f07d7a in g_main_context_dispatch (context=0x68da40) at gmain.c:3152
+ #15 0x00007ffff3f07d7a in g_main_context_dispatch (context=context@entry=0x68da40) at gmain.c:3767
+ #16 0x00007ffff3f080b8 in g_main_context_iterate (context=0x68da40, block=block@entry=1, dispatch=dispatch@entry=1, self=<optimized out>) at gmain.c:3838
+ #17 0x00007ffff3f0838a in g_main_loop_run (loop=0x710de0) at gmain.c:4032
+ #18 0x00007ffff5f53045 in gtk_main () at gtkmain.c:1207
+ #19 0x0000000000411a22 in main (argc=1, argv=0x7fffffffdfa8)
+
+Resolves: https://bugzilla.redhat.com/show_bug.cgi?id=1310974
+
+Acked-by: Fabiano Fidêncio <fidencio@redhat.com>
+(cherry picked from commit cb4ec1fc8088df4bedfc310668cbc6b4938497e2)
+---
+ src/virt-viewer-util.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/virt-viewer-util.c b/src/virt-viewer-util.c
+index f2ccd13..37269d2 100644
+--- a/src/virt-viewer-util.c
++++ b/src/virt-viewer-util.c
+@@ -541,6 +541,7 @@ displays_cmp(const void *p1, const void *p2, gpointer user_data)
+     guint j = *(guint*)p2;
+     GdkRectangle *m1 = g_hash_table_lookup(displays, GINT_TO_POINTER(i));
+     GdkRectangle *m2 = g_hash_table_lookup(displays, GINT_TO_POINTER(j));
++    g_return_val_if_fail(m1 != NULL && m2 != NULL, 0);
+     diff = m1->x - m2->x;
+     if (diff == 0)
+         diff = m1->y - m2->y;
+@@ -591,6 +592,7 @@ virt_viewer_align_monitors_linear(GHashTable *displays)
+         guint nth = sorted_displays[i];
+         g_assert(nth < ndisplays);
+         GdkRectangle *rect = g_hash_table_lookup(displays, GINT_TO_POINTER(nth));
++        g_return_if_fail(rect != NULL);
+         rect->x = x;
+         rect->y = 0;
+         x += rect->width;
+@@ -623,6 +625,7 @@ virt_viewer_shift_monitors_to_origin(GHashTable *displays)
+     g_hash_table_iter_init(&iter, displays);
+     while (g_hash_table_iter_next(&iter, &key, &value)) {
+         GdkRectangle *display = value;
++        g_return_if_fail(display != NULL);
+         if (display->width > 0 && display->height > 0) {
+             xmin = MIN(xmin, display->x);
+             ymin = MIN(ymin, display->y);

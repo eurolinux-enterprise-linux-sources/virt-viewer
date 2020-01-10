@@ -1,0 +1,24 @@
+From c4429942b66a013db1170d2c81aa477cb972faa2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabiano=20Fid=C3=AAncio?= <fidencio@redhat.com>
+Date: Thu, 30 Jun 2016 11:16:23 +0200
+Subject: [PATCH virt-viewer] remote-viewer: GtkRecentChooserWidget is not
+ suitable for mnemonic activation
+
+Related: https://bugzilla.redhat.com/show_bug.cgi?id=1351562
+---
+ src/remote-viewer.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/remote-viewer.c b/src/remote-viewer.c
+index 978e881..acc9a74 100644
+--- a/src/remote-viewer.c
++++ b/src/remote-viewer.c
+@@ -1123,7 +1123,7 @@ connect_dialog(GtkWindow *main_window, gchar **uri)
+     gtk_box_pack_start(GTK_BOX(box), alignment, TRUE, TRUE, 0);
+ #endif
+ 
+-    label = gtk_label_new_with_mnemonic(_("_Recent Connections"));
++    label = gtk_label_new(_("Recent Connections"));
+     make_label_bold(GTK_LABEL(label));
+     gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 0);
+     gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);

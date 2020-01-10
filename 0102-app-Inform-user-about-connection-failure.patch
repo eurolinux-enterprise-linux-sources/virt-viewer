@@ -1,0 +1,73 @@
+From c3078cbdcd63dd5834f033b0cc085aa7345f927c Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Wed, 5 Oct 2016 14:33:17 +0200
+Subject: [PATCH virt-viewer] app: Inform user about connection failure
+To: virt-tools-list@redhat.com
+
+Use errno to get the reason of the failure
+
+Resolves:
+https://bugzilla.redhat.com/show_bug.cgi?id=1377214
+https://bugzilla.redhat.com/show_bug.cgi?id=1377100
+(cherry picked from commit a744f9a5ce6cb0719a51ae6249bcfb5d53744702)
+---
+ src/virt-viewer-app.c | 18 +++++++++++++++---
+ 1 file changed, 15 insertions(+), 3 deletions(-)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index 5f1c925..0cfaf4c 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -34,6 +34,7 @@
+ #include <locale.h>
+ #include <glib/gprintf.h>
+ #include <glib/gi18n.h>
++#include <errno.h>
+ 
+ #include <libxml/xpath.h>
+ #include <libxml/uri.h>
+@@ -636,19 +637,30 @@ virt_viewer_app_open_tunnel_ssh(const char *sshhost,
+ }
+ 
+ static int
+-virt_viewer_app_open_unix_sock(const char *unixsock)
++virt_viewer_app_open_unix_sock(const char *unixsock, GError **error)
+ {
+     struct sockaddr_un addr;
+     int fd;
+ 
++    if (strlen(unixsock) + 1 > sizeof(addr.sun_path)) {
++        g_set_error(error, VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
++                    _("Address is too long for unix socket_path: %s"), unixsock);
++        return -1;
++    }
++
+     memset(&addr, 0, sizeof addr);
+     addr.sun_family = AF_UNIX;
+     strcpy(addr.sun_path, unixsock);
+ 
+-    if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
++    if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
++        g_set_error(error, VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
++                    _("Creating unix socket failed: %s"), g_strerror(errno));
+         return -1;
++    }
+ 
+     if (connect(fd, (struct sockaddr *)&addr, sizeof addr) < 0) {
++        g_set_error(error, VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
++                    _("Connecting to unix socket failed: %s"), g_strerror(errno));
+         close(fd);
+         return -1;
+     }
+@@ -1182,7 +1194,7 @@ virt_viewer_app_default_activate(VirtViewerApp *self, GError **error)
+     } else if (priv->unixsock && fd == -1) {
+         virt_viewer_app_trace(self, "Opening direct UNIX connection to display at %s",
+                               priv->unixsock);
+-        if ((fd = virt_viewer_app_open_unix_sock(priv->unixsock)) < 0)
++        if ((fd = virt_viewer_app_open_unix_sock(priv->unixsock, error)) < 0)
+             return FALSE;
+     }
+ #endif
+-- 
+2.10.0
+

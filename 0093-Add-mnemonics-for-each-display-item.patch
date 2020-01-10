@@ -1,0 +1,31 @@
+From bd88cfc53cf7cb76a10a72658fb3f3a9e8a21419 Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Mon, 30 May 2016 19:33:10 +0200
+Subject: [PATCH virt-viewer] Add mnemonics for each display item
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Related: https://bugzilla.redhat.com/show_bug.cgi?id=1351890
+
+Acked-by: Fabiano Fidêncio <fidencio@redhat.com>
+(cherry picked from commit 4b6fc261d0dbbde08cfd826db1c1accb6919336b)
+---
+ src/virt-viewer-app.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index 7c225dd..c7bcec2 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -2296,8 +2296,8 @@ window_update_menu_displays_cb(gpointer value,
+         gboolean visible;
+         gchar *label;
+ 
+-        label = g_strdup_printf(_("Display %d"), nth + 1);
+-        item = gtk_check_menu_item_new_with_label(label);
++        label = g_strdup_printf(_("Display _%d"), nth + 1);
++        item = gtk_check_menu_item_new_with_mnemonic(label);
+         g_free(label);
+ 
+         visible = vwin && gtk_widget_get_visible(GTK_WIDGET(virt_viewer_window_get_window(vwin)));

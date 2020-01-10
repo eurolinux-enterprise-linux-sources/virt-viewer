@@ -1,0 +1,225 @@
+From 305029b01648b8195918169c00a28bc3418b0f04 Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Mon, 7 Mar 2016 11:20:45 +0100
+Subject: [PATCH virt-viewer] Move monitor mapping parsing from app to util
+
+It is not specific to VirtViewerApp.
+Following commits will add support for tests thanks to this move.
+
+Related: https://bugzilla.redhat.com/show_bug.cgi?id=1351881
+         https://bugzilla.redhat.com/show_bug.cgi?id=1315206
+---
+ src/virt-viewer-app.c  | 72 ++---------------------------------------
+ src/virt-viewer-util.c | 87 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ src/virt-viewer-util.h |  3 ++
+ 3 files changed, 92 insertions(+), 70 deletions(-)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index c7bcec2..0410ace 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -55,6 +55,7 @@
+ #include "virt-viewer-auth.h"
+ #include "virt-viewer-window.h"
+ #include "virt-viewer-session.h"
++#include "virt-viewer-util.h"
+ #ifdef HAVE_GTK_VNC
+ #include "virt-viewer-session-vnc.h"
+ #endif
+@@ -370,75 +371,6 @@ app_window_try_fullscreen(VirtViewerApp *self G_GNUC_UNUSED,
+     virt_viewer_window_enter_fullscreen(win, monitor);
+ }
+ 
+-
+-static GHashTable*
+-virt_viewer_app_parse_monitor_mappings(gchar **mappings, gsize nmappings)
+-{
+-    gint nmonitors = get_n_client_monitors();
+-    GHashTable *displaymap = g_hash_table_new(g_direct_hash, g_direct_equal);
+-    GHashTable *monitormap = g_hash_table_new(g_direct_hash, g_direct_equal);
+-    int i = 0;
+-    gchar **tokens = NULL;
+-
+-    if (nmappings == 0) {
+-        g_warning("Empty monitor-mapping configuration");
+-        goto configerror;
+-    }
+-
+-    for (i = 0; i < nmappings; i++) {
+-        gchar *endptr = NULL;
+-        gint display = 0, monitor = 0;
+-
+-        tokens = g_strsplit(mappings[i], ":", 2);
+-        if (g_strv_length(tokens) != 2) {
+-            g_warning("Invalid monitor-mapping configuration: '%s'. "
+-                      "Expected format is '<DISPLAY-ID>:<MONITOR-ID>'",
+-                      mappings[i]);
+-            g_strfreev(tokens);
+-            goto configerror;
+-        }
+-
+-        display = strtol(tokens[0], &endptr, 10);
+-        if ((endptr && *endptr != '\0') || display < 1) {
+-            g_warning("Invalid monitor-mapping configuration: display id is invalid: %s %p='%s'", tokens[0], endptr, endptr);
+-            g_strfreev(tokens);
+-            goto configerror;
+-        }
+-        monitor = strtol(tokens[1], &endptr, 10);
+-        if ((endptr && *endptr != '\0') || monitor < 1) {
+-            g_warning("Invalid monitor-mapping configuration: monitor id '%s' is invalid", tokens[1]);
+-            g_strfreev(tokens);
+-            goto configerror;
+-        }
+-        g_strfreev(tokens);
+-
+-        if (monitor > nmonitors)
+-            g_warning("Initial monitor #%i for display #%i does not exist, skipping...", monitor, display);
+-        else {
+-            /* config file format is 1-based, not 0-based */
+-            display--;
+-            monitor--;
+-
+-            if (g_hash_table_lookup_extended(displaymap, GINT_TO_POINTER(display), NULL, NULL) ||
+-                g_hash_table_lookup_extended(monitormap, GINT_TO_POINTER(monitor), NULL, NULL)) {
+-                g_warning("Invalid monitor-mapping configuration: a display or monitor id was specified twice");
+-                goto configerror;
+-            }
+-            g_debug("Fullscreen config: mapping guest display %i to monitor %i", display, monitor);
+-            g_hash_table_insert(displaymap, GINT_TO_POINTER(display), GINT_TO_POINTER(monitor));
+-            g_hash_table_insert(monitormap, GINT_TO_POINTER(monitor), GINT_TO_POINTER(display));
+-        }
+-    }
+-
+-    g_hash_table_unref(monitormap);
+-    return displaymap;
+-
+-configerror:
+-    g_hash_table_unref(monitormap);
+-    g_hash_table_unref(displaymap);
+-    return NULL;
+-}
+-
+ static GHashTable*
+ virt_viewer_app_get_monitor_mapping_for_section(VirtViewerApp *self, const gchar *section)
+ {
+@@ -455,7 +387,7 @@ virt_viewer_app_get_monitor_mapping_for_section(VirtViewerApp *self, const gchar
+             g_warning("Error reading monitor assignments for %s: %s", section, error->message);
+         g_clear_error(&error);
+     } else {
+-        mapping = virt_viewer_app_parse_monitor_mappings(mappings, nmappings);
++        mapping = virt_viewer_parse_monitor_mappings(mappings, nmappings);
+     }
+     g_strfreev(mappings);
+ 
+diff --git a/src/virt-viewer-util.c b/src/virt-viewer-util.c
+index 37269d2..ed04fa6 100644
+--- a/src/virt-viewer-util.c
++++ b/src/virt-viewer-util.c
+@@ -646,6 +646,93 @@ virt_viewer_shift_monitors_to_origin(GHashTable *displays)
+     }
+ }
+ 
++/**
++ * virt_viewer_parse_monitor_mappings:
++ * @mappings: (array zero-terminated=1) values for the "monitor-mapping" key
++ * @nmappings: the size of @mappings
++ *
++ * Parses and validates monitor mappings values to return a hash table
++ * containing the mapping from guest display ids to client monitors ids.
++ *
++ * Returns: (transfer full) a #GHashTable containing mapping from guest display
++ *  ids to client monitor ids or %NULL if the mapping is invalid.
++ */
++GHashTable*
++virt_viewer_parse_monitor_mappings(gchar **mappings, const gsize nmappings)
++{
++    const gint nmonitors = gdk_screen_get_n_monitors(gdk_screen_get_default());
++    GHashTable *displaymap = g_hash_table_new(g_direct_hash, g_direct_equal);
++    GHashTable *monitormap = g_hash_table_new(g_direct_hash, g_direct_equal);
++    gint i, max_display_id = 0;
++    gchar **tokens = NULL;
++
++    if (nmappings == 0) {
++        g_warning("Empty monitor-mapping configuration");
++        goto configerror;
++    }
++
++    for (i = 0; i < nmappings; i++) {
++        gchar *endptr = NULL;
++        gint display = 0, monitor = 0;
++
++        tokens = g_strsplit(mappings[i], ":", 2);
++        if (g_strv_length(tokens) != 2) {
++            g_warning("Invalid monitor-mapping configuration: '%s'. "
++                      "Expected format is '<DISPLAY-ID>:<MONITOR-ID>'",
++                      mappings[i]);
++            g_strfreev(tokens);
++            goto configerror;
++        }
++
++        display = strtol(tokens[0], &endptr, 10);
++        if ((endptr && *endptr != '\0') || display < 1) {
++            g_warning("Invalid monitor-mapping configuration: display id is invalid: %s %p='%s'", tokens[0], endptr, endptr);
++            g_strfreev(tokens);
++            goto configerror;
++        }
++        monitor = strtol(tokens[1], &endptr, 10);
++        if ((endptr && *endptr != '\0') || monitor < 1) {
++            g_warning("Invalid monitor-mapping configuration: monitor id '%s' is invalid", tokens[1]);
++            g_strfreev(tokens);
++            goto configerror;
++        }
++        g_strfreev(tokens);
++
++        if (monitor > nmonitors) {
++            g_warning("Invalid monitor-mapping configuration: monitor #%i for display #%i does not exist", monitor, display);
++            goto configerror;
++        }
++
++        /* config file format is 1-based, not 0-based */
++        display--;
++        monitor--;
++
++        if (g_hash_table_lookup_extended(displaymap, GINT_TO_POINTER(display), NULL, NULL) ||
++            g_hash_table_lookup_extended(monitormap, GINT_TO_POINTER(monitor), NULL, NULL)) {
++            g_warning("Invalid monitor-mapping configuration: a display or monitor id was specified twice");
++            goto configerror;
++        }
++        g_debug("Fullscreen config: mapping guest display %i to monitor %i", display, monitor);
++        g_hash_table_insert(displaymap, GINT_TO_POINTER(display), GINT_TO_POINTER(monitor));
++        g_hash_table_insert(monitormap, GINT_TO_POINTER(monitor), GINT_TO_POINTER(display));
++        max_display_id = MAX(display, max_display_id);
++    }
++
++    for (i = 0; i < max_display_id; i++) {
++        if (!g_hash_table_lookup_extended(displaymap, GINT_TO_POINTER(i), NULL, NULL)) {
++            g_warning("Invalid monitor-mapping configuration: display #%d was not specified", i+1);
++            goto configerror;
++        }
++    }
++
++    g_hash_table_unref(monitormap);
++    return displaymap;
++
++configerror:
++    g_hash_table_unref(monitormap);
++    g_hash_table_unref(displaymap);
++    return NULL;
++}
+ 
+ /*
+  * Local variables:
+diff --git a/src/virt-viewer-util.h b/src/virt-viewer-util.h
+index f1cb08b..2d36d73 100644
+--- a/src/virt-viewer-util.h
++++ b/src/virt-viewer-util.h
+@@ -60,6 +60,9 @@ gint virt_viewer_compare_buildid(const gchar *s1, const gchar *s2);
+ void virt_viewer_align_monitors_linear(GHashTable *displays);
+ void virt_viewer_shift_monitors_to_origin(GHashTable *displays);
+ 
++/* monitor mapping */
++GHashTable* virt_viewer_parse_monitor_mappings(gchar **mappings,
++                                               const gsize nmappings);
+ #endif
+ 
+ /*

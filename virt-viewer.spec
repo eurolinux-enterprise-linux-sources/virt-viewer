@@ -27,7 +27,7 @@
 
 Name: virt-viewer
 Version: 2.0
-Release: 14%{?dist}%{?extra_release}
+Release: 18%{?dist}%{?extra_release}
 Summary: Virtual Machine Viewer
 Group: Applications/System
 License: GPLv2+
@@ -117,6 +117,26 @@ Patch81: 0081-session-Only-create-a-hashtable-if-apply_monitor_geo.patch
 Patch82: 0082-util-Fix-the-size-of-sorted_displays-allocation.patch
 Patch83: 0083-app-Return-early-on-empty-monitor-mapping.patch
 Patch84: 0084-Refresh-translations-from-Zanata.patch
+Patch85: 0085-ovirt-Only-use-active-ISO-domains-for-foreign-menu.patch
+Patch86: 0086-ovirt-Allow-to-cancel-authentication-without-showing.patch
+Patch87: 0087-app-window-Set-display-menu-not-sensitive-when-neede.patch
+Patch88: 0088-virt-viewer-Set-toolbar-buttons-not-sensitive-when-n.patch
+Patch89: 0089-app-Do-not-show-usbredir-button-without-session.patch
+Patch90: 0090-remote-viewer-GtkRecentChooserWidget-is-not-suitable.patch
+Patch91: 0091-remote-viewer-Use-a-different-mnemonic-for-Connectio.patch
+Patch92: 0092-Add-some-missing-mnemonics-to-menu-items.patch
+Patch93: 0093-Add-mnemonics-for-each-display-item.patch
+Patch94: 0094-spice-avoid-crashing-when-using-invalid-video-config.patch
+Patch95: 0095-monitor-alignment-Do-not-crash-on-NULL-display.patch
+Patch96: 0096-spice-vv-file-do-not-ignore-usb-filter.patch
+Patch97: 0097-Move-monitor-mapping-parsing-from-app-to-util.patch
+Patch98: 0098-virt_viewer_parse_monitor_mappings-Add-parameter-for.patch
+Patch99: 0099-test-Add-tests-for-monitor-mapping.patch
+Patch100: 0100-app-Use-debug-to-inform-about-smartcard-shortcuts-st.patch
+Patch101: 0101-app-Check-validity-of-hotkey.patch
+Patch102: 0102-app-Inform-user-about-connection-failure.patch
+Patch103: 0103-Fix-format-of-italien-translation.patch
+Patch104: 0104-Refresh-translations.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: openssh-clients
@@ -158,6 +178,7 @@ BuildRequires: intltool
 Requires: glib2 >= 2.26
 %if %{with_govirt}
 BuildRequires: libgovirt-devel >= 0.3.2
+BuildRequires: rest-devel >= 0.7.92-3
 %endif
 
 %description
@@ -251,7 +272,26 @@ the display, and libvirt for looking up VNC/SPICE server details.
 %patch82 -p1
 %patch83 -p1
 %patch84 -p1
-
+%patch85 -p1
+%patch86 -p1
+%patch87 -p1
+%patch88 -p1
+%patch89 -p1
+%patch90 -p1
+%patch91 -p1
+%patch92 -p1
+%patch93 -p1
+%patch94 -p1
+%patch95 -p1
+%patch96 -p1
+%patch97 -p1
+%patch98 -p1
+%patch99 -p1
+%patch100 -p1
+%patch101 -p1
+%patch102 -p1
+%patch103 -p1
+%patch104 -p1
 %build
 
 %if 0%{?enable_autotools}
@@ -330,6 +370,52 @@ update-desktop-database -q %{_datadir}/applications
 %{_datadir}/mime/packages/virt-viewer-mime.xml
 
 %changelog
+* Tue Dec 13 2016 Pavel Grunt <pgrunt@redhat.com> - 2.0-18
+- Rebuild with required rest dependency
+  Resolves: rhbz#1318575
+
+* Thu Oct 20 2016 Pavel Grunt <pgrunt@redhat.com> - 2.0-17
+- Refresh translation
+  Resolves: rhbz#1316354
+
+* Tue Oct 11 2016 Pavel Grunt <pgrunt@redhat.com> - 2.0-16
+- Inform about unix socket connection failure
+  Resolves: rhbz#1377214
+- Fix format of displayed string for it_IT
+  Resolves: rhbz#1325127
+
+* Fri Sep 16 2016 Eduardo Lima (Etrunko) <etrunko@redhat.com> - 2.0-15
+- Only use active ISO domains for foreign menu
+  Resolves: rhbz#1313376
+- Allow to cancel authentication without showing error dialog
+  Resolves: rhbz#1318575
+- Set display menu not sensitive when needed
+  Resolves: rhbz#1360253
+- Set toolbar buttons not sensitive when needed
+  Resolves: rhbz#1360253
+- Do not show usbredir button without session
+  Resolves: rhbz#1360253
+- GtkRecentChooserWidget is not suitable for mnemonic activation
+  Related: rhbz#1351562
+- Use a different mnemonic for Connection Address widget
+  Related: rhbz#1351562
+- Add some missing mnemonics to menu items
+  Resolves: rhbz#1351890
+- Add mnemonics for each display item
+  Resolves: rhbz#1351890
+- Avoid crashing when using invalid video config
+  Resolves: rhbz#1310974
+- Do not crash on NULL display
+  Resolves: rhbz#1310974
+- Do not ignore usb-filter in vv-file
+  Resolves: rhbz#1327525
+- Add parameter for client monitors in monitor-mapping
+  Resolves: rhbz#1351881
+- Use debug to inform about smartcard shortcuts state
+  Related: rhbz#1351876
+- Check validity of hotkey
+  Resolves: rhbz#1351876
+
 * Fri Mar 04 2016 Fabiano Fidêncio <fidencio@redhat.com> - 2.0-14
 - Monitor mapping doesn't properly adjust resolutions
   Resolves: rhbz#1309234

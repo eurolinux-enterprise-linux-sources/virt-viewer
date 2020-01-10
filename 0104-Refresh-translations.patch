@@ -1,0 +1,3548 @@
+From c15cc1f012a213a170bb3311660a3595ecc91c2e Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Thu, 20 Oct 2016 08:47:46 +0200
+Subject: [PATCH virt-viewer] Refresh translations
+To: virt-tools-list@redhat.com
+
+Resolves: rhbz#1316354
+---
+ po/af.po       |  2 +-
+ po/am.po       |  2 +-
+ po/anp.po      |  2 +-
+ po/ar.po       |  2 +-
+ po/as.po       |  2 +-
+ po/ast.po      |  2 +-
+ po/bal.po      |  2 +-
+ po/be.po       |  2 +-
+ po/bg.po       |  2 +-
+ po/bn.po       |  2 +-
+ po/bn_IN.po    |  2 +-
+ po/bo.po       |  2 +-
+ po/br.po       |  2 +-
+ po/brx.po      |  2 +-
+ po/bs.po       |  2 +-
+ po/ca.po       |  2 +-
+ po/cs.po       |  2 +-
+ po/cy.po       |  2 +-
+ po/da.po       |  2 +-
+ po/de.po       | 51 ++++++++++++++++---------------
+ po/de_CH.po    |  2 +-
+ po/el.po       |  2 +-
+ po/en_GB.po    |  2 +-
+ po/eo.po       |  2 +-
+ po/es.po       | 56 +++++++++++++++++++---------------
+ po/et.po       |  2 +-
+ po/eu.po       |  2 +-
+ po/fa.po       |  2 +-
+ po/fi.po       |  2 +-
+ po/fr.po       | 70 ++++++++++++++++++++++--------------------
+ po/gl.po       |  2 +-
+ po/gu.po       |  2 +-
+ po/he.po       |  2 +-
+ po/hi.po       |  2 +-
+ po/hr.po       |  2 +-
+ po/hu.po       |  2 +-
+ po/ia.po       |  2 +-
+ po/id.po       |  2 +-
+ po/ilo.po      |  2 +-
+ po/is.po       |  2 +-
+ po/it.po       | 67 ++++++++++++++++++++++------------------
+ po/ja.po       | 96 +++++++++++++++++++++++++++++++++++-----------------------
+ po/ka.po       |  2 +-
+ po/kk.po       |  2 +-
+ po/km.po       |  2 +-
+ po/kn.po       |  2 +-
+ po/ko.po       | 80 +++++++++++++++++++++++++++---------------------
+ po/kw.po       |  2 +-
+ po/kw@kkcor.po |  2 +-
+ po/kw@uccor.po |  2 +-
+ po/kw_GB.po    |  2 +-
+ po/ky.po       |  2 +-
+ po/lt.po       |  2 +-
+ po/lv.po       |  2 +-
+ po/mai.po      |  2 +-
+ po/mk.po       |  2 +-
+ po/ml.po       |  2 +-
+ po/mn.po       |  2 +-
+ po/mr.po       |  2 +-
+ po/ms.po       |  2 +-
+ po/nb.po       |  2 +-
+ po/nds.po      |  2 +-
+ po/ne.po       |  2 +-
+ po/nl.po       |  2 +-
+ po/nn.po       |  2 +-
+ po/nso.po      |  2 +-
+ po/or.po       |  2 +-
+ po/pa.po       |  2 +-
+ po/pl.po       |  2 +-
+ po/pt.po       |  2 +-
+ po/pt_BR.po    | 64 +++++++++++++++++++++------------------
+ po/ro.po       |  2 +-
+ po/ru.po       | 74 ++++++++++++++++++++++++--------------------
+ po/si.po       |  2 +-
+ po/sk.po       |  2 +-
+ po/sl.po       |  2 +-
+ po/sq.po       |  2 +-
+ po/sr.po       |  2 +-
+ po/sr@latin.po |  2 +-
+ po/sv.po       |  2 +-
+ po/ta.po       |  2 +-
+ po/te.po       |  2 +-
+ po/tg.po       |  2 +-
+ po/th.po       |  2 +-
+ po/tr.po       |  2 +-
+ po/tw.po       |  2 +-
+ po/uk.po       |  2 +-
+ po/ur.po       |  2 +-
+ po/vi.po       |  2 +-
+ po/wba.po      |  2 +-
+ po/yo.po       |  2 +-
+ po/zh_CN.po    | 73 ++++++++++++++++++++++++--------------------
+ po/zh_HK.po    |  2 +-
+ po/zh_TW.po    | 74 ++++++++++++++++++++++++--------------------
+ po/zu.po       |  2 +-
+ 95 files changed, 479 insertions(+), 396 deletions(-)
+
+diff --git a/po/af.po b/po/af.po
+index 6a58cb7..20e1d8d 100644
+--- a/po/af.po
++++ b/po/af.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Afrikaans\n"
+diff --git a/po/am.po b/po/am.po
+index aa53120..f544eb5 100644
+--- a/po/am.po
++++ b/po/am.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Amharic\n"
+diff --git a/po/anp.po b/po/anp.po
+index 9b2848b..3c0957c 100644
+--- a/po/anp.po
++++ b/po/anp.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Angika\n"
+diff --git a/po/ar.po b/po/ar.po
+index 754d008..0ffa013 100644
+--- a/po/ar.po
++++ b/po/ar.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Arabic\n"
+diff --git a/po/as.po b/po/as.po
+index 5a6ae88..68a10db 100644
+--- a/po/as.po
++++ b/po/as.po
+@@ -10,7 +10,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Assamese (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/ast.po b/po/ast.po
+index 81aec81..4443781 100644
+--- a/po/ast.po
++++ b/po/ast.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Asturian\n"
+diff --git a/po/bal.po b/po/bal.po
+index a4f9fad..56b9b51 100644
+--- a/po/bal.po
++++ b/po/bal.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Baluchi\n"
+diff --git a/po/be.po b/po/be.po
+index 42ac644..83eb93c 100644
+--- a/po/be.po
++++ b/po/be.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Belarusian\n"
+diff --git a/po/bg.po b/po/bg.po
+index fe86e69..40a82f8 100644
+--- a/po/bg.po
++++ b/po/bg.po
+@@ -8,7 +8,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Bulgarian (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/bn.po b/po/bn.po
+index 23e07fa..7ba79e9 100644
+--- a/po/bn.po
++++ b/po/bn.po
+@@ -13,7 +13,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Bengali (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/bn_IN.po b/po/bn_IN.po
+index d375f92..05bca4a 100644
+--- a/po/bn_IN.po
++++ b/po/bn_IN.po
+@@ -10,7 +10,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Bengali (India) (http://www.transifex.com/projects/p/virt-"
+diff --git a/po/bo.po b/po/bo.po
+index 0ced403..bd26607 100644
+--- a/po/bo.po
++++ b/po/bo.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Tibetan\n"
+diff --git a/po/br.po b/po/br.po
+index 51e36f4..9e6c3fd 100644
+--- a/po/br.po
++++ b/po/br.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Breton\n"
+diff --git a/po/brx.po b/po/brx.po
+index 576edb9..a4212c5 100644
+--- a/po/brx.po
++++ b/po/brx.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Bodo\n"
+diff --git a/po/bs.po b/po/bs.po
+index 46de454..7175243 100644
+--- a/po/bs.po
++++ b/po/bs.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Bosnian\n"
+diff --git a/po/ca.po b/po/ca.po
+index 80e7397..5728d06 100644
+--- a/po/ca.po
++++ b/po/ca.po
+@@ -10,7 +10,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2016-02-14 10:44-0500\n"
+ "Last-Translator: Robert Antoni Buj Gelonch <rbuj@fedoraproject.org>\n"
+ "Language-Team: Catalan (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/cs.po b/po/cs.po
+index 492df52..ae3d02b 100644
+--- a/po/cs.po
++++ b/po/cs.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Czech\n"
+diff --git a/po/cy.po b/po/cy.po
+index 5565e84..f1db72b 100644
+--- a/po/cy.po
++++ b/po/cy.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Welsh\n"
+diff --git a/po/da.po b/po/da.po
+index 42e132d..968efa7 100644
+--- a/po/da.po
++++ b/po/da.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Danish\n"
+diff --git a/po/de.po b/po/de.po
+index db0a4e3..0864e49 100644
+--- a/po/de.po
++++ b/po/de.po
+@@ -1,7 +1,7 @@
+ # SOME DESCRIPTIVE TITLE.
+ # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+ # This file is distributed under the same license as the PACKAGE package.
+-# 
++#
+ # Translators:
+ # Automatically generated, 2010
+ # Fabian Affolter <fab@fedoraproject.org>, 2012
+@@ -14,14 +14,14 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: virt-viewer\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2013-07-09 21:09+0100\n"
+-"MIME-Version: 1.0\n"
+-"Content-Type: text/plain; charset=UTF-8\n"
+-"Content-Transfer-Encoding: 8bit\n"
+-"PO-Revision-Date: 2016-10-10 12:46+0000\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
++"PO-Revision-Date: 2016-10-19 09:59+0000\n"
+ "Last-Translator: hpeters <hpeters@redhat.com>\n"
+ "Language-Team: German <trans-de@lists.fedoraproject.org>\n"
+ "Language: de\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=UTF-8\n"
++"Content-Transfer-Encoding: 8bit\n"
+ "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+ "X-Generator: Zanata 3.9.5\n"
+ 
+@@ -112,8 +112,7 @@ msgstr ""
+ #, c-format
+ msgid "Error: extra arguments given while using Spice controller\n"
+ msgstr ""
+-"Fehler: Zusätzliche Parameter bei Verwendung von Spice-Kontroller "
+-"angegeben\n"
++"Fehler: Zusätzliche Parameter bei Verwendung von Spice-Kontroller angegeben\n"
+ 
+ #: ../src/remote-viewer-main.c:156
+ #, c-format
+@@ -198,13 +197,13 @@ msgstr "Verbindungstyp konnte nicht von URI ermittelt werden"
+ msgid "Couldn't open oVirt session: "
+ msgstr "oVirt-Sitzung konnte nicht geöffnet werden:"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-about.xml.h:1
+ msgid "About Glade"
+ msgstr "Über Glade"
+@@ -272,17 +271,17 @@ msgstr "Nicht mehr nachfragen"
+ #: ../src/virt-viewer-app.c:647
+ #, c-format
+ msgid "Address is too long for unix socket_path: %s"
+-msgstr ""
++msgstr "Adresse ist zu lang für Unix socket_path: %s"
+ 
+ #: ../src/virt-viewer-app.c:657
+ #, c-format
+ msgid "Creating unix socket failed: %s"
+-msgstr ""
++msgstr "Erstellung von Unix-Socket fehlgeschlagen: %s"
+ 
+ #: ../src/virt-viewer-app.c:663
+ #, c-format
+ msgid "Connecting to unix socket failed: %s"
+-msgstr ""
++msgstr "Verbindung mit Unix-Socket fehlgeschlagen: %s"
+ 
+ #: ../src/virt-viewer-app.c:946
+ #, c-format
+@@ -370,7 +369,6 @@ msgstr "Zoomlevel des Fensters in Prozent"
+ msgid "Open in full screen mode (adjusts guest resolution to fit the client)"
+ msgstr ""
+ "Im Vollbildmodus öffnen (passt die Auflösung des Gast-Systems dem Client an)."
+-""
+ 
+ #: ../src/virt-viewer-app.c:2434
+ msgid "Customise hotkeys"
+@@ -398,7 +396,8 @@ msgstr "Debugging-Informationen anzeigen"
+ 
+ #: ../src/virt-viewer-auth.c:88
+ #, c-format
+-msgid "Authentication is required for the %s connection to:\n"
++msgid ""
++"Authentication is required for the %s connection to:\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+@@ -413,13 +412,13 @@ msgstr ""
+ msgid "Authentication is required for the %s connection:\n"
+ msgstr "Authentifikation ist erforderlich für die %s Verbindung:\n"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-auth.xml.h:1
+ msgid "Authentication required"
+ msgstr "Authentifikation erforderlich"
+@@ -486,12 +485,14 @@ msgstr "Grafische Konsole der virtuellen Maschine"
+ 
+ #: ../src/virt-viewer-main.c:107
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "Usage: %s [OPTIONS] DOMAIN-NAME|ID|UUID\n"
+ "\n"
+ "%s\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "Verwendung: %s [OPTIONEN] DOMAIN-NAME|ID|UUID\n"
+ "\n"
+ "%s\n"
+@@ -499,10 +500,12 @@ msgstr "\n"
+ 
+ #: ../src/virt-viewer-main.c:112
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "No DOMAIN-NAME|ID|UUID was specified for '--wait'\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "Keine DOMAIN-NAME|ID|UUID angegeben für »--wait«\n"
+ "\n"
+ 
+@@ -620,7 +623,7 @@ msgstr "(Drücken Sie %s, um den Mauszeiger freizugeben)"
+ #. translators:
+ #. * This is "<ungrab (or empty)><space (or empty)><subtitle (or empty)> - <appname>"
+ #. * Such as: "(Press Ctrl+Alt to release pointer) BigCorpTycoon MOTD - Virt Viewer"
+-#. 
++#.
+ #: ../src/virt-viewer-window.c:1168
+ #, c-format
+ msgid "%s%s%s - %s"
+@@ -711,13 +714,13 @@ msgstr "Authentifikation fehlgeschlagen."
+ msgid "Failed to connect: "
+ msgstr "Verbindung fehlgeschlagen:"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer.xml.h:1
+ msgid "_File"
+ msgstr "_Datei"
+diff --git a/po/de_CH.po b/po/de_CH.po
+index 891cdec..9d1de81 100644
+--- a/po/de_CH.po
++++ b/po/de_CH.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: German (Switzerland)\n"
+diff --git a/po/el.po b/po/el.po
+index 26923ee..4c51672 100644
+--- a/po/el.po
++++ b/po/el.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Greek\n"
+diff --git a/po/en_GB.po b/po/en_GB.po
+index 9ac797c..d58e785 100644
+--- a/po/en_GB.po
++++ b/po/en_GB.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: English (United Kingdom)\n"
+diff --git a/po/eo.po b/po/eo.po
+index 04df9e8..20b387b 100644
+--- a/po/eo.po
++++ b/po/eo.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Esperanto\n"
+diff --git a/po/es.po b/po/es.po
+index f9b71c1..b2080b9 100644
+--- a/po/es.po
++++ b/po/es.po
+@@ -1,7 +1,7 @@
+ # SOME DESCRIPTIVE TITLE.
+ # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+ # This file is distributed under the same license as the PACKAGE package.
+-# 
++#
+ # Translators:
+ # Adolfo Jayme <fitoschido@gmail.com>, 2012
+ # vareli <ehespinosa@ya.com>, 2013
+@@ -15,14 +15,14 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: virt-viewer\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2013-07-09 21:09+0100\n"
+-"MIME-Version: 1.0\n"
+-"Content-Type: text/plain; charset=UTF-8\n"
+-"Content-Transfer-Encoding: 8bit\n"
+-"PO-Revision-Date: 2016-10-06 10:51+0000\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
++"PO-Revision-Date: 2016-10-20 01:23+0000\n"
+ "Last-Translator: gguerrer <gguerrer@redhat.com>\n"
+ "Language-Team: Spanish <trans-es@lists.fedoraproject.org>\n"
+ "Language: es\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=UTF-8\n"
++"Content-Transfer-Encoding: 8bit\n"
+ "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+ "X-Generator: Zanata 3.9.5\n"
+ 
+@@ -161,8 +161,7 @@ msgstr "La máquina virtual oVirt %s no tiene pantalla"
+ #: ../src/remote-viewer.c:940
+ #, c-format
+ msgid "oVirt VM %s has unknown display type: %d"
+-msgstr ""
+-"La máquina virtual oVirt %s  tiene un tipo de pantalla desconocido: %d"
++msgstr "La máquina virtual oVirt %s  tiene un tipo de pantalla desconocido: %d"
+ 
+ #. Create the widgets
+ #: ../src/remote-viewer.c:1086
+@@ -202,13 +201,13 @@ msgstr "No se puede determinar el tipo de conexión de la URI"
+ msgid "Couldn't open oVirt session: "
+ msgstr "No se pudo abrir la sesión oVirt:"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-about.xml.h:1
+ msgid "About Glade"
+ msgstr "Acerca de Glade"
+@@ -275,17 +274,17 @@ msgstr "No me pregunte otra vez"
+ #: ../src/virt-viewer-app.c:647
+ #, c-format
+ msgid "Address is too long for unix socket_path: %s"
+-msgstr ""
++msgstr "La dirección es demasiado larga para unix socket_path: %s"
+ 
+ #: ../src/virt-viewer-app.c:657
+ #, c-format
+ msgid "Creating unix socket failed: %s"
+-msgstr ""
++msgstr "La creación del socket Unix ha fallado: %s"
+ 
+ #: ../src/virt-viewer-app.c:663
+ #, c-format
+ msgid "Connecting to unix socket failed: %s"
+-msgstr ""
++msgstr "La conexión a socket Unix ha fallado: %s"
+ 
+ #: ../src/virt-viewer-app.c:946
+ #, c-format
+@@ -401,11 +400,13 @@ msgstr "Mostrar información de depuración"
+ 
+ #: ../src/virt-viewer-auth.c:88
+ #, c-format
+-msgid "Authentication is required for the %s connection to:\n"
++msgid ""
++"Authentication is required for the %s connection to:\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+-msgstr "Se requiere autenticación para la conexión %s a:\n"
++msgstr ""
++"Se requiere autenticación para la conexión %s a:\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+@@ -413,18 +414,19 @@ msgstr "Se requiere autenticación para la conexión %s a:\n"
+ #: ../src/virt-viewer-auth.c:92
+ #, c-format
+ msgid "Authentication is required for the %s connection:\n"
+-msgstr "Se requiere autenticación para la conexión %s:\n"
++msgstr ""
++"Se requiere autenticación para la conexión %s:\n"
+ "\n"
+ "\n"
+ "\n"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-auth.xml.h:1
+ msgid "Authentication required"
+ msgstr "Se necesita autenticación"
+@@ -491,12 +493,14 @@ msgstr "Consola gráfica de la máquina virtual"
+ 
+ #: ../src/virt-viewer-main.c:107
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "Usage: %s [OPTIONS] DOMAIN-NAME|ID|UUID\n"
+ "\n"
+ "%s\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "Uso: %s [OPCIONES] DOMINIO-NOMBRE|ID|UUID\n"
+ "\n"
+ "%s\n"
+@@ -504,10 +508,12 @@ msgstr "\n"
+ 
+ #: ../src/virt-viewer-main.c:112
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "No DOMAIN-NAME|ID|UUID was specified for '--wait'\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "No se especificó ningún NOMBRE-DOMINIO|ID|UUID para '--wait'\n"
+ "\n"
+ 
+@@ -625,7 +631,7 @@ msgstr "(Presione %s para liberar el  puntero)"
+ #. translators:
+ #. * This is "<ungrab (or empty)><space (or empty)><subtitle (or empty)> - <appname>"
+ #. * Such as: "(Press Ctrl+Alt to release pointer) BigCorpTycoon MOTD - Virt Viewer"
+-#. 
++#.
+ #: ../src/virt-viewer-window.c:1168
+ #, c-format
+ msgid "%s%s%s - %s"
+@@ -715,13 +721,13 @@ msgstr "Falló la autenticación."
+ msgid "Failed to connect: "
+ msgstr "Falló al conectarse a:"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer.xml.h:1
+ msgid "_File"
+ msgstr "_Archivo"
+diff --git a/po/et.po b/po/et.po
+index 3496726..3f1cddc 100644
+--- a/po/et.po
++++ b/po/et.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Estonian\n"
+diff --git a/po/eu.po b/po/eu.po
+index dd16aaa..c72d6b9 100644
+--- a/po/eu.po
++++ b/po/eu.po
+@@ -8,7 +8,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Basque (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/fa.po b/po/fa.po
+index 2657b18..7752ec1 100644
+--- a/po/fa.po
++++ b/po/fa.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Persian\n"
+diff --git a/po/fi.po b/po/fi.po
+index d8dc026..7c089b9 100644
+--- a/po/fi.po
++++ b/po/fi.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Finnish\n"
+diff --git a/po/fr.po b/po/fr.po
+index 734cd79..f209ebe 100644
+--- a/po/fr.po
++++ b/po/fr.po
+@@ -1,7 +1,7 @@
+ # SOME DESCRIPTIVE TITLE.
+ # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+ # This file is distributed under the same license as the PACKAGE package.
+-# 
++#
+ # Translators:
+ # Boris BARNIER <b.barnier@gmail.com>, 2010
+ # Christophe Fergeau <cfergeau@redhat.com>, 2013
+@@ -12,14 +12,14 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: virt-viewer\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2013-07-09 21:09+0100\n"
+-"MIME-Version: 1.0\n"
+-"Content-Type: text/plain; charset=UTF-8\n"
+-"Content-Transfer-Encoding: 8bit\n"
+-"PO-Revision-Date: 2016-08-22 04:15+0000\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
++"PO-Revision-Date: 2016-10-12 01:08+0000\n"
+ "Last-Translator: Corina Roe <croe@redhat.com>\n"
+ "Language-Team: French <trans-fr@lists.fedoraproject.org>\n"
+ "Language: fr\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=UTF-8\n"
++"Content-Transfer-Encoding: 8bit\n"
+ "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+ "X-Generator: Zanata 3.9.5\n"
+ 
+@@ -166,7 +166,7 @@ msgstr "Détails de la connexion"
+ 
+ #: ../src/remote-viewer.c:1101
+ msgid "Connection _Address"
+-msgstr ""
++msgstr "Adresse_Connexion"
+ 
+ #: ../src/remote-viewer.c:1113
+ msgid "For example, spice://foo.example.org:5900"
+@@ -174,7 +174,7 @@ msgstr "Par exemple, spice://foo.example.org:5900"
+ 
+ #: ../src/remote-viewer.c:1126
+ msgid "Recent Connections"
+-msgstr ""
++msgstr "Connexions récentes"
+ 
+ #: ../src/remote-viewer.c:1240
+ msgid "Setting up Spice session..."
+@@ -197,13 +197,13 @@ msgstr "Impossible de déterminer le type de la connexion à partir de l'URI"
+ msgid "Couldn't open oVirt session: "
+ msgstr "Impossible de créer une session oVirt :"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-about.xml.h:1
+ msgid "About Glade"
+ msgstr "À propos de Glade"
+@@ -269,17 +269,17 @@ msgstr "Ne plus demander"
+ #: ../src/virt-viewer-app.c:647
+ #, c-format
+ msgid "Address is too long for unix socket_path: %s"
+-msgstr ""
++msgstr "L'adresse est trop longue pour le chemin_socket unix : %s"
+ 
+ #: ../src/virt-viewer-app.c:657
+ #, c-format
+ msgid "Creating unix socket failed: %s"
+-msgstr ""
++msgstr "La création du socket unix a échoué : %s"
+ 
+ #: ../src/virt-viewer-app.c:663
+ #, c-format
+ msgid "Connecting to unix socket failed: %s"
+-msgstr ""
++msgstr "La connexion au socket unix a échoué : %s"
+ 
+ #: ../src/virt-viewer-app.c:946
+ #, c-format
+@@ -338,8 +338,7 @@ msgstr ""
+ #, c-format
+ msgid "Unable to authenticate with remote desktop server: %s"
+ msgstr ""
+-"Impossible d'authentifier la connexion avec le serveur de bureau distant : "
+-"%s"
++"Impossible d'authentifier la connexion avec le serveur de bureau distant : %s"
+ 
+ #: ../src/virt-viewer-app.c:1484
+ #, c-format
+@@ -354,7 +353,7 @@ msgstr "Le niveau du zoom doit se trouver entre %d-%d\n"
+ #: ../src/virt-viewer-app.c:2248
+ #, c-format
+ msgid "Display _%d"
+-msgstr ""
++msgstr "Affichage _%d"
+ 
+ #: ../src/virt-viewer-app.c:2421
+ #, c-format
+@@ -397,11 +396,13 @@ msgstr "Afficher les informations de débogage"
+ 
+ #: ../src/virt-viewer-auth.c:88
+ #, c-format
+-msgid "Authentication is required for the %s connection to:\n"
++msgid ""
++"Authentication is required for the %s connection to:\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+-msgstr "Authentification requise pour la connexion %s à :\n"
++msgstr ""
++"Authentification requise pour la connexion %s à :\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+@@ -411,13 +412,13 @@ msgstr "Authentification requise pour la connexion %s à :\n"
+ msgid "Authentication is required for the %s connection:\n"
+ msgstr "Authentification nécessaire pour la connexion %s :\n"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-auth.xml.h:1
+ msgid "Authentication required"
+ msgstr "Authentification requise"
+@@ -484,12 +485,14 @@ msgstr "Console graphique de la machine virtuelle"
+ 
+ #: ../src/virt-viewer-main.c:107
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "Usage: %s [OPTIONS] DOMAIN-NAME|ID|UUID\n"
+ "\n"
+ "%s\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "Usage : %s [OPTIONS] DOMAIN-NAME|ID|UUID\n"
+ "\n"
+ "%s\n"
+@@ -497,10 +500,12 @@ msgstr "\n"
+ 
+ #: ../src/virt-viewer-main.c:112
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "No DOMAIN-NAME|ID|UUID was specified for '--wait'\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "Aucun DOMAIN-NAME|ID|UUID indiqué pour '--wait'\n"
+ "\n"
+ 
+@@ -618,7 +623,7 @@ msgstr "(Appuyer sur %s pour libérer la souris)"
+ #. translators:
+ #. * This is "<ungrab (or empty)><space (or empty)><subtitle (or empty)> - <appname>"
+ #. * Such as: "(Press Ctrl+Alt to release pointer) BigCorpTycoon MOTD - Virt Viewer"
+-#. 
++#.
+ #: ../src/virt-viewer-window.c:1168
+ #, c-format
+ msgid "%s%s%s - %s"
+@@ -641,8 +646,7 @@ msgstr ""
+ #: ../src/virt-viewer-file.c:833
+ #, c-format
+ msgid "At least %s version %s is required to setup this connection"
+-msgstr ""
+-"La configuration de cette connexion nécessite au minimum %s version %s"
++msgstr "La configuration de cette connexion nécessite au minimum %s version %s"
+ 
+ #: ../src/virt-viewer.c:170
+ msgid "Waiting for guest domain to re-start"
+@@ -709,24 +713,24 @@ msgstr "L'authentification a échoué"
+ msgid "Failed to connect: "
+ msgstr "Échec de connexion :"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer.xml.h:1
+ msgid "_File"
+ msgstr "_Fichier"
+ 
+ #: ../src/virt-viewer.xml.h:2
+ msgid "_Screenshot"
+-msgstr ""
++msgstr "_Capture d'écran"
+ 
+ #: ../src/virt-viewer.xml.h:3
+ msgid "_USB device selection"
+-msgstr ""
++msgstr "_Sélection du périphérique USB"
+ 
+ #: ../src/virt-viewer.xml.h:4
+ msgid "Smartcard insertion"
+@@ -742,7 +746,7 @@ msgstr "_Affichage"
+ 
+ #: ../src/virt-viewer.xml.h:7
+ msgid "_Full screen"
+-msgstr ""
++msgstr "_Plein écran"
+ 
+ #: ../src/virt-viewer.xml.h:8
+ msgid "_Zoom"
+@@ -750,7 +754,7 @@ msgstr "_Zoom"
+ 
+ #: ../src/virt-viewer.xml.h:9
+ msgid "_Displays"
+-msgstr ""
++msgstr "_Affichages"
+ 
+ #: ../src/virt-viewer.xml.h:10
+ msgid "Release cursor"
+diff --git a/po/gl.po b/po/gl.po
+index 4078f2c..39e7aef 100644
+--- a/po/gl.po
++++ b/po/gl.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Galician\n"
+diff --git a/po/gu.po b/po/gu.po
+index dd07e43..c0ec0bf 100644
+--- a/po/gu.po
++++ b/po/gu.po
+@@ -10,7 +10,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Gujarati (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/he.po b/po/he.po
+index 071bc04..f18c833 100644
+--- a/po/he.po
++++ b/po/he.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Hebrew\n"
+diff --git a/po/hi.po b/po/hi.po
+index d26beed..f057fa4 100644
+--- a/po/hi.po
++++ b/po/hi.po
+@@ -11,7 +11,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Hindi (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/hr.po b/po/hr.po
+index 6b9f9e1..e73affb 100644
+--- a/po/hr.po
++++ b/po/hr.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Croatian\n"
+diff --git a/po/hu.po b/po/hu.po
+index c01fa45..ab03642 100644
+--- a/po/hu.po
++++ b/po/hu.po
+@@ -11,7 +11,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-02-22 10:54-0500\n"
+ "Last-Translator: Porcsin László <dzsolly85@gmail.com>\n"
+ "Language-Team: Hungarian (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/ia.po b/po/ia.po
+index 2e14fdb..4a4b3dc 100644
+--- a/po/ia.po
++++ b/po/ia.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Interlingua\n"
+diff --git a/po/id.po b/po/id.po
+index f380c40..1455c84 100644
+--- a/po/id.po
++++ b/po/id.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Indonesian\n"
+diff --git a/po/ilo.po b/po/ilo.po
+index e6bd7ed..3af74fc 100644
+--- a/po/ilo.po
++++ b/po/ilo.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Iloko\n"
+diff --git a/po/is.po b/po/is.po
+index 48bd869..5daacca 100644
+--- a/po/is.po
++++ b/po/is.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Icelandic\n"
+diff --git a/po/it.po b/po/it.po
+index 7d0685b..158a279 100644
+--- a/po/it.po
++++ b/po/it.po
+@@ -1,7 +1,7 @@
+ # SOME DESCRIPTIVE TITLE.
+ # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+ # This file is distributed under the same license as the PACKAGE package.
+-# 
++#
+ # Translators:
+ # Francesco Tombolini <tombo@adamantio.net>, 2010
+ # fvalen <fvalen@redhat.com>, 2013
+@@ -14,14 +14,14 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: virt-viewer\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2013-07-09 21:09+0100\n"
+-"MIME-Version: 1.0\n"
+-"Content-Type: text/plain; charset=UTF-8\n"
+-"Content-Transfer-Encoding: 8bit\n"
+-"PO-Revision-Date: 2016-09-01 09:35+0000\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
++"PO-Revision-Date: 2016-10-19 01:53+0000\n"
+ "Last-Translator: Copied by Zanata <copied-by-zanata@zanata.org>\n"
+ "Language-Team: Italian <trans-it@lists.fedoraproject.org>\n"
+ "Language: it\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=UTF-8\n"
++"Content-Transfer-Encoding: 8bit\n"
+ "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+ "X-Generator: Zanata 3.9.5\n"
+ 
+@@ -166,7 +166,7 @@ msgstr "Dettagli connessione"
+ 
+ #: ../src/remote-viewer.c:1101
+ msgid "Connection _Address"
+-msgstr ""
++msgstr "_Indirizzo di connessione"
+ 
+ #: ../src/remote-viewer.c:1113
+ msgid "For example, spice://foo.example.org:5900"
+@@ -174,7 +174,7 @@ msgstr "Ad esempio, spice://foo.example.org:5900"
+ 
+ #: ../src/remote-viewer.c:1126
+ msgid "Recent Connections"
+-msgstr ""
++msgstr "Connessioni recenti"
+ 
+ #: ../src/remote-viewer.c:1240
+ msgid "Setting up Spice session..."
+@@ -197,13 +197,13 @@ msgstr "Impossibile determinare il tipo di connessione dall'URI"
+ msgid "Couldn't open oVirt session: "
+ msgstr "Impossibile aprire la sessione oVirt: "
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-about.xml.h:1
+ msgid "About Glade"
+ msgstr "Informazioni su Glade"
+@@ -269,17 +269,17 @@ msgstr "Non chiedermelo più"
+ #: ../src/virt-viewer-app.c:647
+ #, c-format
+ msgid "Address is too long for unix socket_path: %s"
+-msgstr ""
++msgstr "Indirizzo troppo lungo per percorso_socket unix: %s"
+ 
+ #: ../src/virt-viewer-app.c:657
+ #, c-format
+ msgid "Creating unix socket failed: %s"
+-msgstr ""
++msgstr "Creazione socket unix non riuscita: %s"
+ 
+ #: ../src/virt-viewer-app.c:663
+ #, c-format
+ msgid "Connecting to unix socket failed: %s"
+-msgstr ""
++msgstr "Connessione a socket unix non riuscita: %s"
+ 
+ #: ../src/virt-viewer-app.c:946
+ #, c-format
+@@ -330,7 +330,8 @@ msgid ""
+ "Unable to authenticate with remote desktop server at %s: %s\n"
+ "Retry connection again?"
+ msgstr ""
+-"Impossibile eseguire l'autenticazione con il server desktop remoto su %s: %s\n"
++"Impossibile eseguire l'autenticazione con il server desktop remoto su %s: "
++"%s\n"
+ "Riprovare il collegamento?"
+ 
+ #: ../src/virt-viewer-app.c:1476
+@@ -352,7 +353,7 @@ msgstr "Il livello di zoom deve essere tra %d e %d\n"
+ #: ../src/virt-viewer-app.c:2248
+ #, c-format
+ msgid "Display _%d"
+-msgstr ""
++msgstr "Visualizza _%d"
+ 
+ #: ../src/virt-viewer-app.c:2421
+ #, c-format
+@@ -394,11 +395,13 @@ msgstr "Mostra le informazioni di debug"
+ 
+ #: ../src/virt-viewer-auth.c:88
+ #, c-format
+-msgid "Authentication is required for the %s connection to:\n"
++msgid ""
++"Authentication is required for the %s connection to:\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+-msgstr "Autenticazione richiesta per la connessione %s a:\n"
++msgstr ""
++"Autenticazione richiesta per la connessione %s a:\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+@@ -408,13 +411,13 @@ msgstr "Autenticazione richiesta per la connessione %s a:\n"
+ msgid "Authentication is required for the %s connection:\n"
+ msgstr "Autenticazione richiesta per la connessione %s:\n"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-auth.xml.h:1
+ msgid "Authentication required"
+ msgstr "Autenticazione necessaria"
+@@ -481,12 +484,14 @@ msgstr "Console grafica macchina virtuale"
+ 
+ #: ../src/virt-viewer-main.c:107
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "Usage: %s [OPTIONS] DOMAIN-NAME|ID|UUID\n"
+ "\n"
+ "%s\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "Utilizzo: %s [OPZIONI] NOME-DOMINIO|ID|UUID\n"
+ "\n"
+ "%s\n"
+@@ -494,10 +499,12 @@ msgstr "\n"
+ 
+ #: ../src/virt-viewer-main.c:112
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "No DOMAIN-NAME|ID|UUID was specified for '--wait'\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "Nessun DOMAIN-NAME|ID|UUID specificato per \"--wait\"\n"
+ "\n"
+ 
+@@ -615,7 +622,7 @@ msgstr "(Premere %s per rilasciare il puntatore)"
+ #. translators:
+ #. * This is "<ungrab (or empty)><space (or empty)><subtitle (or empty)> - <appname>"
+ #. * Such as: "(Press Ctrl+Alt to release pointer) BigCorpTycoon MOTD - Virt Viewer"
+-#. 
++#.
+ #: ../src/virt-viewer-window.c:1168
+ #, c-format
+ msgid "%s%s%s - %s"
+@@ -705,24 +712,24 @@ msgstr "Autenticazione non riuscita."
+ msgid "Failed to connect: "
+ msgstr "Impossibile connettersi: "
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer.xml.h:1
+ msgid "_File"
+ msgstr "_File"
+ 
+ #: ../src/virt-viewer.xml.h:2
+ msgid "_Screenshot"
+-msgstr ""
++msgstr "_Screenshot"
+ 
+ #: ../src/virt-viewer.xml.h:3
+ msgid "_USB device selection"
+-msgstr ""
++msgstr "Selezione dispositivo _USB"
+ 
+ #: ../src/virt-viewer.xml.h:4
+ msgid "Smartcard insertion"
+@@ -738,7 +745,7 @@ msgstr "_Visualizza"
+ 
+ #: ../src/virt-viewer.xml.h:7
+ msgid "_Full screen"
+-msgstr ""
++msgstr "Schermo _intero"
+ 
+ #: ../src/virt-viewer.xml.h:8
+ msgid "_Zoom"
+@@ -746,7 +753,7 @@ msgstr "_Zoom"
+ 
+ #: ../src/virt-viewer.xml.h:9
+ msgid "_Displays"
+-msgstr ""
++msgstr "_Visualizzazioni"
+ 
+ #: ../src/virt-viewer.xml.h:10
+ msgid "Release cursor"
+diff --git a/po/ja.po b/po/ja.po
+index 707c161..3308766 100644
+--- a/po/ja.po
++++ b/po/ja.po
+@@ -1,25 +1,26 @@
+ # SOME DESCRIPTIVE TITLE.
+ # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+ # This file is distributed under the same license as the PACKAGE package.
+-# 
++#
+ # Translators:
+ # Hajime Taira <htaira@redhat.com>, 2012
+ # Kiyoto Hashida <khashida@redhat.com>, 2010
+ # Tomoyuki KATO <tomo@dream.daynight.jp>, 2012-2013
+ # asasaki <asasaki@redhat.com>, 2016. #zanata
++# jito <jito@redhat.com>, 2016. #zanata
+ # pgrunt <pgrunt@redhat.com>, 2016. #zanata
+ msgid ""
+ msgstr ""
+ "Project-Id-Version: virt-viewer\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2013-07-09 21:09+0100\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
++"PO-Revision-Date: 2016-10-17 01:48+0000\n"
++"Last-Translator: jito <jito@redhat.com>\n"
++"Language-Team: Japanese <trans-ja@lists.fedoraproject.org>\n"
++"Language: ja\n"
+ "MIME-Version: 1.0\n"
+ "Content-Type: text/plain; charset=UTF-8\n"
+ "Content-Transfer-Encoding: 8bit\n"
+-"PO-Revision-Date: 2016-09-07 11:29+0000\n"
+-"Last-Translator: pgrunt <pgrunt@redhat.com>\n"
+-"Language-Team: Japanese <trans-ja@lists.fedoraproject.org>\n"
+-"Language: ja\n"
+ "Plural-Forms: nplurals=1; plural=0;\n"
+ "X-Generator: Zanata 3.9.5\n"
+ 
+@@ -101,13 +102,16 @@ msgstr "リモートビューアークライアント"
+ msgid ""
+ "%s\n"
+ "Run '%s --help' to see a full list of available command line options\n"
+-msgstr "%s\n"
+-"利用可能なコマンドラインオプションの完全な一覧を確認するには '%s --help' を実行してください\n"
++msgstr ""
++"%s\n"
++"利用可能なコマンドラインオプションの完全な一覧を確認するには '%s --help' を実"
++"行してください\n"
+ 
+ #: ../src/remote-viewer-main.c:149
+ #, c-format
+ msgid "Error: extra arguments given while using Spice controller\n"
+-msgstr "エラー: Spice コントローラーを使用しているときに余計な引数が指定されました\n"
++msgstr ""
++"エラー: Spice コントローラーを使用しているときに余計な引数が指定されました\n"
+ 
+ #: ../src/remote-viewer-main.c:156
+ #, c-format
+@@ -161,7 +165,7 @@ msgstr "接続の詳細"
+ 
+ #: ../src/remote-viewer.c:1101
+ msgid "Connection _Address"
+-msgstr ""
++msgstr "接続アドレス(_A)"
+ 
+ #: ../src/remote-viewer.c:1113
+ msgid "For example, spice://foo.example.org:5900"
+@@ -169,7 +173,7 @@ msgstr "例: spice://foo.example.org:5900"
+ 
+ #: ../src/remote-viewer.c:1126
+ msgid "Recent Connections"
+-msgstr ""
++msgstr "最近の接続"
+ 
+ #: ../src/remote-viewer.c:1240
+ msgid "Setting up Spice session..."
+@@ -192,13 +196,13 @@ msgstr "URI から接続の種類を決定できません"
+ msgid "Couldn't open oVirt session: "
+ msgstr "oVirt セッションを開けませんでした: "
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-about.xml.h:1
+ msgid "About Glade"
+ msgstr "Glade について"
+@@ -213,7 +217,9 @@ msgstr ""
+ 
+ #: ../src/virt-viewer-about.xml.h:4
+ msgid "A remote desktop client built with GTK-VNC, SPICE-GTK and libvirt"
+-msgstr "GTK-VNC, SPICE-GTK および libvirt でビルドされたリモートデスクトップクライアント"
++msgstr ""
++"GTK-VNC, SPICE-GTK および libvirt でビルドされたリモートデスクトップクライア"
++"ント"
+ 
+ #: ../src/virt-viewer-about.xml.h:5
+ msgid "virt-manager.org"
+@@ -264,17 +270,17 @@ msgstr "二度と確認しない"
+ #: ../src/virt-viewer-app.c:647
+ #, c-format
+ msgid "Address is too long for unix socket_path: %s"
+-msgstr ""
++msgstr "unix socket_path に対してアドレスが長すぎます: %s"
+ 
+ #: ../src/virt-viewer-app.c:657
+ #, c-format
+ msgid "Creating unix socket failed: %s"
+-msgstr ""
++msgstr "unix ソケットの作成に失敗しました: %s"
+ 
+ #: ../src/virt-viewer-app.c:663
+ #, c-format
+ msgid "Connecting to unix socket failed: %s"
+-msgstr ""
++msgstr "unix ソケットへの接続に失敗しました: %s"
+ 
+ #: ../src/virt-viewer-app.c:946
+ #, c-format
+@@ -324,7 +330,8 @@ msgstr "グラフィックサーバー %s に接続できません"
+ msgid ""
+ "Unable to authenticate with remote desktop server at %s: %s\n"
+ "Retry connection again?"
+-msgstr "%s のリモートデスクトップサーバーの認証で失敗しました: %s\n"
++msgstr ""
++"%s のリモートデスクトップサーバーの認証で失敗しました: %s\n"
+ "再び接続を試行しますか？"
+ 
+ #: ../src/virt-viewer-app.c:1476
+@@ -345,7 +352,7 @@ msgstr "ズームレベルは  %d-%d の範囲内でなければいけません\
+ #: ../src/virt-viewer-app.c:2248
+ #, c-format
+ msgid "Display _%d"
+-msgstr ""
++msgstr "ディスプレイ_%d"
+ 
+ #: ../src/virt-viewer-app.c:2421
+ #, c-format
+@@ -358,7 +365,9 @@ msgstr "ウィンドウのズームレベル（パーセント単位）"
+ 
+ #: ../src/virt-viewer-app.c:2432
+ msgid "Open in full screen mode (adjusts guest resolution to fit the client)"
+-msgstr "フルスクリーンモードで開きます (クライアントに合わせてゲストの解像度を調整します)。"
++msgstr ""
++"フルスクリーンモードで開きます (クライアントに合わせてゲストの解像度を調整し"
++"ます)。"
+ 
+ #: ../src/virt-viewer-app.c:2434
+ msgid "Customise hotkeys"
+@@ -386,11 +395,13 @@ msgstr "デバッグ情報を表示します"
+ 
+ #: ../src/virt-viewer-auth.c:88
+ #, c-format
+-msgid "Authentication is required for the %s connection to:\n"
++msgid ""
++"Authentication is required for the %s connection to:\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+-msgstr "%s 接続には認証が必要:\n"
++msgstr ""
++"%s 接続には認証が必要:\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+@@ -400,13 +411,13 @@ msgstr "%s 接続には認証が必要:\n"
+ msgid "Authentication is required for the %s connection:\n"
+ msgstr "%s 接続には認証が必要:\n"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-auth.xml.h:1
+ msgid "Authentication required"
+ msgstr "認証が必要です"
+@@ -463,7 +474,9 @@ msgstr "仮想マシンビューアー"
+ #: ../src/virt-viewer-main.c:80
+ #, c-format
+ msgid "Run '%s --help' to see a full list of available command line options"
+-msgstr "利用可能なコマンドラインオプションの完全な一覧を確認するには '%s --help' を実行してください"
++msgstr ""
++"利用可能なコマンドラインオプションの完全な一覧を確認するには '%s --help' を実"
++"行してください"
+ 
+ #: ../src/virt-viewer-main.c:86
+ msgid "Virtual machine graphical console"
+@@ -471,12 +484,14 @@ msgstr "仮想マシンのグラフィカルコンソール"
+ 
+ #: ../src/virt-viewer-main.c:107
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "Usage: %s [OPTIONS] DOMAIN-NAME|ID|UUID\n"
+ "\n"
+ "%s\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "使用法: %s [オプション] ドメイン名|ID|UUID\n"
+ "\n"
+ "%s\n"
+@@ -484,10 +499,12 @@ msgstr "\n"
+ 
+ #: ../src/virt-viewer-main.c:112
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "No DOMAIN-NAME|ID|UUID was specified for '--wait'\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "DOMAIN-NAME|ID|UUID が '--wait' に指定されていません\n"
+ "\n"
+ 
+@@ -605,7 +622,7 @@ msgstr "(ポインターを開放するには %s を押します)"
+ #. translators:
+ #. * This is "<ungrab (or empty)><space (or empty)><subtitle (or empty)> - <appname>"
+ #. * Such as: "(Press Ctrl+Alt to release pointer) BigCorpTycoon MOTD - Virt Viewer"
+-#. 
++#.
+ #: ../src/virt-viewer-window.c:1168
+ #, c-format
+ msgid "%s%s%s - %s"
+@@ -621,12 +638,15 @@ msgstr " "
+ msgid ""
+ "At least %s version %s is required to setup this connection, see %s for "
+ "details"
+-msgstr "少なくとも %s バージョン %s がこの接続をセットアップするために必要です。詳細は、%s を参照してください。"
++msgstr ""
++"少なくとも %s バージョン %s がこの接続をセットアップするために必要です。詳細"
++"は、%s を参照してください。"
+ 
+ #: ../src/virt-viewer-file.c:833
+ #, c-format
+ msgid "At least %s version %s is required to setup this connection"
+-msgstr "少なくとも %s バージョン %s がこのセッションをセットアップするために必要です"
++msgstr ""
++"少なくとも %s バージョン %s がこのセッションをセットアップするために必要です"
+ 
+ #: ../src/virt-viewer.c:170
+ msgid "Waiting for guest domain to re-start"
+@@ -693,24 +713,24 @@ msgstr "認証に失敗しました。"
+ msgid "Failed to connect: "
+ msgstr "接続に失敗しました:"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer.xml.h:1
+ msgid "_File"
+ msgstr "ファイル(_F)"
+ 
+ #: ../src/virt-viewer.xml.h:2
+ msgid "_Screenshot"
+-msgstr ""
++msgstr "スクリーンショット(_S)"
+ 
+ #: ../src/virt-viewer.xml.h:3
+ msgid "_USB device selection"
+-msgstr ""
++msgstr "USB デバイスの選択(_U)"
+ 
+ #: ../src/virt-viewer.xml.h:4
+ msgid "Smartcard insertion"
+@@ -726,7 +746,7 @@ msgstr "表示(_V)"
+ 
+ #: ../src/virt-viewer.xml.h:7
+ msgid "_Full screen"
+-msgstr ""
++msgstr "フルスクリーン(_F)"
+ 
+ #: ../src/virt-viewer.xml.h:8
+ msgid "_Zoom"
+@@ -734,7 +754,7 @@ msgstr "ズーム(_Z)"
+ 
+ #: ../src/virt-viewer.xml.h:9
+ msgid "_Displays"
+-msgstr ""
++msgstr "ディスプレイ(_D)"
+ 
+ #: ../src/virt-viewer.xml.h:10
+ msgid "Release cursor"
+diff --git a/po/ka.po b/po/ka.po
+index db24053..317627b 100644
+--- a/po/ka.po
++++ b/po/ka.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Georgian\n"
+diff --git a/po/kk.po b/po/kk.po
+index 739cfb5..6f542b2 100644
+--- a/po/kk.po
++++ b/po/kk.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Kazakh\n"
+diff --git a/po/km.po b/po/km.po
+index 96bb141..12db482 100644
+--- a/po/km.po
++++ b/po/km.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Khmer\n"
+diff --git a/po/kn.po b/po/kn.po
+index 4527081..c2c7082 100644
+--- a/po/kn.po
++++ b/po/kn.po
+@@ -12,7 +12,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Kannada (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/ko.po b/po/ko.po
+index 6e49242..7bd93f3 100644
+--- a/po/ko.po
++++ b/po/ko.po
+@@ -1,7 +1,7 @@
+ # SOME DESCRIPTIVE TITLE.
+ # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+ # This file is distributed under the same license as the PACKAGE package.
+-# 
++#
+ # Translators:
+ # Automatically generated, 2010
+ # eukim <eukim@redhat.com>, 2013
+@@ -14,15 +14,15 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: virt-viewer\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2013-07-09 21:09+0100\n"
+-"MIME-Version: 1.0\n"
+-"Content-Type: text/plain; charset=UTF-8\n"
+-"Content-Transfer-Encoding: 8bit\n"
+-"PO-Revision-Date: 2016-08-22 06:35+0000\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
++"PO-Revision-Date: 2016-10-17 02:37+0000\n"
+ "Last-Translator: eukim <eukim@redhat.com>\n"
+ "Language-Team: Korean (http://www.transifex.com/projects/p/fedora/language/"
+ "ko/)\n"
+ "Language: ko\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=UTF-8\n"
++"Content-Transfer-Encoding: 8bit\n"
+ "Plural-Forms: nplurals=1; plural=0;\n"
+ "X-Generator: Zanata 3.9.5\n"
+ 
+@@ -104,7 +104,8 @@ msgstr "원격 뷰어 클라이언트 "
+ msgid ""
+ "%s\n"
+ "Run '%s --help' to see a full list of available command line options\n"
+-msgstr "%s\n"
++msgstr ""
++"%s\n"
+ "사용 가능한 명령행 옵션의 전체 목록을 보려면 '%s --help'를 실행하십시오\n"
+ 
+ #: ../src/remote-viewer-main.c:149
+@@ -164,7 +165,7 @@ msgstr "상세 연결 정보"
+ 
+ #: ../src/remote-viewer.c:1101
+ msgid "Connection _Address"
+-msgstr ""
++msgstr "연결 주소 (_A) "
+ 
+ #: ../src/remote-viewer.c:1113
+ msgid "For example, spice://foo.example.org:5900"
+@@ -172,7 +173,7 @@ msgstr "예: spice://foo.example.org:5900"
+ 
+ #: ../src/remote-viewer.c:1126
+ msgid "Recent Connections"
+-msgstr ""
++msgstr "최근 연결 "
+ 
+ #: ../src/remote-viewer.c:1240
+ msgid "Setting up Spice session..."
+@@ -195,13 +196,13 @@ msgstr "URI에서 연결 유형을 지정할 수 없음 "
+ msgid "Couldn't open oVirt session: "
+ msgstr "oVirt 세션을 열 수 없습니다:"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-about.xml.h:1
+ msgid "About Glade"
+ msgstr "Glade에 관하여 "
+@@ -267,17 +268,17 @@ msgstr "다시 묻지 않습니다 "
+ #: ../src/virt-viewer-app.c:647
+ #, c-format
+ msgid "Address is too long for unix socket_path: %s"
+-msgstr ""
++msgstr "unix socket_path 주소가 너무 깁니다: %s"
+ 
+ #: ../src/virt-viewer-app.c:657
+ #, c-format
+ msgid "Creating unix socket failed: %s"
+-msgstr ""
++msgstr "unix 소켓 생성에 실패했습니다: %s"
+ 
+ #: ../src/virt-viewer-app.c:663
+ #, c-format
+ msgid "Connecting to unix socket failed: %s"
+-msgstr ""
++msgstr "unix 소켓 연결에 실패했습니다: %s"
+ 
+ #: ../src/virt-viewer-app.c:946
+ #, c-format
+@@ -327,7 +328,8 @@ msgstr "그래픽 서버 %s에 연결할 수 없음 "
+ msgid ""
+ "Unable to authenticate with remote desktop server at %s: %s\n"
+ "Retry connection again?"
+-msgstr "%s의 원격 데스크톱 서버에 인증할 수 없습니다: %s\n"
++msgstr ""
++"%s의 원격 데스크톱 서버에 인증할 수 없습니다: %s\n"
+ "연결을 다시 시도 하시겠습니까? "
+ 
+ #: ../src/virt-viewer-app.c:1476
+@@ -348,7 +350,7 @@ msgstr "줌 레벨은 %d-%d 범위 내에 있어야 합니다\n"
+ #: ../src/virt-viewer-app.c:2248
+ #, c-format
+ msgid "Display _%d"
+-msgstr ""
++msgstr "디스플레이 _%d"
+ 
+ #: ../src/virt-viewer-app.c:2421
+ #, c-format
+@@ -361,7 +363,8 @@ msgstr "윈도우의 줌 레벨 (백분율) "
+ 
+ #: ../src/virt-viewer-app.c:2432
+ msgid "Open in full screen mode (adjusts guest resolution to fit the client)"
+-msgstr "전체 화면 모드로 엽니다 (클라이언트에 맞게 게스트 해상도를 조정합니다)."
++msgstr ""
++"전체 화면 모드로 엽니다 (클라이언트에 맞게 게스트 해상도를 조정합니다)."
+ 
+ #: ../src/virt-viewer-app.c:2434
+ msgid "Customise hotkeys"
+@@ -389,11 +392,13 @@ msgstr "디버그 정보 보기 "
+ 
+ #: ../src/virt-viewer-auth.c:88
+ #, c-format
+-msgid "Authentication is required for the %s connection to:\n"
++msgid ""
++"Authentication is required for the %s connection to:\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+-msgstr "%s 연결에 인증이 필요합니다:\n"
++msgstr ""
++"%s 연결에 인증이 필요합니다:\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+@@ -403,13 +408,13 @@ msgstr "%s 연결에 인증이 필요합니다:\n"
+ msgid "Authentication is required for the %s connection:\n"
+ msgstr "%s 연결에 인증이 필요합니다:\n"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-auth.xml.h:1
+ msgid "Authentication required"
+ msgstr "인증이 필요함 "
+@@ -466,7 +471,8 @@ msgstr "가상 머신 뷰어 "
+ #: ../src/virt-viewer-main.c:80
+ #, c-format
+ msgid "Run '%s --help' to see a full list of available command line options"
+-msgstr "사용 가능한 명령행 옵션의 전체 목록을 보려면 '%s --help'를 실행하십시오 "
++msgstr ""
++"사용 가능한 명령행 옵션의 전체 목록을 보려면 '%s --help'를 실행하십시오 "
+ 
+ #: ../src/virt-viewer-main.c:86
+ msgid "Virtual machine graphical console"
+@@ -474,12 +480,14 @@ msgstr "가상 머신 그래픽 콘솔"
+ 
+ #: ../src/virt-viewer-main.c:107
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "Usage: %s [OPTIONS] DOMAIN-NAME|ID|UUID\n"
+ "\n"
+ "%s\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "사용법: %s [OPTIONS] DOMAIN-NAME|ID|UUID\n"
+ "\n"
+ "%s\n"
+@@ -487,10 +495,12 @@ msgstr "\n"
+ 
+ #: ../src/virt-viewer-main.c:112
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "No DOMAIN-NAME|ID|UUID was specified for '--wait'\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "DOMAIN-NAME|ID|UUID가 '--wait'에 대해 지정되어 있지 않습니다\n"
+ "\n"
+ 
+@@ -608,7 +618,7 @@ msgstr "(포인터를 개방하려면 %s를 누르십시오)"
+ #. translators:
+ #. * This is "<ungrab (or empty)><space (or empty)><subtitle (or empty)> - <appname>"
+ #. * Such as: "(Press Ctrl+Alt to release pointer) BigCorpTycoon MOTD - Virt Viewer"
+-#. 
++#.
+ #: ../src/virt-viewer-window.c:1168
+ #, c-format
+ msgid "%s%s%s - %s"
+@@ -624,7 +634,9 @@ msgstr " "
+ msgid ""
+ "At least %s version %s is required to setup this connection, see %s for "
+ "details"
+-msgstr "이 연결을 설정하기 위해 최소한 %s 버전 %s이 필요합니다. 자세한 내용은 %s에서 참조하십시오"
++msgstr ""
++"이 연결을 설정하기 위해 최소한 %s 버전 %s이 필요합니다. 자세한 내용은 %s에서 "
++"참조하십시오"
+ 
+ #: ../src/virt-viewer-file.c:833
+ #, c-format
+@@ -696,24 +708,24 @@ msgstr "인증 실패."
+ msgid "Failed to connect: "
+ msgstr "연결 실패:"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer.xml.h:1
+ msgid "_File"
+ msgstr "파일(_F)"
+ 
+ #: ../src/virt-viewer.xml.h:2
+ msgid "_Screenshot"
+-msgstr ""
++msgstr "스크린샷 (_S)"
+ 
+ #: ../src/virt-viewer.xml.h:3
+ msgid "_USB device selection"
+-msgstr ""
++msgstr "USB 장치 선택 (_U)"
+ 
+ #: ../src/virt-viewer.xml.h:4
+ msgid "Smartcard insertion"
+@@ -729,7 +741,7 @@ msgstr "보기(_V)"
+ 
+ #: ../src/virt-viewer.xml.h:7
+ msgid "_Full screen"
+-msgstr ""
++msgstr "전체 화면(_F)"
+ 
+ #: ../src/virt-viewer.xml.h:8
+ msgid "_Zoom"
+@@ -737,7 +749,7 @@ msgstr "줌(_Z) "
+ 
+ #: ../src/virt-viewer.xml.h:9
+ msgid "_Displays"
+-msgstr ""
++msgstr "디스플레이 (_D)"
+ 
+ #: ../src/virt-viewer.xml.h:10
+ msgid "Release cursor"
+diff --git a/po/kw.po b/po/kw.po
+index e530f09..3a43a7d 100644
+--- a/po/kw.po
++++ b/po/kw.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Cornish\n"
+diff --git a/po/kw@kkcor.po b/po/kw@kkcor.po
+index 79e38b7..8b05353 100644
+--- a/po/kw@kkcor.po
++++ b/po/kw@kkcor.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Cornish (Common Orthography)\n"
+diff --git a/po/kw@uccor.po b/po/kw@uccor.po
+index 468622a..5c4c3fa 100644
+--- a/po/kw@uccor.po
++++ b/po/kw@uccor.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Cornish (Unified Orthography)\n"
+diff --git a/po/kw_GB.po b/po/kw_GB.po
+index 27d9e13..f335c49 100644
+--- a/po/kw_GB.po
++++ b/po/kw_GB.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Cornish (United Kingdom)\n"
+diff --git a/po/ky.po b/po/ky.po
+index d55220e..abcdec1 100644
+--- a/po/ky.po
++++ b/po/ky.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Kirghiz\n"
+diff --git a/po/lt.po b/po/lt.po
+index a2f8628..fd7a07c 100644
+--- a/po/lt.po
++++ b/po/lt.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Lithuanian\n"
+diff --git a/po/lv.po b/po/lv.po
+index 3c18b03..9383ca9 100644
+--- a/po/lv.po
++++ b/po/lv.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Latvian\n"
+diff --git a/po/mai.po b/po/mai.po
+index 333b97f..b155977 100644
+--- a/po/mai.po
++++ b/po/mai.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Maithili\n"
+diff --git a/po/mk.po b/po/mk.po
+index 6f82f18..389fd48 100644
+--- a/po/mk.po
++++ b/po/mk.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Macedonian\n"
+diff --git a/po/ml.po b/po/ml.po
+index 85f46a5..daee7ff 100644
+--- a/po/ml.po
++++ b/po/ml.po
+@@ -8,7 +8,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Malayalam (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/mn.po b/po/mn.po
+index ed92a6e..d8333c5 100644
+--- a/po/mn.po
++++ b/po/mn.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Mongolian\n"
+diff --git a/po/mr.po b/po/mr.po
+index 18fe4fa..82fb926 100644
+--- a/po/mr.po
++++ b/po/mr.po
+@@ -10,7 +10,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Marathi (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/ms.po b/po/ms.po
+index 8642d71..3bd714a 100644
+--- a/po/ms.po
++++ b/po/ms.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Malay\n"
+diff --git a/po/nb.po b/po/nb.po
+index 62bfe40..8a034d2 100644
+--- a/po/nb.po
++++ b/po/nb.po
+@@ -8,7 +8,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Norwegian Bokmål (http://www.transifex.com/projects/p/virt-"
+diff --git a/po/nds.po b/po/nds.po
+index db7b5af..3ecdcde 100644
+--- a/po/nds.po
++++ b/po/nds.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Low German\n"
+diff --git a/po/ne.po b/po/ne.po
+index 0cc31c3..ad80b9a 100644
+--- a/po/ne.po
++++ b/po/ne.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Nepali\n"
+diff --git a/po/nl.po b/po/nl.po
+index ec8d5ac..227701e 100644
+--- a/po/nl.po
++++ b/po/nl.po
+@@ -8,7 +8,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Dutch (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/nn.po b/po/nn.po
+index a58b8af..c1d1463 100644
+--- a/po/nn.po
++++ b/po/nn.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Norwegian Nynorsk\n"
+diff --git a/po/nso.po b/po/nso.po
+index 7cde1bd..30d6829 100644
+--- a/po/nso.po
++++ b/po/nso.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Northern Sotho\n"
+diff --git a/po/or.po b/po/or.po
+index a6c028c..07aaa82 100644
+--- a/po/or.po
++++ b/po/or.po
+@@ -8,7 +8,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Oriya (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/pa.po b/po/pa.po
+index 860fd8e..f98e9af 100644
+--- a/po/pa.po
++++ b/po/pa.po
+@@ -9,7 +9,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Panjabi (Punjabi) (http://www.transifex.com/projects/p/virt-"
+diff --git a/po/pl.po b/po/pl.po
+index 446247f..7960338 100644
+--- a/po/pl.po
++++ b/po/pl.po
+@@ -9,7 +9,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-12-07 10:36-0500\n"
+ "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
+ "Language-Team: Polish (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/pt.po b/po/pt.po
+index 08cfba9..648bf7d 100644
+--- a/po/pt.po
++++ b/po/pt.po
+@@ -8,7 +8,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Portuguese (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/pt_BR.po b/po/pt_BR.po
+index 25ade35..d8419b9 100644
+--- a/po/pt_BR.po
++++ b/po/pt_BR.po
+@@ -1,7 +1,7 @@
+ # SOME DESCRIPTIVE TITLE.
+ # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+ # This file is distributed under the same license as the PACKAGE package.
+-# 
++#
+ # Translators:
+ # Glaucia Freitas <gcintra@redhat.com>, 2012
+ # Glaucia Freitas <gcintra@redhat.com>, 2013
+@@ -11,14 +11,14 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: virt-viewer\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2013-07-09 21:09+0100\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
++"PO-Revision-Date: 2016-10-17 01:16+0000\n"
++"Last-Translator: adallape <adallape@redhat.com>\n"
++"Language-Team: Portuguese (Brazil) <trans-pt_br@lists.fedoraproject.org>\n"
++"Language: pt-BR\n"
+ "MIME-Version: 1.0\n"
+ "Content-Type: text/plain; charset=UTF-8\n"
+ "Content-Transfer-Encoding: 8bit\n"
+-"PO-Revision-Date: 2016-08-30 02:28+0000\n"
+-"Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+-"Language-Team: Portuguese (Brazil) <trans-pt_br@lists.fedoraproject.org>\n"
+-"Language: pt-BR\n"
+ "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+ "X-Generator: Zanata 3.9.5\n"
+ 
+@@ -163,7 +163,7 @@ msgstr "Detalhes da conexão"
+ 
+ #: ../src/remote-viewer.c:1101
+ msgid "Connection _Address"
+-msgstr ""
++msgstr "En_dereço de conexão "
+ 
+ #: ../src/remote-viewer.c:1113
+ msgid "For example, spice://foo.example.org:5900"
+@@ -171,7 +171,7 @@ msgstr "Por exemplo, spice://foo.example.org:5900"
+ 
+ #: ../src/remote-viewer.c:1126
+ msgid "Recent Connections"
+-msgstr ""
++msgstr "Conexões recentes"
+ 
+ #: ../src/remote-viewer.c:1240
+ msgid "Setting up Spice session..."
+@@ -194,13 +194,13 @@ msgstr "Não foi possíve determinar o tipo de conexão a partir do URI"
+ msgid "Couldn't open oVirt session: "
+ msgstr "Não foi possível abrir a sessão oVirt: "
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-about.xml.h:1
+ msgid "About Glade"
+ msgstr "Sobre o Glade"
+@@ -270,17 +270,17 @@ msgstr "Não perguntar novamente."
+ #: ../src/virt-viewer-app.c:647
+ #, c-format
+ msgid "Address is too long for unix socket_path: %s"
+-msgstr ""
++msgstr "Endereço é muito longo para unix socket_path: %s"
+ 
+ #: ../src/virt-viewer-app.c:657
+ #, c-format
+ msgid "Creating unix socket failed: %s"
+-msgstr ""
++msgstr "A criação de socket unix falhou: %s"
+ 
+ #: ../src/virt-viewer-app.c:663
+ #, c-format
+ msgid "Connecting to unix socket failed: %s"
+-msgstr ""
++msgstr "A conexão ao socket unix falhou: %s"
+ 
+ #: ../src/virt-viewer-app.c:946
+ #, c-format
+@@ -352,7 +352,7 @@ msgstr "O nível de amplificação deve estar entre %d-%d\n"
+ #: ../src/virt-viewer-app.c:2248
+ #, c-format
+ msgid "Display _%d"
+-msgstr ""
++msgstr "Exibir_ %d"
+ 
+ #: ../src/virt-viewer-app.c:2421
+ #, c-format
+@@ -395,11 +395,13 @@ msgstr "Exibir informações de depuração"
+ 
+ #: ../src/virt-viewer-auth.c:88
+ #, c-format
+-msgid "Authentication is required for the %s connection to:\n"
++msgid ""
++"Authentication is required for the %s connection to:\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+-msgstr "É necessária autenticação para a conexão %s a:\n"
++msgstr ""
++"É necessária autenticação para a conexão %s a:\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+@@ -409,13 +411,13 @@ msgstr "É necessária autenticação para a conexão %s a:\n"
+ msgid "Authentication is required for the %s connection:\n"
+ msgstr "É necessária autenticação para a conexão %s:\n"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-auth.xml.h:1
+ msgid "Authentication required"
+ msgstr "Autenticação requerida"
+@@ -482,12 +484,14 @@ msgstr "Console gráfico da máquina virtual "
+ 
+ #: ../src/virt-viewer-main.c:107
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "Usage: %s [OPTIONS] DOMAIN-NAME|ID|UUID\n"
+ "\n"
+ "%s\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "Uso: %s [OPTIONS] DOMAIN-NAME|ID|UUID\n"
+ "\n"
+ "%s\n"
+@@ -495,10 +499,12 @@ msgstr "\n"
+ 
+ #: ../src/virt-viewer-main.c:112
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "No DOMAIN-NAME|ID|UUID was specified for '--wait'\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "Não foi especificado nenhum NOME-DOMÍNIO |ID|UUID para '--wait'\n"
+ "\n"
+ 
+@@ -616,7 +622,7 @@ msgstr "(Pressione %s para liberar o ponteiro)"
+ #. translators:
+ #. * This is "<ungrab (or empty)><space (or empty)><subtitle (or empty)> - <appname>"
+ #. * Such as: "(Press Ctrl+Alt to release pointer) BigCorpTycoon MOTD - Virt Viewer"
+-#. 
++#.
+ #: ../src/virt-viewer-window.c:1168
+ #, c-format
+ msgid "%s%s%s - %s"
+@@ -706,24 +712,24 @@ msgstr "A autenticação falhou."
+ msgid "Failed to connect: "
+ msgstr "Falhou ao conectar:"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer.xml.h:1
+ msgid "_File"
+ msgstr "_Arquivo"
+ 
+ #: ../src/virt-viewer.xml.h:2
+ msgid "_Screenshot"
+-msgstr ""
++msgstr "_Captura de tela"
+ 
+ #: ../src/virt-viewer.xml.h:3
+ msgid "_USB device selection"
+-msgstr ""
++msgstr "Seleção de dispositivo _USB"
+ 
+ #: ../src/virt-viewer.xml.h:4
+ msgid "Smartcard insertion"
+@@ -739,7 +745,7 @@ msgstr "_Visualizar"
+ 
+ #: ../src/virt-viewer.xml.h:7
+ msgid "_Full screen"
+-msgstr ""
++msgstr "_Tela cheia"
+ 
+ #: ../src/virt-viewer.xml.h:8
+ msgid "_Zoom"
+@@ -747,7 +753,7 @@ msgstr "_Zoom"
+ 
+ #: ../src/virt-viewer.xml.h:9
+ msgid "_Displays"
+-msgstr ""
++msgstr "_Telas "
+ 
+ #: ../src/virt-viewer.xml.h:10
+ msgid "Release cursor"
+diff --git a/po/ro.po b/po/ro.po
+index f4d435f..76d7c83 100644
+--- a/po/ro.po
++++ b/po/ro.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Romanian\n"
+diff --git a/po/ru.po b/po/ru.po
+index 1f9e583..40a593c 100644
+--- a/po/ru.po
++++ b/po/ru.po
+@@ -1,7 +1,7 @@
+ # SOME DESCRIPTIVE TITLE.
+ # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+ # This file is distributed under the same license as the PACKAGE package.
+-# 
++#
+ # Translators:
+ # Automatically generated, 2010
+ # triplepointfive <iya777@yandex.ru>, 2012
+@@ -13,16 +13,16 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: virt-viewer\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2013-07-09 21:09+0100\n"
+-"MIME-Version: 1.0\n"
+-"Content-Type: text/plain; charset=UTF-8\n"
+-"Content-Transfer-Encoding: 8bit\n"
+-"PO-Revision-Date: 2016-09-01 09:36+0000\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
++"PO-Revision-Date: 2016-10-19 01:54+0000\n"
+ "Last-Translator: Copied by Zanata <copied-by-zanata@zanata.org>\n"
+ "Language-Team: Russian <trans-ru@lists.fedoraproject.org>\n"
+ "Language: ru\n"
+-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=UTF-8\n"
++"Content-Transfer-Encoding: 8bit\n"
++"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
++"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+ "X-Generator: Zanata 3.9.5\n"
+ 
+ #: ../data/remote-viewer.desktop.in.h:1 ../src/remote-viewer-main.c:116
+@@ -103,7 +103,8 @@ msgstr "Клиент удаленного просмотра"
+ msgid ""
+ "%s\n"
+ "Run '%s --help' to see a full list of available command line options\n"
+-msgstr "%s\n"
++msgstr ""
++"%s\n"
+ "Выполните «%s --help» для просмотра полного списка параметров\n"
+ 
+ #: ../src/remote-viewer-main.c:149
+@@ -163,7 +164,7 @@ msgstr "Свойства подключения"
+ 
+ #: ../src/remote-viewer.c:1101
+ msgid "Connection _Address"
+-msgstr ""
++msgstr "_Адрес подключения"
+ 
+ #: ../src/remote-viewer.c:1113
+ msgid "For example, spice://foo.example.org:5900"
+@@ -171,7 +172,7 @@ msgstr "Например, spice://foo.example.org:5900"
+ 
+ #: ../src/remote-viewer.c:1126
+ msgid "Recent Connections"
+-msgstr ""
++msgstr "Недавние подключения"
+ 
+ #: ../src/remote-viewer.c:1240
+ msgid "Setting up Spice session..."
+@@ -194,13 +195,13 @@ msgstr "Не удалось определить тип подключения 
+ msgid "Couldn't open oVirt session: "
+ msgstr "Не удалось открыть сеанс oVirt: "
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-about.xml.h:1
+ msgid "About Glade"
+ msgstr "О  Glade"
+@@ -209,7 +210,8 @@ msgstr "О  Glade"
+ msgid ""
+ "Copyright (C) 2007-2012 Daniel P. Berrange\n"
+ "Copyright (C) 2007-2014 Red Hat, Inc."
+-msgstr "(C) Daniel P. Berrange, 2007–2012\n"
++msgstr ""
++"(C) Daniel P. Berrange, 2007–2012\n"
+ "(C) Red Hat, Inc., 2007–2014"
+ 
+ #: ../src/virt-viewer-about.xml.h:4
+@@ -268,17 +270,17 @@ msgstr "Больше не спрашивать"
+ #: ../src/virt-viewer-app.c:647
+ #, c-format
+ msgid "Address is too long for unix socket_path: %s"
+-msgstr ""
++msgstr "Адрес слишком длинный для пути к сокету unix: %s"
+ 
+ #: ../src/virt-viewer-app.c:657
+ #, c-format
+ msgid "Creating unix socket failed: %s"
+-msgstr ""
++msgstr "Не удалось создать сокет unix: %s"
+ 
+ #: ../src/virt-viewer-app.c:663
+ #, c-format
+ msgid "Connecting to unix socket failed: %s"
+-msgstr ""
++msgstr "Не удалось подключиться к сокету unix: %s"
+ 
+ #: ../src/virt-viewer-app.c:946
+ #, c-format
+@@ -351,7 +353,7 @@ msgstr "Масштаб должен быть в диапазоне %d–%d\n"
+ #: ../src/virt-viewer-app.c:2248
+ #, c-format
+ msgid "Display _%d"
+-msgstr ""
++msgstr "Дисплей _%d"
+ 
+ #: ../src/virt-viewer-app.c:2421
+ #, c-format
+@@ -394,11 +396,13 @@ msgstr "Показать сообщения диагностики"
+ 
+ #: ../src/virt-viewer-auth.c:88
+ #, c-format
+-msgid "Authentication is required for the %s connection to:\n"
++msgid ""
++"Authentication is required for the %s connection to:\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+-msgstr "Требуется аутентификация для подключения %s к:\n"
++msgstr ""
++"Требуется аутентификация для подключения %s к:\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+@@ -408,13 +412,13 @@ msgstr "Требуется аутентификация для подключе
+ msgid "Authentication is required for the %s connection:\n"
+ msgstr "Требуется аутентификация для подключения %s:\n"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-auth.xml.h:1
+ msgid "Authentication required"
+ msgstr "Требуется проверка подлинности"
+@@ -479,12 +483,14 @@ msgstr "Графическая консоль виртуальной машин
+ 
+ #: ../src/virt-viewer-main.c:107
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "Usage: %s [OPTIONS] DOMAIN-NAME|ID|UUID\n"
+ "\n"
+ "%s\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "Формат: %s [ПАРАМЕТРЫ] ДОМЕН|ID|UUID\n"
+ "\n"
+ "%s\n"
+@@ -492,10 +498,12 @@ msgstr "\n"
+ 
+ #: ../src/virt-viewer-main.c:112
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "No DOMAIN-NAME|ID|UUID was specified for '--wait'\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "Не указано DOMAIN-NAME|ID|UUID для --wait\n"
+ "\n"
+ 
+@@ -613,7 +621,7 @@ msgstr "(нажмите %s для освобождения курсора)"
+ #. translators:
+ #. * This is "<ungrab (or empty)><space (or empty)><subtitle (or empty)> - <appname>"
+ #. * Such as: "(Press Ctrl+Alt to release pointer) BigCorpTycoon MOTD - Virt Viewer"
+-#. 
++#.
+ #: ../src/virt-viewer-window.c:1168
+ #, c-format
+ msgid "%s%s%s - %s"
+@@ -703,24 +711,24 @@ msgstr "Ошибка аутентификации."
+ msgid "Failed to connect: "
+ msgstr "Не удалось подключиться: "
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer.xml.h:1
+ msgid "_File"
+ msgstr "_Файл"
+ 
+ #: ../src/virt-viewer.xml.h:2
+ msgid "_Screenshot"
+-msgstr ""
++msgstr "_Снимок экрана"
+ 
+ #: ../src/virt-viewer.xml.h:3
+ msgid "_USB device selection"
+-msgstr ""
++msgstr "_Выбор устройства USB"
+ 
+ #: ../src/virt-viewer.xml.h:4
+ msgid "Smartcard insertion"
+@@ -736,7 +744,7 @@ msgstr "_Просмотр"
+ 
+ #: ../src/virt-viewer.xml.h:7
+ msgid "_Full screen"
+-msgstr ""
++msgstr "_Полноэкранный режим"
+ 
+ #: ../src/virt-viewer.xml.h:8
+ msgid "_Zoom"
+@@ -744,7 +752,7 @@ msgstr "_Масштаб"
+ 
+ #: ../src/virt-viewer.xml.h:9
+ msgid "_Displays"
+-msgstr ""
++msgstr "Дис_плеи"
+ 
+ #: ../src/virt-viewer.xml.h:10
+ msgid "Release cursor"
+diff --git a/po/si.po b/po/si.po
+index af25c41..4509549 100644
+--- a/po/si.po
++++ b/po/si.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Sinhala\n"
+diff --git a/po/sk.po b/po/sk.po
+index 9617a97..b9a8a41 100644
+--- a/po/sk.po
++++ b/po/sk.po
+@@ -8,7 +8,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Slovak (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/sl.po b/po/sl.po
+index e2aad58..5c97bba 100644
+--- a/po/sl.po
++++ b/po/sl.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Slovenian\n"
+diff --git a/po/sq.po b/po/sq.po
+index f9b589d..18b95a3 100644
+--- a/po/sq.po
++++ b/po/sq.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Albanian\n"
+diff --git a/po/sr.po b/po/sr.po
+index d9a4701..df3e00d 100644
+--- a/po/sr.po
++++ b/po/sr.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Serbian\n"
+diff --git a/po/sr@latin.po b/po/sr@latin.po
+index 16f6a00..48c9e8d 100644
+--- a/po/sr@latin.po
++++ b/po/sr@latin.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Serbian (LATIN)\n"
+diff --git a/po/sv.po b/po/sv.po
+index 381f585..5513298 100644
+--- a/po/sv.po
++++ b/po/sv.po
+@@ -11,7 +11,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-08-31 01:47-0400\n"
+ "Last-Translator: Göran Uddeborg <goeran@uddeborg.se>\n"
+ "Language-Team: Swedish (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/ta.po b/po/ta.po
+index 93d83d2..db943f5 100644
+--- a/po/ta.po
++++ b/po/ta.po
+@@ -12,7 +12,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Tamil (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/te.po b/po/te.po
+index 3f63102..4549530 100644
+--- a/po/te.po
++++ b/po/te.po
+@@ -11,7 +11,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Telugu (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/tg.po b/po/tg.po
+index 6c599c4..48f920f 100644
+--- a/po/tg.po
++++ b/po/tg.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Tajik\n"
+diff --git a/po/th.po b/po/th.po
+index 4b80477..e3308b1 100644
+--- a/po/th.po
++++ b/po/th.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Thai\n"
+diff --git a/po/tr.po b/po/tr.po
+index db9ed18..610a794 100644
+--- a/po/tr.po
++++ b/po/tr.po
+@@ -8,7 +8,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-01-12 06:21-0500\n"
+ "Last-Translator: Daniel Berrange <dan-transifex@berrange.com>\n"
+ "Language-Team: Turkish (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/tw.po b/po/tw.po
+index a5aa085..97a94d0 100644
+--- a/po/tw.po
++++ b/po/tw.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Twi\n"
+diff --git a/po/uk.po b/po/uk.po
+index 2cb8f35..7037296 100644
+--- a/po/uk.po
++++ b/po/uk.po
+@@ -9,7 +9,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: 2015-12-07 12:22-0500\n"
+ "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
+ "Language-Team: Ukrainian (http://www.transifex.com/projects/p/virt-viewer/"
+diff --git a/po/ur.po b/po/ur.po
+index 9a490fd..491fd0f 100644
+--- a/po/ur.po
++++ b/po/ur.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Urdu\n"
+diff --git a/po/vi.po b/po/vi.po
+index 810f17d..e5aeae1 100644
+--- a/po/vi.po
++++ b/po/vi.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Vietnamese\n"
+diff --git a/po/wba.po b/po/wba.po
+index ddd9a21..2094869 100644
+--- a/po/wba.po
++++ b/po/wba.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: wba\n"
+diff --git a/po/yo.po b/po/yo.po
+index 93f15a2..8b463d6 100644
+--- a/po/yo.po
++++ b/po/yo.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Yoruba\n"
+diff --git a/po/zh_CN.po b/po/zh_CN.po
+index 91ca607..582e59b 100644
+--- a/po/zh_CN.po
++++ b/po/zh_CN.po
+@@ -1,7 +1,7 @@
+ # SOME DESCRIPTIVE TITLE.
+ # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+ # This file is distributed under the same license as the PACKAGE package.
+-# 
++#
+ # Translators:
+ # Aron Xu <aronxu@gnome.org>, 2010
+ # Christopher Meng <cickumqt@gmail.com>, 2013
+@@ -14,14 +14,14 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: virt-viewer\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2013-07-09 21:09+0100\n"
+-"MIME-Version: 1.0\n"
+-"Content-Type: text/plain; charset=UTF-8\n"
+-"Content-Transfer-Encoding: 8bit\n"
+-"PO-Revision-Date: 2016-08-18 06:04+0000\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
++"PO-Revision-Date: 2016-10-12 12:22+0000\n"
+ "Last-Translator: Leah Liu <lliu@redhat.com>\n"
+ "Language-Team: Chinese (China) <trans-zh_cn@lists.fedoraproject.org>\n"
+ "Language: zh-CN\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=UTF-8\n"
++"Content-Transfer-Encoding: 8bit\n"
+ "Plural-Forms: nplurals=1; plural=0;\n"
+ "X-Generator: Zanata 3.9.5\n"
+ 
+@@ -103,7 +103,8 @@ msgstr "远程查看器客户端"
+ msgid ""
+ "%s\n"
+ "Run '%s --help' to see a full list of available command line options\n"
+-msgstr "%s\n"
++msgstr ""
++"%s\n"
+ "运行 '%s --help' 来查看可用命令行选项的完整列表\n"
+ 
+ #: ../src/remote-viewer-main.c:149
+@@ -163,7 +164,7 @@ msgstr "连接详情"
+ 
+ #: ../src/remote-viewer.c:1101
+ msgid "Connection _Address"
+-msgstr ""
++msgstr "连接地址（_A）"
+ 
+ #: ../src/remote-viewer.c:1113
+ msgid "For example, spice://foo.example.org:5900"
+@@ -171,7 +172,7 @@ msgstr "例如：spice://foo.example.org:5900"
+ 
+ #: ../src/remote-viewer.c:1126
+ msgid "Recent Connections"
+-msgstr ""
++msgstr "最新连接"
+ 
+ #: ../src/remote-viewer.c:1240
+ msgid "Setting up Spice session..."
+@@ -194,13 +195,13 @@ msgstr "无法确定 URI 的连接类型"
+ msgid "Couldn't open oVirt session: "
+ msgstr "无法打开 oVirt 会话："
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-about.xml.h:1
+ msgid "About Glade"
+ msgstr "关于 Glade"
+@@ -237,7 +238,8 @@ msgid ""
+ "along with this program; if not, write to the Free Software\n"
+ "Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA\n"
+ msgstr ""
+-"本程序是免费软件，您可以根据自由软件基金发布的 GNU 通用公共许可证版本 2 或(您认为合适的)之后的版本重新发布和（/或）修改这个软件。\n"
++"本程序是免费软件，您可以根据自由软件基金发布的 GNU 通用公共许可证版本 2 或(您"
++"认为合适的)之后的版本重新发布和（/或）修改这个软件。\n"
+ "\n"
+ "发布本程序是希望它\n"
+ "对您有帮助，但不做任何保证，\n"
+@@ -263,17 +265,17 @@ msgstr "不要再问我"
+ #: ../src/virt-viewer-app.c:647
+ #, c-format
+ msgid "Address is too long for unix socket_path: %s"
+-msgstr ""
++msgstr "对于 unix socket_path 来说地址过长：%s"
+ 
+ #: ../src/virt-viewer-app.c:657
+ #, c-format
+ msgid "Creating unix socket failed: %s"
+-msgstr ""
++msgstr "创建 unix 插槽失败：%s"
+ 
+ #: ../src/virt-viewer-app.c:663
+ #, c-format
+ msgid "Connecting to unix socket failed: %s"
+-msgstr ""
++msgstr "连接到 unix 插槽失败：%s"
+ 
+ #: ../src/virt-viewer-app.c:946
+ #, c-format
+@@ -323,7 +325,8 @@ msgstr "无法连接到图形服务器 %s"
+ msgid ""
+ "Unable to authenticate with remote desktop server at %s: %s\n"
+ "Retry connection again?"
+-msgstr "无法使用 %s 中的远程桌面服务器验证：%s\n"
++msgstr ""
++"无法使用 %s 中的远程桌面服务器验证：%s\n"
+ "重新尝试连接？"
+ 
+ #: ../src/virt-viewer-app.c:1476
+@@ -344,7 +347,7 @@ msgstr "缩放等级必须在 %d-%d 之间\n"
+ #: ../src/virt-viewer-app.c:2248
+ #, c-format
+ msgid "Display _%d"
+-msgstr ""
++msgstr "显示 _%d"
+ 
+ #: ../src/virt-viewer-app.c:2421
+ #, c-format
+@@ -385,11 +388,13 @@ msgstr "显示调试信息"
+ 
+ #: ../src/virt-viewer-auth.c:88
+ #, c-format
+-msgid "Authentication is required for the %s connection to:\n"
++msgid ""
++"Authentication is required for the %s connection to:\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+-msgstr "%s 连接至以下部分需要认证：\n"
++msgstr ""
++"%s 连接至以下部分需要认证：\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+@@ -399,13 +404,13 @@ msgstr "%s 连接至以下部分需要认证：\n"
+ msgid "Authentication is required for the %s connection:\n"
+ msgstr "%s 连接需要认证：\n"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-auth.xml.h:1
+ msgid "Authentication required"
+ msgstr "所需验证"
+@@ -470,12 +475,14 @@ msgstr "虚拟机图形控制台"
+ 
+ #: ../src/virt-viewer-main.c:107
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "Usage: %s [OPTIONS] DOMAIN-NAME|ID|UUID\n"
+ "\n"
+ "%s\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "用法：%s [选项] 域名|ID|UUID\n"
+ "\n"
+ "%s\n"
+@@ -483,10 +490,12 @@ msgstr "\n"
+ 
+ #: ../src/virt-viewer-main.c:112
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "No DOMAIN-NAME|ID|UUID was specified for '--wait'\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "No DOMAIN-NAME|ID|UUID was specified for '--wait'\n"
+ "\n"
+ 
+@@ -604,7 +613,7 @@ msgstr "(按 %s 释放光标)"
+ #. translators:
+ #. * This is "<ungrab (or empty)><space (or empty)><subtitle (or empty)> - <appname>"
+ #. * Such as: "(Press Ctrl+Alt to release pointer) BigCorpTycoon MOTD - Virt Viewer"
+-#. 
++#.
+ #: ../src/virt-viewer-window.c:1168
+ #, c-format
+ msgid "%s%s%s - %s"
+@@ -692,24 +701,24 @@ msgstr "认证失败。"
+ msgid "Failed to connect: "
+ msgstr "连接失败："
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer.xml.h:1
+ msgid "_File"
+ msgstr "文件（_F）"
+ 
+ #: ../src/virt-viewer.xml.h:2
+ msgid "_Screenshot"
+-msgstr ""
++msgstr "截图（_S）"
+ 
+ #: ../src/virt-viewer.xml.h:3
+ msgid "_USB device selection"
+-msgstr ""
++msgstr "USB 设备选择（_U）"
+ 
+ #: ../src/virt-viewer.xml.h:4
+ msgid "Smartcard insertion"
+@@ -725,7 +734,7 @@ msgstr "查看（_V）"
+ 
+ #: ../src/virt-viewer.xml.h:7
+ msgid "_Full screen"
+-msgstr ""
++msgstr "全屏（_F）"
+ 
+ #: ../src/virt-viewer.xml.h:8
+ msgid "_Zoom"
+@@ -733,7 +742,7 @@ msgstr "缩放（_Z）"
+ 
+ #: ../src/virt-viewer.xml.h:9
+ msgid "_Displays"
+-msgstr ""
++msgstr "显示（_D）"
+ 
+ #: ../src/virt-viewer.xml.h:10
+ msgid "Release cursor"
+diff --git a/po/zh_HK.po b/po/zh_HK.po
+index a8647d5..4122917 100644
+--- a/po/zh_HK.po
++++ b/po/zh_HK.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Chinese (Hong Kong SAR China)\n"
+diff --git a/po/zh_TW.po b/po/zh_TW.po
+index 10afc96..7a0e130 100644
+--- a/po/zh_TW.po
++++ b/po/zh_TW.po
+@@ -1,7 +1,7 @@
+ # SOME DESCRIPTIVE TITLE.
+ # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+ # This file is distributed under the same license as the PACKAGE package.
+-# 
++#
+ # Translators:
+ # Cheng-Chia Tseng <pswo10680@gmail.com>, 2013
+ # Chester Cheng <ccheng@redhat.com>, 2013
+@@ -14,14 +14,14 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: virt-viewer\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2013-07-09 21:09+0100\n"
+-"MIME-Version: 1.0\n"
+-"Content-Type: text/plain; charset=UTF-8\n"
+-"Content-Transfer-Encoding: 8bit\n"
+-"PO-Revision-Date: 2016-09-01 09:34+0000\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
++"PO-Revision-Date: 2016-10-19 01:48+0000\n"
+ "Last-Translator: Copied by Zanata <copied-by-zanata@zanata.org>\n"
+ "Language-Team: Chinese (Taiwan) <trans-zh_TW@lists.fedoraproject.org>\n"
+ "Language: zh-TW\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=UTF-8\n"
++"Content-Transfer-Encoding: 8bit\n"
+ "Plural-Forms: nplurals=1; plural=0;\n"
+ "X-Generator: Zanata 3.9.5\n"
+ 
+@@ -103,7 +103,8 @@ msgstr "遠端檢視器用戶端"
+ msgid ""
+ "%s\n"
+ "Run '%s --help' to see a full list of available command line options\n"
+-msgstr "%s\n"
++msgstr ""
++"%s\n"
+ "請執行「%s --help」以檢視可用指令選項的完整清單\n"
+ 
+ #: ../src/remote-viewer-main.c:149
+@@ -163,7 +164,7 @@ msgstr "連線細節"
+ 
+ #: ../src/remote-viewer.c:1101
+ msgid "Connection _Address"
+-msgstr ""
++msgstr "連線位址(_A)"
+ 
+ #: ../src/remote-viewer.c:1113
+ msgid "For example, spice://foo.example.org:5900"
+@@ -171,7 +172,7 @@ msgstr "例如，spice://foo.example.org:5900"
+ 
+ #: ../src/remote-viewer.c:1126
+ msgid "Recent Connections"
+-msgstr ""
++msgstr "最近連線數"
+ 
+ #: ../src/remote-viewer.c:1240
+ msgid "Setting up Spice session..."
+@@ -194,13 +195,13 @@ msgstr "無法從 URI 判斷連線類型"
+ msgid "Couldn't open oVirt session: "
+ msgstr "無法開啟 oVirt 作業階段： "
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-about.xml.h:1
+ msgid "About Glade"
+ msgstr "關於 Glade"
+@@ -249,8 +250,8 @@ msgstr ""
+ "\n"
+ "當您取得此程式時，您應同時取得了\n"
+ "一份 GNU 通用公共許可證。若沒有的話，請聯絡自由軟體\n"
+-"基金會（Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA "
+-"02111-1307 USA\n"
++"基金會（Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, "
++"MA 02111-1307 USA\n"
+ 
+ #: ../src/virt-viewer-about.xml.h:20
+ msgid "The Fedora Translation Team"
+@@ -267,17 +268,17 @@ msgstr "不再詢問我"
+ #: ../src/virt-viewer-app.c:647
+ #, c-format
+ msgid "Address is too long for unix socket_path: %s"
+-msgstr ""
++msgstr "Unix socket_path 的位址過長：%s"
+ 
+ #: ../src/virt-viewer-app.c:657
+ #, c-format
+ msgid "Creating unix socket failed: %s"
+-msgstr ""
++msgstr "無法建立 Unix Socket：%s"
+ 
+ #: ../src/virt-viewer-app.c:663
+ #, c-format
+ msgid "Connecting to unix socket failed: %s"
+-msgstr ""
++msgstr "無法連線至 Unix Socket：%s"
+ 
+ #: ../src/virt-viewer-app.c:946
+ #, c-format
+@@ -327,7 +328,8 @@ msgstr "無法連接圖形化伺服器 %s"
+ msgid ""
+ "Unable to authenticate with remote desktop server at %s: %s\n"
+ "Retry connection again?"
+-msgstr "無法在位於 %s 的遠端桌面伺服器上驗證：%s\n"
++msgstr ""
++"無法在位於 %s 的遠端桌面伺服器上驗證：%s\n"
+ "重新嘗試連線？"
+ 
+ #: ../src/virt-viewer-app.c:1476
+@@ -348,7 +350,7 @@ msgstr "放大等級必須介於 %d-%d\n"
+ #: ../src/virt-viewer-app.c:2248
+ #, c-format
+ msgid "Display _%d"
+-msgstr ""
++msgstr "顯示(_%d)"
+ 
+ #: ../src/virt-viewer-app.c:2421
+ #, c-format
+@@ -389,11 +391,13 @@ msgstr "顯示除錯資訊"
+ 
+ #: ../src/virt-viewer-auth.c:88
+ #, c-format
+-msgid "Authentication is required for the %s connection to:\n"
++msgid ""
++"Authentication is required for the %s connection to:\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+-msgstr "%s 連線須通過驗證才能連線至：\n"
++msgstr ""
++"%s 連線須通過驗證才能連線至：\n"
+ "\n"
+ "<b>%s</b>\n"
+ "\n"
+@@ -403,13 +407,13 @@ msgstr "%s 連線須通過驗證才能連線至：\n"
+ msgid "Authentication is required for the %s connection:\n"
+ msgstr "%s 連線須通過驗證：\n"
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer-auth.xml.h:1
+ msgid "Authentication required"
+ msgstr "須要通過驗證"
+@@ -474,12 +478,14 @@ msgstr "虛擬機圖形化主控台"
+ 
+ #: ../src/virt-viewer-main.c:107
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "Usage: %s [OPTIONS] DOMAIN-NAME|ID|UUID\n"
+ "\n"
+ "%s\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "用法：%s [OPTIONS] DOMAIN-NAME|ID|UUID\n"
+ "\n"
+ "%s\n"
+@@ -487,10 +493,12 @@ msgstr "\n"
+ 
+ #: ../src/virt-viewer-main.c:112
+ #, c-format
+-msgid "\n"
++msgid ""
++"\n"
+ "No DOMAIN-NAME|ID|UUID was specified for '--wait'\n"
+ "\n"
+-msgstr "\n"
++msgstr ""
++"\n"
+ "未指定「--wait」的 DOMAIN-NAME|ID|UUID\n"
+ "\n"
+ 
+@@ -608,7 +616,7 @@ msgstr "(按下 %s 以釋放游標)"
+ #. translators:
+ #. * This is "<ungrab (or empty)><space (or empty)><subtitle (or empty)> - <appname>"
+ #. * Such as: "(Press Ctrl+Alt to release pointer) BigCorpTycoon MOTD - Virt Viewer"
+-#. 
++#.
+ #: ../src/virt-viewer-window.c:1168
+ #, c-format
+ msgid "%s%s%s - %s"
+@@ -696,24 +704,24 @@ msgstr "驗證失敗。"
+ msgid "Failed to connect: "
+ msgstr "無法連線： "
+ 
+-#. 
++#.
+ #. * Local variables:
+ #. *  c-indent-level: 4
+ #. *  c-basic-offset: 4
+ #. *  indent-tabs-mode: nil
+ #. * End:
+-#. 
++#.
+ #: ../src/virt-viewer.xml.h:1
+ msgid "_File"
+ msgstr "檔案(_F)"
+ 
+ #: ../src/virt-viewer.xml.h:2
+ msgid "_Screenshot"
+-msgstr ""
++msgstr "螢幕截圖(_S)"
+ 
+ #: ../src/virt-viewer.xml.h:3
+ msgid "_USB device selection"
+-msgstr ""
++msgstr "USB 裝置選取(_U)"
+ 
+ #: ../src/virt-viewer.xml.h:4
+ msgid "Smartcard insertion"
+@@ -729,7 +737,7 @@ msgstr "檢視(_V)"
+ 
+ #: ../src/virt-viewer.xml.h:7
+ msgid "_Full screen"
+-msgstr ""
++msgstr "全螢幕(_F)"
+ 
+ #: ../src/virt-viewer.xml.h:8
+ msgid "_Zoom"
+@@ -737,7 +745,7 @@ msgstr "遠近(_Z)"
+ 
+ #: ../src/virt-viewer.xml.h:9
+ msgid "_Displays"
+-msgstr ""
++msgstr "顯示(_D)"
+ 
+ #: ../src/virt-viewer.xml.h:10
+ msgid "Release cursor"
+diff --git a/po/zu.po b/po/zu.po
+index f95d894..2a79b40 100644
+--- a/po/zu.po
++++ b/po/zu.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: PACKAGE VERSION\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2016-10-11 09:03+0200\n"
++"POT-Creation-Date: 2016-10-20 08:47+0200\n"
+ "PO-Revision-Date: \n"
+ "Last-Translator: \n"
+ "Language-Team: Zulu\n"
+-- 
+2.10.1
+

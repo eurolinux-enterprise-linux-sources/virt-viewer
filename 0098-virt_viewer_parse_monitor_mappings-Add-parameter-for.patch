@@ -1,0 +1,66 @@
+From e570cf293391c202b851c9e94f79f18becb72d8e Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Tue, 8 Mar 2016 08:55:19 +0100
+Subject: [PATCH virt-viewer] virt_viewer_parse_monitor_mappings: Add parameter
+ for client monitors
+
+Drop dependency on gdk. it allows to write tests not depending
+on the client's configuration.
+
+Resolves: https://bugzilla.redhat.com/show_bug.cgi?id=1351881
+---
+ src/virt-viewer-app.c  | 2 +-
+ src/virt-viewer-util.c | 4 ++--
+ src/virt-viewer-util.h | 3 ++-
+ 3 files changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index 0410ace..ff336ea 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -387,7 +387,7 @@ virt_viewer_app_get_monitor_mapping_for_section(VirtViewerApp *self, const gchar
+             g_warning("Error reading monitor assignments for %s: %s", section, error->message);
+         g_clear_error(&error);
+     } else {
+-        mapping = virt_viewer_parse_monitor_mappings(mappings, nmappings);
++        mapping = virt_viewer_parse_monitor_mappings(mappings, nmappings, get_n_client_monitors());
+     }
+     g_strfreev(mappings);
+ 
+diff --git a/src/virt-viewer-util.c b/src/virt-viewer-util.c
+index ed04fa6..3799aac 100644
+--- a/src/virt-viewer-util.c
++++ b/src/virt-viewer-util.c
+@@ -650,6 +650,7 @@ virt_viewer_shift_monitors_to_origin(GHashTable *displays)
+  * virt_viewer_parse_monitor_mappings:
+  * @mappings: (array zero-terminated=1) values for the "monitor-mapping" key
+  * @nmappings: the size of @mappings
++ * @nmonitors: the count of client's monitors
+  *
+  * Parses and validates monitor mappings values to return a hash table
+  * containing the mapping from guest display ids to client monitors ids.
+@@ -658,9 +659,8 @@ virt_viewer_shift_monitors_to_origin(GHashTable *displays)
+  *  ids to client monitor ids or %NULL if the mapping is invalid.
+  */
+ GHashTable*
+-virt_viewer_parse_monitor_mappings(gchar **mappings, const gsize nmappings)
++virt_viewer_parse_monitor_mappings(gchar **mappings, const gsize nmappings, const gint nmonitors)
+ {
+-    const gint nmonitors = gdk_screen_get_n_monitors(gdk_screen_get_default());
+     GHashTable *displaymap = g_hash_table_new(g_direct_hash, g_direct_equal);
+     GHashTable *monitormap = g_hash_table_new(g_direct_hash, g_direct_equal);
+     gint i, max_display_id = 0;
+diff --git a/src/virt-viewer-util.h b/src/virt-viewer-util.h
+index 2d36d73..0b33d99 100644
+--- a/src/virt-viewer-util.h
++++ b/src/virt-viewer-util.h
+@@ -62,7 +62,8 @@ void virt_viewer_shift_monitors_to_origin(GHashTable *displays);
+ 
+ /* monitor mapping */
+ GHashTable* virt_viewer_parse_monitor_mappings(gchar **mappings,
+-                                               const gsize nmappings);
++                                               const gsize nmappings,
++                                               const gint nmonitors);
+ #endif
+ 
+ /*

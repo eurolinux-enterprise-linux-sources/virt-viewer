@@ -1,0 +1,38 @@
+From 3ce9293be749a766aa3962041d31f8f94c3eb688 Mon Sep 17 00:00:00 2001
+From: Uri Lublin <uril@redhat.com>
+Date: Thu, 18 Feb 2016 13:44:24 +0200
+Subject: [PATCH virt-viewer] spice: vv-file: do not ignore usb-filter
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Resolves: https://bugzilla.redhat.com/show_bug.cgi?id=1327525
+
+Signed-off-by: Uri Lublin <uril@redhat.com>
+Acked-by: Fabiano Fidêncio <fidencio@redhat.com>
+(cherry picked from commit 7a54b96dbebfeb44f73a3e48e11f32006763a3b6)
+---
+ src/virt-viewer-session-spice.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/src/virt-viewer-session-spice.c b/src/virt-viewer-session-spice.c
+index d724b53..17aaff4 100644
+--- a/src/virt-viewer-session-spice.c
++++ b/src/virt-viewer-session-spice.c
+@@ -441,6 +441,16 @@ fill_session(VirtViewerFile *file, SpiceSession *session)
+         g_object_set(G_OBJECT(gtk), "auto-usbredir", enabled, NULL);
+     }
+ 
++    if (virt_viewer_file_is_set(file, "usb-filter")) {
++        gchar *filterstr = virt_viewer_file_get_usb_filter(file);
++        SpiceUsbDeviceManager *manager = spice_usb_device_manager_get(session,
++                                                                      NULL);
++        if (manager != NULL) {
++            g_object_set(manager, "auto-connect-filter", filterstr, NULL);
++        }
++        g_free(filterstr);
++    }
++
+     if (virt_viewer_file_is_set(file, "secure-channels")) {
+         gchar **channels = virt_viewer_file_get_secure_channels(file, NULL);
+         g_object_set(G_OBJECT(session), "secure-channels", channels, NULL);

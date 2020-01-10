@@ -1,0 +1,140 @@
+From e7b081782aa822bd7340b20b935145a000c8e230 Mon Sep 17 00:00:00 2001
+From: Lukas Venhoda <lvenhoda@redhat.com>
+Date: Wed, 22 Apr 2015 10:51:09 +0200
+Subject: [PATCH virt-viewer] virt-viewer: Set toolbar buttons not sensitive
+ when needed
+
+File->Screenshot, File->Preferences, View->Zoom and Send keys are now
+sensitive only while quest is connected.
+
+Changed behaviour of zoom:
+
+Previously, zoom could be set while quest wasn't connected. The zoom
+would then be set on connection. There was no indication of current zoom
+level while not connected to guest.
+
+Now, the menu is not sensitive while not connected to guest. Zoom can
+now be only modified while connected to guest, or from the command line.
+
+Resolves: https://bugzilla.redhat.com/show_bug.cgi?id=1360253
+---
+ src/virt-viewer-app.c    | 13 +++++++++++++
+ src/virt-viewer-app.h    |  1 +
+ src/virt-viewer-window.c | 27 +++++++++++++++++++++++++++
+ src/virt-viewer-window.h |  1 +
+ src/virt-viewer.c        |  1 +
+ 5 files changed, 43 insertions(+)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index 660f2ef..35fd7dc 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -832,6 +832,19 @@ virt_viewer_app_set_usb_options_sensitive(VirtViewerApp *self, gboolean sensitiv
+                    GINT_TO_POINTER(sensitive));
+ }
+ 
++static void
++set_menus_sensitive(gpointer value, gpointer user_data)
++{
++    virt_viewer_window_set_menus_sensitive(VIRT_VIEWER_WINDOW(value),
++                                           GPOINTER_TO_INT(user_data));
++}
++
++void
++virt_viewer_app_set_menus_sensitive(VirtViewerApp *self, gboolean sensitive)
++{
++    g_list_foreach(self->priv->windows, set_menus_sensitive, GINT_TO_POINTER(sensitive));
++}
++
+ static VirtViewerWindow *
+ virt_viewer_app_get_nth_window(VirtViewerApp *self, gint nth)
+ {
+diff --git a/src/virt-viewer-app.h b/src/virt-viewer-app.h
+index 517a22d..ab1d7a9 100644
+--- a/src/virt-viewer-app.h
++++ b/src/virt-viewer-app.h
+@@ -100,6 +100,7 @@ void virt_viewer_app_clear_hotkeys(VirtViewerApp *app);
+ GList* virt_viewer_app_get_initial_displays(VirtViewerApp* self);
+ gint virt_viewer_app_get_initial_monitor_for_display(VirtViewerApp* self, gint display);
+ void virt_viewer_app_set_enable_accel(VirtViewerApp *app, gboolean enable);
++void virt_viewer_app_set_menus_sensitive(VirtViewerApp *self, gboolean sensitive);
+ 
+ G_END_DECLS
+ 
+diff --git a/src/virt-viewer-window.c b/src/virt-viewer-window.c
+index 0a5d99b..b98ee89 100644
+--- a/src/virt-viewer-window.c
++++ b/src/virt-viewer-window.c
+@@ -308,7 +308,9 @@ virt_viewer_window_init (VirtViewerWindow *self)
+     priv->builder = virt_viewer_util_load_ui("virt-viewer.xml");
+ 
+     gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-send")), FALSE);
++    gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-view-zoom")), FALSE);
+     gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-file-screenshot")), FALSE);
++    gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-preferences")), FALSE);
+ 
+     gtk_builder_connect_signals(priv->builder, self);
+ 
+@@ -1204,6 +1206,29 @@ virt_viewer_window_set_usb_options_sensitive(VirtViewerWindow *self, gboolean se
+     gtk_widget_set_visible(priv->toolbar_usb_device_selection, sensitive);
+ }
+ 
++void
++virt_viewer_window_set_menus_sensitive(VirtViewerWindow *self, gboolean sensitive)
++{
++    VirtViewerWindowPrivate *priv;
++    GtkWidget *menu;
++
++    g_return_if_fail(VIRT_VIEWER_IS_WINDOW(self));
++
++    priv = self->priv;
++
++    menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "menu-preferences"));
++    gtk_widget_set_sensitive(menu, sensitive);
++
++    menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "menu-file-screenshot"));
++    gtk_widget_set_sensitive(menu, sensitive);
++
++    menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "menu-view-zoom"));
++    gtk_widget_set_sensitive(menu, sensitive);
++
++    menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "menu-send"));
++    gtk_widget_set_sensitive(menu, sensitive);
++}
++
+ static void
+ display_show_hint(VirtViewerDisplay *display,
+                   GParamSpec *pspec G_GNUC_UNUSED,
+@@ -1282,6 +1307,8 @@ virt_viewer_window_set_display(VirtViewerWindow *self, VirtViewerDisplay *displa
+         if (virt_viewer_display_get_enabled(display))
+             virt_viewer_window_desktop_resize(display, self);
+ 
++        gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-preferences")), TRUE);
++        gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-view-zoom")), TRUE);
+         gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-send")), TRUE);
+         gtk_widget_set_sensitive(self->priv->toolbar_send_key, TRUE);
+     }
+diff --git a/src/virt-viewer-window.h b/src/virt-viewer-window.h
+index 1f1e130..c25e9c9 100644
+--- a/src/virt-viewer-window.h
++++ b/src/virt-viewer-window.h
+@@ -71,6 +71,7 @@ void virt_viewer_window_set_display(VirtViewerWindow *self, VirtViewerDisplay *d
+ VirtViewerDisplay* virt_viewer_window_get_display(VirtViewerWindow *self);
+ void virt_viewer_window_set_menu_displays_sensitive(VirtViewerWindow *self, gboolean sensitive);
+ void virt_viewer_window_set_usb_options_sensitive(VirtViewerWindow *self, gboolean sensitive);
++void virt_viewer_window_set_menus_sensitive(VirtViewerWindow *self, gboolean sensitive);
+ void virt_viewer_window_update_title(VirtViewerWindow *self);
+ void virt_viewer_window_show(VirtViewerWindow *self);
+ void virt_viewer_window_hide(VirtViewerWindow *self);
+diff --git a/src/virt-viewer.c b/src/virt-viewer.c
+index 62124d3..c273065 100644
+--- a/src/virt-viewer.c
++++ b/src/virt-viewer.c
+@@ -169,6 +169,7 @@ virt_viewer_deactivated(VirtViewerApp *app, gboolean connect_error)
+ 
+         virt_viewer_app_show_status(app, _("Waiting for guest domain to re-start"));
+         virt_viewer_app_trace(app, "Guest %s display has disconnected, waiting to reconnect", priv->domkey);
++        virt_viewer_app_set_menus_sensitive(app, FALSE);
+     } else {
+         VIRT_VIEWER_APP_CLASS(virt_viewer_parent_class)->deactivated(app, connect_error);
+     }

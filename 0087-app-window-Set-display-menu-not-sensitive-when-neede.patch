@@ -1,0 +1,79 @@
+From c2e5ced80e2de3cfdef1438a33721e2b4927e50b Mon Sep 17 00:00:00 2001
+From: Lukas Venhoda <lvenhoda@redhat.com>
+Date: Thu, 16 Apr 2015 13:59:23 +0200
+Subject: [PATCH virt-viewer] app/window: Set display menu not sensitive when
+ needed
+
+Displays menu must be sensitive only when at least one display is
+enabled.
+
+Resolves: https://bugzilla.redhat.com/show_bug.cgi?id=1360253
+---
+ src/virt-viewer-app.c    |  6 +++++-
+ src/virt-viewer-window.c | 13 +++++++++++++
+ src/virt-viewer-window.h |  1 +
+ 3 files changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index 4fef684..660f2ef 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -2262,17 +2262,21 @@ window_update_menu_displays_cb(gpointer value,
+     GtkMenuShell *submenu;
+     GList *keys = g_hash_table_get_keys(self->priv->displays);
+     GList *tmp;
++    gboolean sensitive;
+ 
+     keys = g_list_sort(keys, update_menu_displays_sort);
+     submenu = window_empty_display_submenu(VIRT_VIEWER_WINDOW(value));
+ 
++    sensitive = (keys != NULL);
++    virt_viewer_window_set_menu_displays_sensitive(VIRT_VIEWER_WINDOW(value), sensitive);
++
+     tmp = keys;
+     while (tmp) {
+         int nth = GPOINTER_TO_INT(tmp->data);
+         VirtViewerWindow *vwin = virt_viewer_app_get_nth_window(self, nth);
+         VirtViewerDisplay *display = VIRT_VIEWER_DISPLAY(g_hash_table_lookup(self->priv->displays, tmp->data));
+         GtkWidget *item;
+-        gboolean visible, sensitive;
++        gboolean visible;
+         gchar *label;
+ 
+         label = g_strdup_printf(_("Display %d"), nth + 1);
+diff --git a/src/virt-viewer-window.c b/src/virt-viewer-window.c
+index f3af333..0a5d99b 100644
+--- a/src/virt-viewer-window.c
++++ b/src/virt-viewer-window.c
+@@ -1178,6 +1178,19 @@ virt_viewer_window_update_title(VirtViewerWindow *self)
+ }
+ 
+ void
++virt_viewer_window_set_menu_displays_sensitive(VirtViewerWindow *self, gboolean sensitive)
++{
++    VirtViewerWindowPrivate *priv;
++    GtkWidget *menu;
++
++    g_return_if_fail(VIRT_VIEWER_IS_WINDOW(self));
++
++    priv = self->priv;
++    menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "menu-displays"));
++    gtk_widget_set_sensitive(menu, sensitive);
++}
++
++void
+ virt_viewer_window_set_usb_options_sensitive(VirtViewerWindow *self, gboolean sensitive)
+ {
+     VirtViewerWindowPrivate *priv;
+diff --git a/src/virt-viewer-window.h b/src/virt-viewer-window.h
+index 8a4322b..1f1e130 100644
+--- a/src/virt-viewer-window.h
++++ b/src/virt-viewer-window.h
+@@ -69,6 +69,7 @@ GtkWindow* virt_viewer_window_get_window (VirtViewerWindow* window);
+ VirtViewerNotebook* virt_viewer_window_get_notebook (VirtViewerWindow* window);
+ void virt_viewer_window_set_display(VirtViewerWindow *self, VirtViewerDisplay *display);
+ VirtViewerDisplay* virt_viewer_window_get_display(VirtViewerWindow *self);
++void virt_viewer_window_set_menu_displays_sensitive(VirtViewerWindow *self, gboolean sensitive);
+ void virt_viewer_window_set_usb_options_sensitive(VirtViewerWindow *self, gboolean sensitive);
+ void virt_viewer_window_update_title(VirtViewerWindow *self);
+ void virt_viewer_window_show(VirtViewerWindow *self);
