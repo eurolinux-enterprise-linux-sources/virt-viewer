@@ -1,0 +1,48 @@
+From 8d45a71c5d905d6bc4ddeee2d63581020934a0ea Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Thu, 16 Apr 2015 17:28:57 +0200
+Subject: [PATCH] vv-file: Use "versions" in min version check
+
+This tries to use the list of versions added to .vv files by the
+previous commit. If remote-viewer was built with an os-id specified, and
+if it's found in the 'versions' .vv file key, then the version
+associated with it is used for version checks, otherwise the 'version'
+field is used if present.
+---
+ src/virt-viewer-file.c | 23 +++++++++++++++++++++--
+ 1 file changed, 21 insertions(+), 2 deletions(-)
+
+diff --git a/src/virt-viewer-file.c b/src/virt-viewer-file.c
+index 35d25fb..3caf1ec 100644
+--- a/src/virt-viewer-file.c
++++ b/src/virt-viewer-file.c
+@@ -774,8 +774,27 @@ virt_viewer_file_check_min_version(VirtViewerFile *self, GError **error)
+     gchar *min_version = NULL;
+     gint version_cmp;
+ 
+-    if (virt_viewer_file_is_set(self, "version")) {
+-        min_version = virt_viewer_file_get_version(self);
++#ifdef REMOTE_VIEWER_OS_ID
++    if (virt_viewer_file_is_set(self, "versions")) {
++        GHashTable *versions;
++
++        versions = virt_viewer_file_get_versions(self);
++
++        min_version = g_strdup(g_hash_table_lookup(versions, REMOTE_VIEWER_OS_ID));
++
++        g_hash_table_unref(versions);
++    }
++#endif
++
++
++    if (min_version == NULL) {
++        if (virt_viewer_file_is_set(self, "version")) {
++            min_version = virt_viewer_file_get_version(self);
++        }
++    }
++
++    if (min_version == NULL) {
++        return TRUE;
+     }
+ 
+     version_cmp = virt_viewer_compare_version(min_version, PACKAGE_VERSION);

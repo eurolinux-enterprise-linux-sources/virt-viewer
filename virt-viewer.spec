@@ -27,7 +27,7 @@
 
 Name: virt-viewer
 Version: 2.0
-Release: 7%{?dist}%{?extra_release}
+Release: 14%{?dist}%{?extra_release}
 Summary: Virtual Machine Viewer
 Group: Applications/System
 License: GPLv2+
@@ -64,6 +64,59 @@ Patch28: 0028-Revert-virt-viewer-main-Require-domain-name-as-argum.patch
 Patch29: 0029-virt-viewer-main-wait-should-not-be-used-without-dom.patch
 Patch30: 0030-virt-viewer-window-Allow-any-zoom-level-for-vnc.patch
 Patch31: 0031-virt-viewer-window-Make-sure-that-minimum-zoom-level.patch
+Patch32: 0032-virt-viewer-window-Set-initial-zoom-only-once.patch
+Patch33: 0033-ovirt-Add-support-for-an-admin-key-in-vv-file.patch
+Patch34: 0034-Enable-hotkeys-after-setting-them-in-virt_viewer_app.patch
+Patch35: 0035-virt-viewer-set-keepAlive-on-libvirt-connection.patch
+Patch36: 0036-Remove-unnecessary-parameter-from-virt_viewer_window.patch
+Patch37: 0037-virt-viewer-window-Allow-to-resize-window-to-any-siz.patch
+Patch38: 0038-events-ensure-event-callbacks-are-threadsafe.patch
+Patch39: 0039-events-register-event-using-GOnce-to-avoid-multiple-.patch
+Patch40: 0040-events-remove-timeout-and-handle-from-arrays.patch
+Patch41: 0041-glib-compat-Use-g_new0-GMutex-1-if-GLib-2.31.patch
+Patch42: 0042-events-allow-zero-timeouts-for-timer.patch
+Patch43: 0043-events-remove-unused-virt_viewer_events_find_-handle.patch
+Patch44: 0044-events-protect-handles-and-timeouts-against-concurre.patch
+Patch45: 0045-events-don-t-reschedule-deleted-timeouts-watches.patch
+Patch46: 0046-events-don-t-hold-events-lock-when-dispatching-free-.patch
+Patch47: 0047-events-don-t-create-glib-IO-watch-for-disabled-handl.patch
+Patch48: 0048-events-allow-to-remove-disabled-timers-and-handles.patch
+Patch49: 0049-events-don-t-leak-GIOChannel-when-destroying-IO-hand.patch
+Patch50: 0050-Exit-normally-when-canceling-dialog.patch
+Patch51: 0051-Clear-GError-in-cleanup-section.patch
+Patch52: 0052-Report-errors-in-one-place.patch
+Patch53: 0053-virt-viewer-Clean-up-if-no-vm-was-chosen.patch
+Patch54: 0054-virt-viewer-Fix-choose-VM-dialog-alt-tab-in-gnome2.patch
+Patch55: 0055-Set-enabled-status-of-all-displays-when-we-get-a-mon.patch
+Patch56: 0056-app-Add-helper-for-number-of-client-monitors.patch
+Patch57: 0057-app-Do-not-map-display-to-non-existent-monitor.patch
+Patch58: 0058-session-spice-Disable-extra-displays-in-fullscreen-m.patch
+Patch59: 0059-Fix-virt-viewer-reconnect-crash-with-SPICE-VMs.patch
+Patch60: 0060-Switch-over-to-use-zanata-for-managing-translations.patch
+Patch61: 0061-Refresh-translations-from-zanata.patch
+Patch62: 0062-ovirt-Take-into-account-SPICE-proxy.patch
+Patch63: 0063-virt-viewer-display-vnc-Set-guest-name-when-using-VN.patch
+Patch64: 0064-virt-viewer-display-vnc-Set-uuid-when-using-VNC.patch
+Patch65: 0065-Fix-crash-when-disabling-last-enabled-display.patch
+Patch66: 0066-build-sys-Don-t-substitute-buildid-when-it-was-not-s.patch
+Patch67: 0067-build-sys-Always-prepend-to-BUILDID.patch
+Patch68: 0068-vv-file-Move-version-checking-code-in-its-own-functi.patch
+Patch69: 0069-vv-file-Refactor-virt_viewer_file_check_min_version.patch
+Patch70: 0070-vv-file-Add-VirtViewerFile-versions.patch
+Patch71: 0071-build-sys-Add-with-osid.patch
+Patch72: 0072-Show-osid-in-remote-viewer-version.patch
+Patch73: 0073-vv-file-Use-versions-in-min-version-check.patch
+Patch74: 0074-util-Replace-virt_viewer_compare_version-with-_compa.patch
+Patch75: 0075-test-Add-test-case-for-virt_viewer_compare_buildid.patch
+Patch76: 0076-vv-file-Add-newer-version-url-key-to-.vv-files.patch
+Patch77: 0077-vv-file-Show-newer-version-url-when-version-check-fa.patch
+Patch78: 0078-display-set-min-value-for-desktop-width-height-props.patch
+Patch79: 0079-display-Set-useful-values-for-MIN_DISPLAY_-WIDTH-HEI.patch
+Patch80: 0080-Use-the-display-ID-to-configure-fullscreen-monitors.patch
+Patch81: 0081-session-Only-create-a-hashtable-if-apply_monitor_geo.patch
+Patch82: 0082-util-Fix-the-size-of-sorted_displays-allocation.patch
+Patch83: 0083-app-Return-early-on-empty-monitor-mapping.patch
+Patch84: 0084-Refresh-translations-from-Zanata.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: openssh-clients
@@ -145,6 +198,59 @@ the display, and libvirt for looking up VNC/SPICE server details.
 %patch29 -p1
 %patch30 -p1
 %patch31 -p1
+%patch32 -p1
+%patch33 -p1
+%patch34 -p1
+%patch35 -p1
+%patch36 -p1
+%patch37 -p1
+%patch38 -p1
+%patch39 -p1
+%patch40 -p1
+%patch41 -p1
+%patch42 -p1
+%patch43 -p1
+%patch44 -p1
+%patch45 -p1
+%patch46 -p1
+%patch47 -p1
+%patch48 -p1
+%patch49 -p1
+%patch50 -p1
+%patch51 -p1
+%patch52 -p1
+%patch53 -p1
+%patch54 -p1
+%patch55 -p1
+%patch56 -p1
+%patch57 -p1
+%patch58 -p1
+%patch59 -p1
+%patch60 -p1
+%patch61 -p1
+%patch62 -p1
+%patch63 -p1
+%patch64 -p1
+%patch65 -p1
+%patch66 -p1
+%patch67 -p1
+%patch68 -p1
+%patch69 -p1
+%patch70 -p1
+%patch71 -p1
+%patch72 -p1
+%patch73 -p1
+%patch74 -p1
+%patch75 -p1
+%patch76 -p1
+%patch77 -p1
+%patch78 -p1
+%patch79 -p1
+%patch80 -p1
+%patch81 -p1
+%patch82 -p1
+%patch83 -p1
+%patch84 -p1
 
 %build
 
@@ -168,7 +274,7 @@ autoreconf -if
 %define govirt_arg --with-ovirt
 %endif
 
-%configure %{spice_arg} %{gtk_arg} %{govirt_arg} --disable-update-mimedb
+%configure %{spice_arg} %{gtk_arg} %{govirt_arg} --with-buildid=%{release} --disable-update-mimedb --with-osid=rhel%{?rhel}
 %__make %{?_smp_mflags}
 
 
@@ -224,6 +330,64 @@ update-desktop-database -q %{_datadir}/applications
 %{_datadir}/mime/packages/virt-viewer-mime.xml
 
 %changelog
+* Fri Mar 04 2016 Fabiano Fidêncio <fidencio@redhat.com> - 2.0-14
+- Monitor mapping doesn't properly adjust resolutions
+  Resolves: rhbz#1309234
+- Return early on empty monitor mapping
+  Resolves: rhbz#1304648
+- Update translations
+  Resolves: rhbz#1194474
+
+* Fri Jan 22 2016 Fabiano Fidêncio <fidencio@redhat.com> - 2.0-13
+- Use --with-buildid for RHEL6 builds
+  Resolves: rhbz#1300639
+- Set useful values for MIM_DISPLAY_{WIDTH,HEIGHT} and use them for
+  desktop-{width,height} properties.
+  Resolves: rhbz#1296878
+
+* Thu Jan 07 2016 Jonathon Jongsma <jjongsma@redhat.com> - 2.0-12
+- The last change was incomplete. We need to define the OSID for the build in
+  order for the minum version check to work properly.
+  Resolves: rhbz#1295944
+
+* Tue Jan 05 2016 Jonathon Jongsma <jjongsma@redhat.com> - 2.0-11
+- Add minimum version check to rhev spice-client
+  Resolves: rhbz#1295944
+
+* Sat Jan 02 2016 Fabiano Fidêncio <fidencio@redhat.com> - 2.0-10
+- Set guest name/uuid when using VNC
+  Resolves: rhbz#1293878
+- Fix crash when disabling last enabled display
+  Resolves: rhbz#1294937
+
+* Fri Dec 18 2015 Fabiano Fidêncio <fidencio@redhat.com> - 2.0-9
+- Update translations
+  Resolves: rhbz#1194474
+- Add support for proxy-uri libgovirt property
+  Resolves: rhbz#1292765
+
+* Wed Dec  9 2015 Fabiano Fidêncio <fidencio@redhat.com> - 2.0-8
+- Set initial zoom only once
+  Related: rhbz#1221501
+- Add 'admin' key to [ovirt] .vv file section
+  Resolves: rhbz#1289969
+- Shortcuts missing from "Send key" menu  when started using plugin
+  Resolves: rhbz#1230603
+- Set keepAlive on libvirt connection
+  Resolves: rhbz#1289971
+- Allow resize windows to any size
+  Resolves: rhbz#1289972 and rhbz#1221501
+- Update virt-viewer-events.c to match libvirt-glib's event file
+  Resolves: rhbz#1246395
+- Error message continuously popping out when stopping libvirtd
+  Resolves: rhbz#1285163
+- Fix choose VM dialog alt-tab in gnome2
+  Resolves: rhbz#1223285
+- Disable extra displays in fullscreen mode
+  Resolves: rhbz#1212802
+- Fix virt-viewer --reconnect crash with SPICE VMs
+  Resolves: rhbz#1287462
+
 * Tue May 12 2015 Fabiano Fidêncio <fidencio@redhat.com> - 2.0-7
 - Allow any zoom level for VNC connections
   Resolves: rhbz#1211216

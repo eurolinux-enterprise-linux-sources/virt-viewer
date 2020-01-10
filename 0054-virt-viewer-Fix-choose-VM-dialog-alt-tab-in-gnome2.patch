@@ -1,0 +1,28 @@
+From 9d64ace8cff0cc85ff4780d2179ec70c85594ef0 Mon Sep 17 00:00:00 2001
+From: Lukas Venhoda <lvenhoda@redhat.com>
+Date: Wed, 20 May 2015 11:32:57 +0200
+Subject: [PATCH] virt-viewer: Fix choose VM dialog alt-tab in gnome2
+
+Choose VM dialog was not visible in taskbar and alt-tab when running on
+system with gnome2.
+
+rhbz#1223285
+
+(cherry picked from commit 596aea6912ea8c536cfab002688cc1634cbe0737)
+---
+ src/virt-viewer-vm-connection.xml | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/src/virt-viewer-vm-connection.xml b/src/virt-viewer-vm-connection.xml
+index 04797fa..62319b6 100644
+--- a/src/virt-viewer-vm-connection.xml
++++ b/src/virt-viewer-vm-connection.xml
+@@ -10,8 +10,6 @@
+     <property name="default_height">200</property>
+     <property name="destroy_with_parent">True</property>
+     <property name="type_hint">dialog</property>
+-    <property name="skip_taskbar_hint">True</property>
+-    <property name="skip_pager_hint">True</property>
+     <child internal-child="vbox">
+       <object class="GtkBox" id="dialog-vbox1">
+         <property name="can_focus">False</property>

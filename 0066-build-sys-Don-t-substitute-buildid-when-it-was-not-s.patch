@@ -1,0 +1,31 @@
+From 027269a693d2827fd0f27068426857797fbe53b3 Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Fri, 17 Apr 2015 17:14:34 +0200
+Subject: [PATCH] build-sys: Don't substitute buildid when it was not set
+
+Since it defaults to being 0, we'll get a spurious 0 on remote-viewer
+--version if we AC_DEFINE/AC_SUBST it when the user did not specify it.
+---
+ configure.ac | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index ea49c3b..d6a438c 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -222,8 +222,13 @@ fi
+ AC_ARG_WITH([buildid],
+     AS_HELP_STRING([--with-buildid=id], [Set additional build version details]),
+     [buildid="$with_buildid"], [buildid="0"])
+-AC_DEFINE_UNQUOTED([BUILDID], "$buildid", [Build version details])
+-AC_SUBST([BUILDID], "$buildid")
++
++if test "x$buildid" != "x0"; then
++    AC_DEFINE_UNQUOTED([BUILDID], "$buildid", [Build version details])
++    AC_SUBST([BUILDID], "$buildid")
++else
++    AC_DEFINE_UNQUOTED([BUILDID], "", [Build version details])
++fi
+ 
+ major=`echo $PACKAGE_VERSION | cut -d. -f1`
+ minor=`echo $PACKAGE_VERSION | cut -d. -f2`

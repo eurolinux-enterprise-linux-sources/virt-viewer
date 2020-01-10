@@ -1,0 +1,67 @@
+From 5421a03ca4dd30e04c6c2aad090baad539182fbe Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Wed, 29 Apr 2015 11:24:51 +0200
+Subject: [PATCH] session-spice: Disable extra displays in fullscreen mode
+
+When running in fullscreen it is possible to end up in a situation
+where we have more displays enabled than monitors. This can happen
+if displays that were enabled in the previous connection to the guest
+doesn't match displays requested when entering the fullscreen mode.
+
+This commit solves the problem by disabling displays that should not be
+enabled in the fullscreen mode.
+
+Resolves: rhbz#1212802
+
+(cherry picked from commit 7870ea5eff91dd163e43f85b4168dd35def0e3e2)
+---
+ src/virt-viewer-session-spice.c | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+diff --git a/src/virt-viewer-session-spice.c b/src/virt-viewer-session-spice.c
+index 506c2a7..b8f8f2a 100644
+--- a/src/virt-viewer-session-spice.c
++++ b/src/virt-viewer-session-spice.c
+@@ -679,6 +679,16 @@ destroy_display(gpointer data)
+     g_object_unref(display);
+ }
+ 
++static gboolean
++display_is_in_fullscreen_mode(VirtViewerSessionSpice *self,
++                              VirtViewerDisplay *display)
++{
++    gint nth = virt_viewer_display_get_nth(display);
++    VirtViewerApp *app = virt_viewer_session_get_app(VIRT_VIEWER_SESSION(self));
++
++    return virt_viewer_app_get_initial_monitor_for_display(app, nth) != -1;
++}
++
+ static void
+ virt_viewer_session_spice_display_monitors(SpiceChannel *channel,
+                                            GParamSpec *pspec G_GNUC_UNUSED,
+@@ -688,6 +698,8 @@ virt_viewer_session_spice_display_monitors(SpiceChannel *channel,
+     GPtrArray *displays = NULL;
+     GtkWidget *display;
+     guint i, monitors_max;
++    gboolean fullscreen_mode =
++        virt_viewer_app_get_fullscreen(virt_viewer_session_get_app(VIRT_VIEWER_SESSION(self)));
+ 
+     g_object_get(channel,
+                  "monitors", &monitors,
+@@ -724,6 +736,16 @@ virt_viewer_session_spice_display_monitors(SpiceChannel *channel,
+         display = g_ptr_array_index(displays, monitor->id);
+         g_return_if_fail(display != NULL);
+ 
++        if (!disabled && fullscreen_mode && self->priv->did_auto_conf &&
++            !display_is_in_fullscreen_mode(self, VIRT_VIEWER_DISPLAY(display))) {
++            g_warning("display %d should not be enabled, disabling",
++                      virt_viewer_display_get_nth(VIRT_VIEWER_DISPLAY(display)));
++            spice_main_set_display_enabled(virt_viewer_session_spice_get_main_channel(self),
++                                           virt_viewer_display_get_nth(VIRT_VIEWER_DISPLAY(display)),
++                                           FALSE);
++            disabled = TRUE;
++        }
++
+         virt_viewer_display_set_enabled(VIRT_VIEWER_DISPLAY(display), !disabled);
+ 
+         if (disabled)

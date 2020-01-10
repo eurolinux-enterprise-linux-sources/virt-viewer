@@ -1,0 +1,133 @@
+From 54001ed2cc544288b081b9e12a0359dfb7cbfeab Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Tue, 14 Jul 2015 14:35:11 +0200
+Subject: [PATCH] virt-viewer-window: Allow to resize window to any size
+
+The function virt_viewer_window_resize restricts window to be bigger
+than a client's screen. It avoids extending the window to more client's
+screens, it causes changes of the zoom level if the guest does not fit
+into a screen.
+
+Lets remove virt_viewer_window_resize (its behaviour was introduced
+by the commit 6acb3856b6d8007752388f22f97aa8aaffdb7a5e). It will let
+the window managers to handle resizing of the window.
+
+Resolves:
+https://bugzilla.redhat.com/show_bug.cgi?id=1221501
+https://bugzilla.redhat.com/show_bug.cgi?id=1205804
+(cherry picked from commit 3cbb6232f33d0ecdc7f58e2ea8eb7830f9fe007f)
+---
+ src/virt-viewer-window.c | 79 ++----------------------------------------------
+ 1 file changed, 3 insertions(+), 76 deletions(-)
+
+diff --git a/src/virt-viewer-window.c b/src/virt-viewer-window.c
+index 86291b8..f3af333 100644
+--- a/src/virt-viewer-window.c
++++ b/src/virt-viewer-window.c
+@@ -67,7 +67,7 @@ void virt_viewer_window_menu_view_release_cursor(GtkWidget *menu, VirtViewerWind
+ /* Internal methods */
+ static void virt_viewer_window_enable_modifiers(VirtViewerWindow *self);
+ static void virt_viewer_window_disable_modifiers(VirtViewerWindow *self);
+-static void virt_viewer_window_resize(VirtViewerWindow *self);
++static void virt_viewer_window_queue_resize(VirtViewerWindow *self);
+ static void virt_viewer_window_toolbar_setup(VirtViewerWindow *self);
+ static GtkMenu* virt_viewer_window_get_keycombo_menu(VirtViewerWindow *self);
+ static void virt_viewer_window_get_minimal_dimensions(VirtViewerWindow *self, guint *width, guint *height);
+@@ -364,7 +364,7 @@ virt_viewer_window_desktop_resize(VirtViewerDisplay *display G_GNUC_UNUSED,
+         self->priv->desktop_resize_pending = TRUE;
+         return;
+     }
+-    virt_viewer_window_resize(self);
++    virt_viewer_window_queue_resize(self);
+ }
+ 
+ 
+@@ -405,79 +405,6 @@ virt_viewer_window_queue_resize(VirtViewerWindow *self)
+ #endif
+ }
+ 
+-/*
+- * This code attempts to resize the top level window to be large enough
+- * to contain the entire display desktop at 1:1 ratio. If the local desktop
+- * isn't large enough that it goes as large as possible and lets the display
+- * scale down to fit, maintaining aspect ratio
+- */
+-static void
+-virt_viewer_window_resize(VirtViewerWindow *self)
+-{
+-    GdkRectangle fullscreen;
+-    GdkScreen *screen;
+-    int width, height;
+-    double desktopAspect;
+-    double screenAspect;
+-    guint desktopWidth, display_width;
+-    guint desktopHeight, display_height;
+-    VirtViewerWindowPrivate *priv = self->priv;
+-
+-    if (priv->fullscreen)
+-        return;
+-
+-    g_debug("Preparing main window resize");
+-    if (!priv->display) {
+-        g_debug("Skipping inactive resize");
+-        return;
+-    }
+-
+-    virt_viewer_display_get_desktop_size(VIRT_VIEWER_DISPLAY(priv->display),
+-                                         &desktopWidth, &desktopHeight);
+-
+-    screen = gtk_widget_get_screen(priv->window);
+-    gdk_screen_get_monitor_geometry(screen,
+-                                    gdk_screen_get_monitor_at_window
+-                                    (screen, gtk_widget_get_window(priv->window)),
+-                                    &fullscreen);
+-
+-    g_return_if_fail(desktopWidth > 0);
+-    g_return_if_fail(desktopHeight > 0);
+-
+-    desktopAspect = (double)desktopWidth / (double)desktopHeight;
+-    screenAspect = (double)fullscreen.width / (double)fullscreen.height;
+-
+-    display_width = desktopWidth * priv->zoomlevel / (double) NORMAL_ZOOM_LEVEL;
+-    display_height = desktopHeight * priv->zoomlevel / (double) NORMAL_ZOOM_LEVEL;
+-
+-    if ((display_width > fullscreen.width) ||
+-        (display_height > fullscreen.height)) {
+-        /* Doesn't fit native res, so go as large as possible
+-           maintaining aspect ratio */
+-        if (screenAspect > desktopAspect) {
+-            width = fullscreen.height * desktopAspect;
+-            height = fullscreen.height;
+-        } else {
+-            width = fullscreen.width;
+-            height = fullscreen.width / desktopAspect;
+-        }
+-        width *= (double) NORMAL_ZOOM_LEVEL / priv->zoomlevel;
+-        height *= (double) NORMAL_ZOOM_LEVEL / priv->zoomlevel;
+-    } else {
+-        width = desktopWidth;
+-        height = desktopHeight;
+-    }
+-
+-    g_debug("Decided todo %dx%d (desktop is %dx%d, fullscreen is %dx%d",
+-              width, height, desktopWidth, desktopHeight,
+-              fullscreen.width, fullscreen.height);
+-
+-    virt_viewer_display_set_desktop_size(VIRT_VIEWER_DISPLAY(priv->display),
+-                                         width, height);
+-
+-    virt_viewer_window_queue_resize(self);
+-}
+-
+ static void
+ virt_viewer_window_move_to_monitor(VirtViewerWindow *self)
+ {
+@@ -1373,7 +1300,7 @@ virt_viewer_window_show(VirtViewerWindow *self)
+     gtk_widget_show(self->priv->window);
+ 
+     if (self->priv->desktop_resize_pending) {
+-        virt_viewer_window_resize(self);
++        virt_viewer_window_queue_resize(self);
+         self->priv->desktop_resize_pending = FALSE;
+     }
+ 

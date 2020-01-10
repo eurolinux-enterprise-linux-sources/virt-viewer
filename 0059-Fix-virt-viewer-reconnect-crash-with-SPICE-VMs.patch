@@ -1,0 +1,123 @@
+From 7fa2acea0679451ecb5b2e19e558f4746390b62f Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Fri, 27 Mar 2015 17:38:05 +0100
+Subject: [PATCH] Fix virt-viewer --reconnect crash with SPICE VMs
+
+When using virt-viewer --reconnect, virt-viewer currently crashes when
+a SPICE VM is destroyed with "virsh destroy"
+
+What happens is that when the guest is destroyed, virt-viewer receives a
+SPICE_CHANNEL_ERROR_IO notification in
+virt_viewer_session_spice_main_channel_event().  This triggers the
+emission of the "session-disconnected" signal, which will end up calling
+spice_session_disconnect() (indirectly through
+virt_viewer_app_disconnected/virt_viewer_app_deactivate).
+
+Since spice-gtk commit ff25f3e, the actual session disconnection is
+done from an idle.  When the "session-disconnected" emission stops, the
+VirtViewerSession instance is destroyed. However, the associated
+VirtViewerDisplaySpice are still alive as the various SpiceChannels
+instances hold a reference through the "virt-viewer-displays" GObject
+data.
+These channels are destroyed when the idle queued by spice_session_disconnect()
+run. The associated VirtViewerDisplay are in turn destroyed too, but
+this causes attempts to use the VirtViewerSession associated with the
+displays, which has already been destroyed. This causes a crash.
+
+This commit adds a virt_viewer_session_spice_clear_displays() which is
+similar to virt_viewer_session_clear_displays(), but makes sure the
+"virt-viewer-displays" references are dropped too. This ensures the
+VirtViewerDisplay instances don't outlive the VirtViewerSession
+they are associated with.
+
+Backtrace for the crash:
+
+ #0  0x0000000000413f0f in display_show_hint (display=0x85ab50 [VirtViewerDisplaySpice], pspec=0x939bd0 [GParamFlags], user_data=0x0) at virt-viewer-app.c:949
+ #4  0x00000031ff22a29f in <emit signal notify:show-hint on instance 0x85ab50 [VirtViewerDisplaySpice]> (instance=instance@entry=0x85ab50, signal_id=<optimized out>, detail=<optimized out>) at gsignal.c:3361
+     #1  0x00000031ff20fc45 in g_closure_invoke (closure=0xa98f50, return_value=return_value@entry=0x0, n_param_values=2, param_values=param_values@entry=0x7fffffffc700, invocation_hint=invocation_hint@entry=0x7fffffffc680) at gclosure.c:768
+     #2  0x00000031ff2214c9 in signal_emit_unlocked_R (node=node@entry=0x674f80, detail=detail@entry=1678, instance=instance@entry=0x85ab50, emission_return=emission_return@entry=0x0, instance_and_params=instance_and_params@entry=0x7fffffffc700) at gsignal.c:3549
+     #3  0x00000031ff229ed0 in g_signal_emit_valist (instance=<optimized out>, signal_id=<optimized out>, detail=<optimized out>, var_args=var_args@entry=0x7fffffffc8d0) at gsignal.c:3305
+ #5  0x00000031ff214175 in g_object_dispatch_properties_changed (object=0x85ab50 [VirtViewerDisplaySpice], n_pspecs=<optimized out>, pspecs=<optimized out>) at gobject.c:1056
+ #6  0x00000031ff216661 in g_object_notify (pspec=0x939bd0 [GParamFlags], object=0x85ab50 [VirtViewerDisplaySpice]) at gobject.c:1149
+ #7  0x00000031ff216661 in g_object_notify (object=0x85ab50 [VirtViewerDisplaySpice], property_name=<optimized out>) at gobject.c:1197
+ #8  0x000000000041e5ab in virt_viewer_display_set_show_hint (self=0x85ab50 [VirtViewerDisplaySpice], mask=1, enable=0) at virt-viewer-display.c:691
+ #9  0x000000000042b62d in update_display_ready (self=0x85ab50 [VirtViewerDisplaySpice])
+     at virt-viewer-display-spice.c:145
+ #13 0x00000031ff22a29f in <emit signal notify:ready on instance 0x898590 [SpiceDisplay]> (instance=instance@entry=0x898590, signal_id=<optimized out>, detail=<optimized out>) at gsignal.c:3361
+     #10 0x00000031ff20fc45 in g_closure_invoke (closure=0x99b280, return_value=return_value@entry=0x0, n_param_values=2, param_values=param_values@entry=0x7fffffffcc50, invocation_hint=invocation_hint@entry=0x7fffffffcbd0) at gclosure.c:768
+     #11 0x00000031ff2214c9 in signal_emit_unlocked_R (node=node@entry=0x674f80, detail=detail@entry=1696, instance=instance@entry=0x898590, emission_return=emission_return@entry=0x0, instance_and_params=instance_and_params@entry=0x7fffffffcc50) at gsignal.c:3549
+     #12 0x00000031ff229ed0 in g_signal_emit_valist (instance=<optimized out>, signal_id=<optimized out>, detail=<optimized out>, var_args=var_args@entry=0x7fffffffce20) at gsignal.c:3305
+ #14 0x00000031ff214175 in g_object_dispatch_properties_changed (object=0x898590 [SpiceDisplay], n_pspecs=<optimized out>, pspecs=<optimized out>) at gobject.c:1056
+ #15 0x00000031ff216661 in g_object_notify (pspec=0xa83370 [GParamBoolean], object=0x898590 [SpiceDisplay]) at gobject.c:1149
+ #16 0x00000031ff216661 in g_object_notify (object=0x898590 [SpiceDisplay], property_name=<optimized out>) at gobject.c:1197
+ #17 0x00007ffff7522525 in update_ready (display=0x898590 [SpiceDisplay]) at spice-widget.c:236
+ #18 0x00007ffff752257e in set_monitor_ready (self=0x898590 [SpiceDisplay], ready=0)
+     at spice-widget.c:244
+ #19 0x00007ffff75274e6 in primary_destroy (channel=0x89f5c0 [SpiceDisplayChannel], data=0x898590)
+     at spice-widget.c:2169
+ #20 0x00007ffff7528918 in channel_destroy (s=0x909fa0 [SpiceSession], channel=0x89f5c0 [SpiceDisplayChannel], data=0x898590) at spice-widget.c:2484
+ #24 0x00000031ff22a29f in <emit signal ??? on instance 0x909fa0 [SpiceSession]> (instance=<optimized out>, signal_id=<optimized out>, detail=<optimized out>) at gsignal.c:3361
+     #21 0x00000031ff20fc45 in g_closure_invoke (closure=0xa9bda0, return_value=return_value@entry=0x0, n_param_values=2, param_values=param_values@entry=0x7fffffffd280, invocation_hint=invocation_hint@entry=0x7fffffffd200) at gclosure.c:768
+     #22 0x00000031ff2214c9 in signal_emit_unlocked_R (node=node@entry=0x9c17d0, detail=detail@entry=0, instance=instance@entry=0x909fa0, emission_return=emission_return@entry=0x0, instance_and_params=instance_and_params@entry=0x7fffffffd280) at gsignal.c:3549
+     #23 0x00000031ff229ed0 in g_signal_emit_valist (instance=<optimized out>, signal_id=<optimized out>, detail=<optimized out>, var_args=var_args@entry=0x7fffffffd450) at gsignal.c:3305
+ #25 0x00007ffff71c3248 in spice_session_channel_destroy (session=0x909fa0 [SpiceSession], channel=0x89f5c0 [SpiceDisplayChannel]) at spice-session.c:2217
+ #26 0x00007ffff71bd8b2 in session_disconnect (self=0x909fa0 [SpiceSession], keep_main=0)
+     at spice-session.c:281
+ #27 0x00007ffff71c1b27 in session_disconnect_idle (self=0x909fa0 [SpiceSession]) at spice-session.c:1853
+ #28 0x00000031fee4a0ba in g_main_context_dispatch (context=0x6a4400) at gmain.c:3122
+ #29 0x00000031fee4a0ba in g_main_context_dispatch (context=context@entry=0x6a4400) at gmain.c:3737
+ #30 0x00000031fee4a450 in g_main_context_iterate (context=0x6a4400, block=block@entry=1, dispatch=dispatch@entry=1, self=<optimized out>) at gmain.c:3808
+ #31 0x00000031fee4a772 in g_main_loop_run (loop=0x9890f0) at gmain.c:4002
+ #32 0x0000003babc05f75 in gtk_main () at gtkmain.c:1219
+ #33 0x000000000043143b in main (argc=1, argv=0x7fffffffda48) at virt-viewer-main.c:12
+
+(cherry picked from commit 30b7e299b09f78ace49f8802a16020b6682ecf48)
+---
+ src/virt-viewer-session-spice.c | 20 ++++++++++++++++++--
+ 1 file changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/src/virt-viewer-session-spice.c b/src/virt-viewer-session-spice.c
+index b8f8f2a..4ab7c85 100644
+--- a/src/virt-viewer-session-spice.c
++++ b/src/virt-viewer-session-spice.c
+@@ -90,6 +90,22 @@ static void virt_viewer_session_spice_smartcard_remove(VirtViewerSession *sessio
+ static gboolean virt_viewer_session_spice_fullscreen_auto_conf(VirtViewerSessionSpice *self);
+ static void virt_viewer_session_spice_apply_monitor_geometry(VirtViewerSession *self, GdkRectangle *monitors, guint nmonitors);
+ 
++static void virt_viewer_session_spice_clear_displays(VirtViewerSessionSpice *self)
++{
++    SpiceSession *session = self->priv->session;
++    GList *l;
++    GList *channels;
++
++    channels = spice_session_get_channels(session);
++    for (l = channels; l != NULL; l = l->next) {
++        SpiceChannel *channel = SPICE_CHANNEL(l->data);
++
++        g_object_set_data(G_OBJECT(channel), "virt-viewer-displays", NULL);
++    }
++    virt_viewer_session_clear_displays(VIRT_VIEWER_SESSION(self));
++}
++
++
+ static void
+ virt_viewer_session_spice_get_property(GObject *object, guint property_id,
+                                        GValue *value, GParamSpec *pspec)
+@@ -294,7 +310,7 @@ virt_viewer_session_spice_close(VirtViewerSession *session)
+ 
+     g_object_add_weak_pointer(G_OBJECT(self), (gpointer*)&self);
+ 
+-    virt_viewer_session_clear_displays(session);
++    virt_viewer_session_spice_clear_displays(self);
+ 
+     if (self->priv->session) {
+         spice_session_disconnect(self->priv->session);
+@@ -509,7 +525,7 @@ virt_viewer_session_spice_main_channel_event(SpiceChannel *channel G_GNUC_UNUSED
+     case SPICE_CHANNEL_CLOSED:
+         g_debug("main channel: closed");
+         /* Ensure the other channels get closed too */
+-        virt_viewer_session_clear_displays(session);
++        virt_viewer_session_spice_clear_displays(self);
+         if (self->priv->session)
+             spice_session_disconnect(self->priv->session);
+         break;

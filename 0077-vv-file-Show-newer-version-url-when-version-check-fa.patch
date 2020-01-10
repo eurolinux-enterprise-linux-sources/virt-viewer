@@ -1,0 +1,46 @@
+From 60dc38f91a45eeb0a46ca9963ef165e1e6c13dee Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Tue, 19 May 2015 19:23:24 +0200
+Subject: [PATCH] vv-file: Show 'newer-version-url' when version check fails
+
+We currently display a generic error message when the current binary is
+older than the minimum version specified in the vv file. The previous
+commit added a 'newer-version-url' field to these .vv file. This commit
+adds that URL to the error message if it's set.
+---
+ src/virt-viewer-file.c | 22 +++++++++++++++++-----
+ 1 file changed, 17 insertions(+), 5 deletions(-)
+
+diff --git a/src/virt-viewer-file.c b/src/virt-viewer-file.c
+index 906d719..2f1eb2b 100644
+--- a/src/virt-viewer-file.c
++++ b/src/virt-viewer-file.c
+@@ -816,11 +816,23 @@ virt_viewer_file_check_min_version(VirtViewerFile *self, GError **error)
+     version_cmp = virt_viewer_compare_buildid(min_version, PACKAGE_VERSION BUILDID);
+ 
+     if (version_cmp > 0) {
+-        g_set_error(error,
+-                    VIRT_VIEWER_ERROR,
+-                    VIRT_VIEWER_ERROR_FAILED,
+-                    _("At least %s version %s is required to setup this connection"),
+-                    g_get_application_name(), min_version);
++        gchar *url;
++        url = virt_viewer_file_get_version_url(self);
++        if (url != NULL) {
++            g_set_error(error,
++                        VIRT_VIEWER_ERROR,
++                        VIRT_VIEWER_ERROR_FAILED,
++                        _("At least %s version %s is required to setup this"
++                          " connection, see %s for details"),
++                        g_get_application_name(), min_version, url);
++            g_free(url);
++        } else {
++            g_set_error(error,
++                        VIRT_VIEWER_ERROR,
++                        VIRT_VIEWER_ERROR_FAILED,
++                        _("At least %s version %s is required to setup this connection"),
++                        g_get_application_name(), min_version);
++        }
+         g_free(min_version);
+         return FALSE;
+     }

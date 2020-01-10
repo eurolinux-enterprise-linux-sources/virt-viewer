@@ -1,0 +1,26 @@
+From 4320be52813dbc5823f76efde0e7f8ce38bf6395 Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Tue, 9 Jun 2015 12:22:25 +0200
+Subject: [PATCH] Show osid in remote-viewer --version
+
+---
+ src/remote-viewer-main.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/src/remote-viewer-main.c b/src/remote-viewer-main.c
+index 749fac1..81cf736 100644
+--- a/src/remote-viewer-main.c
++++ b/src/remote-viewer-main.c
+@@ -47,7 +47,11 @@
+ static void
+ remote_viewer_version(void)
+ {
+-    g_print(_("remote-viewer version %s\n"), VERSION BUILDID);
++    g_print(_("remote-viewer version %s"), VERSION BUILDID);
++#ifdef REMOTE_VIEWER_OS_ID
++    g_print(" (OS ID: %s)", REMOTE_VIEWER_OS_ID);
++#endif
++    g_print("\n");
+     exit(EXIT_SUCCESS);
+ }
+ 

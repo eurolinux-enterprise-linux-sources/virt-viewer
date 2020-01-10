@@ -1,0 +1,46 @@
+From 8b7f4e26d6451da65bcc128f01b60b1748c3123a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabiano=20Fid=C3=AAncio?= <fidencio@redhat.com>
+Date: Wed, 22 Jul 2015 02:14:09 +0200
+Subject: [PATCH] glib-compat: Use g_new0(GMutex, 1) if GLib >= 2.31
+
+Since 2.31, g_mutex_new() is deprecated.
+
+Based on commit 2dc7476d32a9e158e688486e8f184c719c53bb4c from
+libvirt-glib.
+Original author: Daniel P. Berrange <berrange@redhat.com>
+
+Related to: rhbz#1243228
+
+(cherry picked from commit a7050b7d2c82c103bc932a327a7a9152ab77a033)
+---
+ src/virt-glib-compat.h   | 4 ++++
+ src/virt-viewer-events.c | 1 +
+ 2 files changed, 5 insertions(+)
+
+diff --git a/src/virt-glib-compat.h b/src/virt-glib-compat.h
+index 37b6f61..a919fcf 100644
+--- a/src/virt-glib-compat.h
++++ b/src/virt-glib-compat.h
+@@ -71,6 +71,10 @@ G_BEGIN_DECLS
+ GByteArray *g_byte_array_new_take (guint8 *data, gsize len);
+ #endif
+ 
++#if GLIB_CHECK_VERSION(2,31,0)
++#define g_mutex_new() g_new0(GMutex, 1)
++#endif
++
+ G_END_DECLS
+ 
+ #endif // _VIRT_GLIB_COMPAT_H
+diff --git a/src/virt-viewer-events.c b/src/virt-viewer-events.c
+index 74828f5..02b7216 100644
+--- a/src/virt-viewer-events.c
++++ b/src/virt-viewer-events.c
+@@ -33,6 +33,7 @@
+ #include <libvirt/libvirt.h>
+ 
+ #include "virt-viewer-events.h"
++#include "virt-glib-compat.h"
+ 
+ static GMutex *eventlock = NULL;
+ 
