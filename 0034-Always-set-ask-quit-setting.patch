@@ -1,0 +1,31 @@
+From 911573ba86ed4506e5558c8a69739160ceb443d0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marc-Andr=C3=A9=20Lureau?= <marcandre.lureau@gmail.com>
+Date: Fri, 11 Jul 2014 17:06:32 +0200
+Subject: [PATCH] Always set ask-quit setting
+
+Avoid creating empty settings files, always set the ask-quit key.
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1006737
+---
+ src/virt-viewer-app.c |    5 ++---
+ 1 files changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index e159217..f0b9deb 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -395,9 +395,8 @@ virt_viewer_app_maybe_quit(VirtViewerApp *self, VirtViewerWindow *window)
+ 
+         gboolean dont_ask = FALSE;
+         g_object_get(check, "active", &dont_ask, NULL);
+-        if (dont_ask)
+-            g_key_file_set_boolean(self->priv->config,
+-                    "virt-viewer", "ask-quit", FALSE);
++        g_key_file_set_boolean(self->priv->config,
++                    "virt-viewer", "ask-quit", !dont_ask);
+ 
+         gtk_widget_destroy(dialog);
+         switch (result) {
+-- 
+1.7.1
+

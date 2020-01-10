@@ -25,67 +25,54 @@
 %endif
 
 Name: virt-viewer
-Version: 0.5.6
-Release: 8%{?dist}%{?extra_release}.3
+Version: 0.6.0
+Release: 11%{?dist}%{?extra_release}
 Summary: Virtual Machine Viewer
 Group: Applications/System
 License: GPLv2+
 URL: http://virt-manager.org/
 Source0: http://virt-manager.org/download/sources/%{name}/%{name}-%{version}.tar.gz
-Patch1: 0001-Post-release-version-bump.patch
-Patch2: 0002-Sync-spec-with-Fedora.patch
-Patch3: 0003-remote-viewer-set-auto-conf-before-fullscreen.patch
-Patch4: 0004-Do-not-restrict-disabling-display-to-0.patch
-Patch5: 0005-misc-fix-typo.patch
-Patch6: 0006-spice-make-sure-display-ready-hint-is-sync-after-cre.patch
-Patch7: 0007-Allow-to-fullscreen-and-position-display-independent.patch
-Patch8: 0008-Add-to-seperate-program-arguments-to-server-in-man-h.patch
-Patch9: 0009-man-document-running-remote-viewer-without-URI.patch
-Patch10: 0010-window-fix-send-key-menu-popup-position.patch
-Patch11: 0011-window-leave-fullscreen-on-current-window.patch
-Patch12: 0012-Only-fullscreen-the-new-window.patch
-Patch13: 0013-window-wait-until-mapped-before-fullscreen.patch
-Patch14: 0014-Remove-the-container-logic-used-by-legacy-browser-pl.patch
-Patch15: 0015-Rename-variable-fix-gcc-warning.patch
-Patch16: 0016-Silence-unused-arguments-warnings.patch
-Patch17: 0017-Move-connect-dialog-to-remote-viewer.c.patch
-Patch18: 0018-spice-session-use-a-more-robust-signal-connect.patch
-Patch19: 0019-Show-connect-dialog-again-if-connection-from-dialog-.patch
-Patch20: 0020-Fix-trivial-critical.patch
-Patch21: 0021-app-move-display-on-client-monitors-with-full-screen.patch
-Patch22: 0022-build-sys-add-debug-helper-rule.patch
-Patch23: 0023-Use-a-more-descriptive-FileDescription.patch
-Patch24: 0024-man-document-auto-conf-fullscreen-option.patch
-Patch25: 0025-Support-Spice-controller-auto-display-res-flag.patch
-Patch26: 0026-spec-Deprecate-spice-client.patch
-Patch27: 0027-spec-Add-missing-in-if-0-fedora.patch
-Patch28: 0028-ovirt-Set-host-subject-if-needed.patch
-Patch29: 0029-Use-format-string.patch
-Patch30: 0030-Fix-build-without-spice-gtk.patch
-Patch31: 0031-Use-H-instead-of-h-for-the-short-hotkeys.patch
-Patch32: 0032-data-remote-viewer.desktop-Fix-missing-trailing.patch
-Patch33: 0033-Revert-Post-release-version-bump.patch
-Patch34: 0034-virt-viewer-Allow-TLS-only-SPICE-connections.patch
-Patch35: 0035-Unregister-events-and-callbacks-on-dispose.patch
-Patch36: 0036-vnc-implement-release_cursor.patch
-Patch37: 0037-app-always-use-maybe_quit.patch
-Patch38: 0038-spice-show-an-error-dialog-if-password-is-invalid.patch
-Patch39: 0039-Remove-debugging-leftover.patch
-Patch40: 0040-display-add-fullscreen-property.patch
-Patch41: 0041-window-set-display-fullscreen-state.patch
-Patch42: 0042-Use-display-fullscreen-state-instead-of-app-state.patch
-Patch43: 0043-window-move-window-again-after-fullscreen.patch
-# Non upstream patch, CtrlAltDel propagation will be dropped
-Patch44: 0044-Propagate-SEND_CAD-from-controller-to-SpiceSession.patch
-Patch45: 0045-Fix-scaling-of-window-upon-resize.patch
-Patch46: 0046-Fix-race-with-metacity-in-fullscreen.patch
-# Non upstream patch
-Patch47: 0047-set-auto-conf-when-fullscreen-is-set-in-vv-file.patch
+Patch1: 0001-Fix-race-with-metacity-in-fullscreen.patch
+Patch2: 0002-Fix-scaling-of-window-upon-resize.patch
+Patch3: 0003-Silence-a-message-about-missing-configuration-file.patch
+Patch4: 0004-Remove-Automatically-resize-menu.patch
+Patch5: 0005-Use-a-USB-icon-in-the-fullscreen-toolbar.patch
+Patch6: 0006-build-sys-Always-prepend-to-build-id.patch
+Patch7: 0007-Update-user-visible-copyright-information.patch
+Patch8: 0008-man-Add-missing-.-at-end-of-one-sentence.patch
+Patch9: 0009-man-Fix-link-to-GPLv2-text.patch
+Patch10: 0010-man-Fix-concatonated-typo.patch
+Patch11: 0011-man-Use-nicer-link-to-GPLv2.patch
+Patch12: 0012-man-remove-Perl-header.patch
+Patch13: 0013-Don-t-show-do-you-want-to-quit-dialog-in-kiosk-mode.patch
+#Patch14: 0014-set-auto-conf-when-fullscreen-is-set-in-vv-file.patch
+#Patch15: 0015-Propagate-SEND_CAD-from-controller-to-SpiceSession.patch
+Patch16: 0016-Set-freed-variables-to-NULL-in-remote_viewer_start.patch
+Patch17: 0017-Don-t-resize-guest-display-on-zoom-change.patch
+Patch18: 0018-Fix-regression-with-enabling-additional-displays.patch
+Patch19: 0019-Fix-gtk2-build.patch
+Patch20: 0020-rhbz-1007306-Don-t-free-session-if-we-re-re-trying-a.patch
+Patch21: 0021-Fix-broken-release-cursor-accel-when-not-specified-i.patch
+Patch22: 0022-Fix-tiny-windows-for-secondary-displays-in-gtk2-buil.patch
+Patch23: 0023-Fix-tiny-window-when-resetting-zoom-factor-in-gtk2-b.patch
+Patch24: 0024-window-take-zoom-level-into-account-for-display-limi.patch
+Patch25: 0025-Remove-warning-when-removing-display.patch
+Patch26: 0026-Replace-DEBUG_LOG-with-g_debug.patch
+Patch27: 0027-kiosk-don-t-attempt-to-hide-windows-when-disconnecti.patch
+Patch28: 0028-Use-a-custom-log-handler-to-silence-debug-messages.patch
+Patch29: 0029-kiosk-remove-invalid-unref.patch
+Patch30: 0030-Fix-a-floating-display-warning.patch
+Patch31: 0031-man-fix-zoom-level-range.patch
+Patch32: 0032-rhbz-1111514-Fix-un-shrinkable-displays-on-windows-g.patch
+Patch33: 0033-Only-filter-virt-viewer-debug-messages.patch
+Patch34: 0034-Always-set-ask-quit-setting.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: openssh-clients
 Requires(post):   %{_sbindir}/update-alternatives
 Requires(postun): %{_sbindir}/update-alternatives
+Requires(post): desktop-file-utils
+Requires(postun): desktop-file-utils
 
 %if 0%{?enable_autotools}
 BuildRequires: autoconf
@@ -109,9 +96,9 @@ BuildRequires: gtk-vnc-devel >= 0.3.8
 %endif
 %if %{with_spice}
 %if %{with_gtk3}
-BuildRequires: spice-gtk3-devel >= 0.20
+BuildRequires: spice-gtk3-devel >= 0.22
 %else
-BuildRequires: spice-gtk-devel >= 0.20
+BuildRequires: spice-gtk-devel >= 0.22
 %endif
 BuildRequires: spice-protocol >= 0.10.1
 %endif
@@ -139,8 +126,8 @@ the display, and libvirt for looking up VNC/SPICE server details.
 %patch11 -p1
 %patch12 -p1
 %patch13 -p1
-%patch14 -p1
-%patch15 -p1
+#%patch14 -p1
+#%patch15 -p1
 %patch16 -p1
 %patch17 -p1
 %patch18 -p1
@@ -160,19 +147,6 @@ the display, and libvirt for looking up VNC/SPICE server details.
 %patch32 -p1
 %patch33 -p1
 %patch34 -p1
-%patch35 -p1
-%patch36 -p1
-%patch37 -p1
-%patch38 -p1
-%patch39 -p1
-%patch40 -p1
-%patch41 -p1
-%patch42 -p1
-%patch43 -p1
-%patch44 -p1
-%patch45 -p1
-%patch46 -p1
-%patch47 -p1
 
 %build
 
@@ -192,7 +166,7 @@ autoreconf -if
 %define gtk_arg --with-gtk=2.0
 %endif
 
-%configure %{spice_arg} %{gtk_arg}
+%configure %{spice_arg} %{gtk_arg} --disable-update-mimedb
 %__make %{?_smp_mflags}
 
 
@@ -211,6 +185,8 @@ rm -rf $RPM_BUILD_ROOT
 /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
 %{_sbindir}/update-alternatives --install %{_libexecdir}/spice-xpi-client \
   spice-xpi-client %{_libexecdir}/spice-xpi-client-remote-viewer 25
+update-desktop-database -q %{_datadir}/applications
+%{_bindir}/update-mime-database %{_datadir}/mime &> /dev/null
 
 %postun
 if [ $1 -eq 0 ] ; then
@@ -218,6 +194,8 @@ if [ $1 -eq 0 ] ; then
   /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
   %{_sbindir}/update-alternatives --remove spice-xpi-client %{_libexecdir}/spice-xpi-client-remote-viewer
 fi
+update-desktop-database -q %{_datadir}/applications
+%{_bindir}/update-mime-database %{_datadir}/mime &> /dev/null
 
 %posttrans
 /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
@@ -233,6 +211,7 @@ fi
 %{_datadir}/%{name}/ui/virt-viewer-auth.xml
 %{_datadir}/%{name}/ui/virt-viewer-about.xml
 %{_datadir}/icons/hicolor/*/apps/*
+%{_datadir}/icons/hicolor/*/devices/*
 %ghost %{_libexecdir}/spice-xpi-client
 %{_libexecdir}/spice-xpi-client-remote-viewer
 %{_mandir}/man1/virt-viewer.1*
@@ -241,17 +220,76 @@ fi
 %{_datadir}/mime/packages/virt-viewer-mime.xml
 
 %changelog
-* Wed Apr 30 2014 Jonathon Jongsma <jjongsma@redhat.com> - 0.5.6-8.3
+* Wed Jul 23 2014 Marc-André Lureau <marcandre.lureau@redhat.com> 0.6.0-11
+- Always set ask-quit setting
+  Resolves: rhbz#1006737
+
+* Wed Jul 23 2014 Marc-André Lureau <marcandre.lureau@redhat.com> 0.6.0-10
+- Bring back debug output for other libraries.
+  Resolves: rhbz#1107518
+
+* Mon Jun 23 2014 Jonathon Jongsma <jjongsma@redhat.com> - 0.6.0-9
+- Fix unshrinkable displays on windows guest
+  Resolves: rhbz#1111514
+
+* Fri Jun 20 2014 Marc-André Lureau <marcandre.lureau@redhat.com> 0.6.0-8
+- Fix zoom level range in man page.
+  Resolves: rhbz#1111428
+
+* Wed Jun 18 2014 Christophe Fergeau <cfergeau@redhat.com> 0.6.0-7
+- Fix wrong Requires name (trailing '$')
+  Related: rhbz#1063238
+
+* Tue Jun 17 2014 Marc-André Lureau <marcandre.lureau@redhat.com> 0.6.0-6
+- Remove some warnings in kiosk mode
+  Resolves: rhbz#1107518
+- Register remote-viewer.desktop as a handler for application/x-virt-viewer
+  Resolves: rhbz#1063238
+- New display will be zoomed out to a very small display size
+  Resolves: rhbz#1104064
+- Guest can not be resized to expected window size after zoom out
+  Resolves: rhbz#1105528
+
+* Thu Jun 05 2014 Christophe Fergeau <cfergeau@redhat.com> 0.6.0-5
+- Fix authentication after failed attempt with VNC
+  Resolves: rhbz#1007295
+- Fix broken 'release-cursor' accel when not specified in --hotkeys
+  Resolves: rhbz#1029108
+
+* Wed Jun 04 2014 Jonathon Jongsma <jjongsma@redhat.com> - 0.6.0-4
+- Fixed coverity errors discovered in 0.6.0-1 build
+  Related:  rhbz#1097038
+- Remote-Viewer: Zoom Out Behavior Is Not Consistent
+  Resolves: rhbz#1004051
+
+* Wed Jun  4 2014 Marc-André Lureau <marcandre.lureau@redhat.com> 0.6.0-3
+- Remove "Pass CAD" RHEL-only patch.
+  Resolves: rhbz#1007726
+
+* Tue Jun  3 2014 Marc-André Lureau <marcandre.lureau@redhat.com> 0.6.0-2
+- Use a USB icon instead of a generic settings icon
+  Resolves: rhbz#804184
+- Remove menu item "Automatically resize"
+  Resolves: rhbz#1007649
+- Client doesn't send monitor config when launched via browser plugin
+  Resolves: rhbz#1038726
+- Screen is blurry for some resolutions when spice window is maximized
+  Resolves: rhbz#1056041
+- Remove some couldn't load configuration messages
+  Resolves: rhbz#1006737
+
+* Fri May 23 2014 Jonathon Jongsma <jjongsma@redhat.com> - 0.6.0-1
+- Rebase to 0.6.0. Drop all patches except one non-upstream patch that we'll
+  carry for a little while longer yet.
+  Resolves: rhbz#1097038
+
+* Tue Apr 29 2014 Jonathon Jongsma <jjongsma@redhat.com> - 0.5.6-10
 - Automatically adjust resolution when opened fullscreen via vv-file
-  Resolves: rhbz#1092871
+  Resolves: rhbz#1083203
 
-* Tue Apr 22 2014 Marc-André Lureau <marcandre.lureau@redhat.com> 0.5.6-8.2
-- Fix 2 monitors are in fullscreen at only one screen.
-  Resolves: rhbz#1088921
-
-* Tue Apr 15 2014 Marc-André Lureau <marcandre.lureau@redhat.com> 0.5.6-8.1
-- Screen is blurry for some resolutions when window is maximized
-  Resolves: rhbz#1081376
+* Tue Oct 29 2013 Marc-André Lureau <marcandre.lureau@redhat.com> 0.5.6-9
+- Move window again after fullscreen
+  Resolves: rhbz#809546
 
 * Fri Sep 13 2013 Christophe Fergeau <cfergeau@redhat.com> 0.5.6-8
 - Re-add patch to propagate 'send-ctrlaltdel' setting from the controller
@@ -399,7 +437,7 @@ fi
 - Fix crash reconnecting to SPICE after guest restart (rhbz #797082)
 - Add support for foreign menus with SPICE (rhbz #799038)
 
-* Tue Feb 17 2012 Daniel P. Berrange <berrange@redhat.com> - 0.5.1-1
+* Fri Feb 17 2012 Daniel P. Berrange <berrange@redhat.com> - 0.5.1-1
 - Update to 0.5.1 release (rhbz #784920, #749723, #784922)
 
 * Tue Feb 14 2012 Daniel P. Berrange <berrange@redhat.com> - 0.5.0-1
