@@ -1,0 +1,22 @@
+From 7d5e7d121c06978cd7b18249a647f5ce72521caf Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marc-Andr=C3=A9=20Lureau?= <marcandre.lureau@gmail.com>
+Date: Fri, 5 Jul 2013 13:20:00 +0200
+Subject: [PATCH] Remove debugging leftover
+
+(cherry picked from commit eeadf5bc5388609729ad171d60a446abbc0ae297)
+---
+ src/virt-viewer-auth.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/src/virt-viewer-auth.c b/src/virt-viewer-auth.c
+index 81f09bc..79c8589 100644
+--- a/src/virt-viewer-auth.c
++++ b/src/virt-viewer-auth.c
+@@ -134,7 +134,6 @@ virt_viewer_auth_vnc_credentials(VirtViewerSession *session,
+         }
+         if (wantPassword && virt_viewer_file_is_set(file, "password")) {
+             password = virt_viewer_file_get_password(file);
+-            g_message("%s", password);
+             wantPassword = FALSE;
+         }
+     }

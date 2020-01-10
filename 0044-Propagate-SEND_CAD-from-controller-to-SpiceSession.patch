@@ -1,0 +1,23 @@
+From 60445af44f34402f6b35d930803d0dca409f513f Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Sat, 3 Mar 2012 20:57:36 +0100
+Subject: [PATCH] Propagate SEND_CAD from controller to SpiceSession
+
+---
+ src/remote-viewer.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/remote-viewer.c b/src/remote-viewer.c
+index b656175..95ae375 100644
+--- a/src/remote-viewer.c
++++ b/src/remote-viewer.c
+@@ -545,6 +545,9 @@ spice_ctrl_notified(SpiceCtrlController *ctrl,
+         }
+     } else if (g_str_equal(pspec->name, "title")) {
+         virt_viewer_app_set_title(app, g_value_get_string(&value));
++    } else if (g_str_equal(pspec->name, "send-cad")) {
++        g_object_set(G_OBJECT(session), "disable-ctrlaltdel",
++                     !g_value_get_boolean(&value), NULL);
+     } else if (g_str_equal(pspec->name, "display-flags")) {
+         guint flags = g_value_get_uint(&value);
+         gboolean fullscreen = !!(flags & CONTROLLER_SET_FULL_SCREEN);

@@ -1,0 +1,30 @@
+From 949edcaee6823283a54b76df32e48f0df727cbf4 Mon Sep 17 00:00:00 2001
+From: Jonathon Jongsma <jjongsma@redhat.com>
+Date: Tue, 1 Apr 2014 11:47:27 -0500
+Subject: [PATCH] set auto-conf when fullscreen is set in vv file
+
+---
+ src/virt-viewer-file.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/src/virt-viewer-file.c b/src/virt-viewer-file.c
+index 3636c2e..816b561 100644
+--- a/src/virt-viewer-file.c
++++ b/src/virt-viewer-file.c
+@@ -644,9 +644,13 @@ virt_viewer_file_fill_app(VirtViewerFile* self, VirtViewerApp *app, GError **err
+         g_free(val);
+     }
+ 
+-    if (virt_viewer_file_is_set(self, "fullscreen"))
+-        g_object_set(G_OBJECT(app), "fullscreen",
+-            virt_viewer_file_get_fullscreen(self), NULL);
++    if (virt_viewer_file_is_set(self, "fullscreen")) {
++        gboolean fullscreen = virt_viewer_file_get_fullscreen(self);
++        g_object_set(G_OBJECT(app),
++                     "fullscreen", fullscreen,
++                     "fullscreen-auto-conf", fullscreen,
++                     NULL);
++    }
+ 
+     return TRUE;
+ }

@@ -1,0 +1,197 @@
+From 240baeeb4486565a85a65f9945fdb6e0259002c9 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marc-Andr=C3=A9=20Lureau?= <marcandre.lureau@gmail.com>
+Date: Fri, 17 May 2013 14:13:37 +0200
+Subject: [PATCH] Show connect dialog again if connection from dialog failed
+
+https://bugzilla.redhat.com/show_bug.cgi?id=864026
+---
+ src/remote-viewer.c   | 16 ++++++++++++++++
+ src/virt-viewer-app.c | 34 +++++++++++++++++++---------------
+ src/virt-viewer-app.h |  2 +-
+ src/virt-viewer.c     |  6 +++---
+ 4 files changed, 39 insertions(+), 19 deletions(-)
+
+diff --git a/src/remote-viewer.c b/src/remote-viewer.c
+index d1c5525..a0adef7 100644
+--- a/src/remote-viewer.c
++++ b/src/remote-viewer.c
+@@ -77,6 +77,7 @@ static gboolean remote_viewer_start(VirtViewerApp *self);
+ static gboolean remote_viewer_activate(VirtViewerApp *self, GError **error);
+ static void remote_viewer_window_added(VirtViewerApp *self, VirtViewerWindow *win);
+ static void spice_foreign_menu_updated(RemoteViewer *self);
++static gint connect_dialog(gchar **uri);
+ 
+ static void
+ remote_viewer_get_property (GObject *object, guint property_id,
+@@ -145,6 +146,20 @@ remote_viewer_dispose (GObject *object)
+ #endif
+ 
+ static void
++remote_viewer_deactivated(VirtViewerApp *app, gboolean connect_error)
++{
++    RemoteViewer *self = REMOTE_VIEWER(app);
++    RemoteViewerPrivate *priv = self->priv;
++
++    if (connect_error && priv->open_recent_dialog) {
++        virt_viewer_app_start(app);
++        return;
++    }
++
++    VIRT_VIEWER_APP_CLASS(remote_viewer_parent_class)->deactivated(app, connect_error);
++}
++
++static void
+ remote_viewer_class_init (RemoteViewerClass *klass)
+ {
+ #ifdef HAVE_SPICE_GTK
+@@ -161,6 +176,7 @@ remote_viewer_class_init (RemoteViewerClass *klass)
+ #endif
+ 
+     app_class->start = remote_viewer_start;
++    app_class->deactivated = remote_viewer_deactivated;
+ #ifdef HAVE_SPICE_GTK
+     app_class->activate = remote_viewer_activate;
+     app_class->window_added = remote_viewer_window_added;
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index b13338e..539c4a4 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -1080,38 +1080,44 @@ virt_viewer_app_start_reconnect_poll(VirtViewerApp *self)
+ }
+ 
+ static void
+-virt_viewer_app_default_deactivated(VirtViewerApp *self)
++virt_viewer_app_default_deactivated(VirtViewerApp *self, gboolean connect_error)
+ {
+     VirtViewerAppPrivate *priv = self->priv;
+ 
+-    virt_viewer_app_show_status(self, _("Guest domain has shutdown"));
+-    virt_viewer_app_trace(self, "Guest %s display has disconnected, shutting down",
+-                          priv->guest_name);
++    if (!connect_error) {
++        virt_viewer_app_show_status(self, _("Guest domain has shutdown"));
++        virt_viewer_app_trace(self, "Guest %s display has disconnected, shutting down",
++                              priv->guest_name);
++    }
++
+     gtk_main_quit();
+ }
+ 
+ static void
+-virt_viewer_app_deactivated(VirtViewerApp *self)
++virt_viewer_app_deactivated(VirtViewerApp *self, gboolean connect_error)
+ {
+     VirtViewerAppClass *klass;
+     klass = VIRT_VIEWER_APP_GET_CLASS(self);
+ 
+-    klass->deactivated(self);
++    klass->deactivated(self, connect_error);
+ }
+ 
+ static void
+-virt_viewer_app_deactivate(VirtViewerApp *self)
++virt_viewer_app_deactivate(VirtViewerApp *self, gboolean connect_error)
+ {
+     VirtViewerAppPrivate *priv = self->priv;
+ 
+     if (!priv->active)
+         return;
+ 
+-    if (priv->session)
++    if (priv->session) {
+         virt_viewer_session_close(VIRT_VIEWER_SESSION(priv->session));
++        g_clear_object(&priv->session);
++    }
+ 
+     priv->connected = FALSE;
+     priv->active = FALSE;
++    priv->started = FALSE;
+ #if 0
+     g_free(priv->pretty_address);
+     priv->pretty_address = NULL;
+@@ -1123,7 +1129,7 @@ virt_viewer_app_deactivate(VirtViewerApp *self)
+         priv->authretry = FALSE;
+         g_idle_add(virt_viewer_app_retryauth, self);
+     } else
+-        virt_viewer_app_deactivated(self);
++        virt_viewer_app_deactivated(self, connect_error);
+ 
+ }
+ 
+@@ -1154,17 +1160,18 @@ virt_viewer_app_disconnected(VirtViewerSession *session G_GNUC_UNUSED,
+                              VirtViewerApp *self)
+ {
+     VirtViewerAppPrivate *priv = self->priv;
++    gboolean connect_error = !priv->connected && !priv->cancelled;
+ 
+     if (priv->quiting)
+         gtk_main_quit();
+ 
+-    if (!priv->connected && !priv->cancelled) {
++    if (connect_error) {
+         virt_viewer_app_simple_message_dialog(self,
+                                               _("Unable to connect to the graphic server %s"),
+                                               priv->pretty_address);
+     }
+     virt_viewer_app_set_usb_options_sensitive(self, FALSE);
+-    virt_viewer_app_deactivate(self);
++    virt_viewer_app_deactivate(self, connect_error);
+ }
+ 
+ static void virt_viewer_app_cancelled(VirtViewerSession *session,
+@@ -1331,10 +1338,7 @@ virt_viewer_app_dispose (GObject *object)
+         g_hash_table_unref(tmp);
+     }
+ 
+-    if (priv->session) {
+-        g_object_unref(priv->session);
+-        priv->session = NULL;
+-    }
++    g_clear_object(&priv->session);
+     g_free(priv->title);
+     priv->title = NULL;
+     g_free(priv->guest_name);
+diff --git a/src/virt-viewer-app.h b/src/virt-viewer-app.h
+index 32bc7fb..14c8a96 100644
+--- a/src/virt-viewer-app.h
++++ b/src/virt-viewer-app.h
+@@ -54,7 +54,7 @@ typedef struct {
+     gboolean (*start) (VirtViewerApp *self);
+     gboolean (*initial_connect) (VirtViewerApp *self, GError **error);
+     gboolean (*activate) (VirtViewerApp *self, GError **error);
+-    void (*deactivated) (VirtViewerApp *self);
++    void (*deactivated) (VirtViewerApp *self, gboolean connect_error);
+     gboolean (*open_connection)(VirtViewerApp *self, int *fd);
+ } VirtViewerAppClass;
+ 
+diff --git a/src/virt-viewer.c b/src/virt-viewer.c
+index 898e1c0..5dea5b6 100644
+--- a/src/virt-viewer.c
++++ b/src/virt-viewer.c
+@@ -65,7 +65,7 @@ G_DEFINE_TYPE (VirtViewer, virt_viewer, VIRT_VIEWER_TYPE_APP)
+ 
+ static gboolean virt_viewer_initial_connect(VirtViewerApp *self, GError **error);
+ static gboolean virt_viewer_open_connection(VirtViewerApp *self, int *fd);
+-static void virt_viewer_deactivated(VirtViewerApp *self);
++static void virt_viewer_deactivated(VirtViewerApp *self, gboolean connect_error);
+ static gboolean virt_viewer_start(VirtViewerApp *self);
+ 
+ static void
+@@ -125,7 +125,7 @@ virt_viewer_init(VirtViewer *self)
+ }
+ 
+ static void
+-virt_viewer_deactivated(VirtViewerApp *app)
++virt_viewer_deactivated(VirtViewerApp *app, gboolean connect_error)
+ {
+     VirtViewer *self = VIRT_VIEWER(app);
+     VirtViewerPrivate *priv = self->priv;
+@@ -144,7 +144,7 @@ virt_viewer_deactivated(VirtViewerApp *app)
+         virt_viewer_app_show_status(app, _("Waiting for guest domain to re-start"));
+         virt_viewer_app_trace(app, "Guest %s display has disconnected, waiting to reconnect", priv->domkey);
+     } else {
+-        VIRT_VIEWER_APP_CLASS(virt_viewer_parent_class)->deactivated(app);
++        VIRT_VIEWER_APP_CLASS(virt_viewer_parent_class)->deactivated(app, connect_error);
+     }
+ }
+ 

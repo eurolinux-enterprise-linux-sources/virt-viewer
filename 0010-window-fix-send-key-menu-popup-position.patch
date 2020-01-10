@@ -1,0 +1,35 @@
+From 0f6dd1f3794faf768379e4b152ca863387523a55 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marc-Andr=C3=A9=20Lureau?= <marcandre.lureau@redhat.com>
+Date: Tue, 14 May 2013 03:27:19 +0300
+Subject: [PATCH] window: fix send key menu popup position
+
+Fix send key menu popup position.
+
+The current code wasn't correctly translating the menu coordinates
+based on the toplevel windows position, it was always using origin 0.
+
+https://bugzilla.redhat.com/show_bug.cgi?id=913601
+---
+ src/virt-viewer-window.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/src/virt-viewer-window.c b/src/virt-viewer-window.c
+index 5c9a9db..814726f 100644
+--- a/src/virt-viewer-window.c
++++ b/src/virt-viewer-window.c
+@@ -726,11 +726,12 @@ static void keycombo_menu_location(GtkMenu *menu G_GNUC_UNUSED, gint *x, gint *y
+ {
+     VirtViewerWindow *self = user_data;
+     GtkAllocation allocation;
++    GtkWidget *toplevel = gtk_widget_get_toplevel(self->priv->toolbar_send_key);
+ 
+     *push_in = TRUE;
+-    gdk_window_get_origin(gtk_widget_get_window(self->priv->toolbar_send_key), x, y);
+-    gtk_widget_translate_coordinates(self->priv->toolbar_send_key, gtk_widget_get_toplevel(self->priv->toolbar_send_key),
+-                                     0, 0, x, y);
++    gdk_window_get_origin(gtk_widget_get_window(toplevel), x, y);
++    gtk_widget_translate_coordinates(self->priv->toolbar_send_key, toplevel,
++                                     *x, *y, x, y);
+     gtk_widget_get_allocation(self->priv->toolbar_send_key, &allocation);
+     *y += allocation.height;
+ }

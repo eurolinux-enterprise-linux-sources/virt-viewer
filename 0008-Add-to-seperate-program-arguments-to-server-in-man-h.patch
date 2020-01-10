@@ -1,0 +1,70 @@
+From 9b1ad0b11837d97b25b7d7b20a611472b60859d3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marc-Andr=C3=A9=20Lureau?= <marcandre.lureau@gmail.com>
+Date: Thu, 9 May 2013 15:52:55 +0200
+Subject: [PATCH] Add -- to seperate program arguments to server in man /
+ --help
+
+Since some of the arguments are expecting following value, make it more
+explicit in the man and --help that -- can seperate options from server
+name or location.
+
+https://bugzilla.redhat.com/show_bug.cgi?id=843103
+---
+ man/remote-viewer.pod    | 2 +-
+ man/virt-viewer.pod      | 2 +-
+ src/remote-viewer-main.c | 2 +-
+ src/virt-viewer-main.c   | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/man/remote-viewer.pod b/man/remote-viewer.pod
+index 3bbb2e9..0a60387 100644
+--- a/man/remote-viewer.pod
++++ b/man/remote-viewer.pod
+@@ -5,7 +5,7 @@ remote-viewer - a simple remote desktop client
+ 
+ =head1 SYNOPSIS
+ 
+-B<remote-viewer> [OPTIONS] URI
++B<remote-viewer> [OPTIONS] -- URI
+ 
+ =head1 DESCRIPTION
+ 
+diff --git a/man/virt-viewer.pod b/man/virt-viewer.pod
+index e2a5754..6ed381a 100644
+--- a/man/virt-viewer.pod
++++ b/man/virt-viewer.pod
+@@ -5,7 +5,7 @@ virt-viewer - display the graphical console for a virtual machine
+ 
+ =head1 SYNOPSIS
+ 
+-B<virt-viewer> [OPTIONS] DOMAIN-NAME|ID|UUID
++B<virt-viewer> [OPTIONS] -- DOMAIN-NAME|ID|UUID
+ 
+ =head1 DESCRIPTION
+ 
+diff --git a/src/remote-viewer-main.c b/src/remote-viewer-main.c
+index adc234e..73187d1 100644
+--- a/src/remote-viewer-main.c
++++ b/src/remote-viewer-main.c
+@@ -228,7 +228,7 @@ main(int argc, char **argv)
+         { "hotkeys", 'h', 0, G_OPTION_ARG_STRING, &hotkeys,
+           N_("Customise hotkeys"), NULL },
+         { G_OPTION_REMAINING, '\0', 0, G_OPTION_ARG_STRING_ARRAY, &args,
+-          NULL, "URI" },
++          NULL, "-- URI" },
+         { NULL, 0, 0, G_OPTION_ARG_NONE, NULL, NULL, NULL }
+     };
+ 
+diff --git a/src/virt-viewer-main.c b/src/virt-viewer-main.c
+index 51f8cc6..fca4626 100644
+--- a/src/virt-viewer-main.c
++++ b/src/virt-viewer-main.c
+@@ -84,7 +84,7 @@ int main(int argc, char **argv)
+         { "hotkeys", 'h', 0, G_OPTION_ARG_STRING, &hotkeys,
+           N_("Customise hotkeys"), NULL },
+         { G_OPTION_REMAINING, '\0', 0, G_OPTION_ARG_STRING_ARRAY, &args,
+-          NULL, "DOMAIN-NAME|ID|UUID" },
++          NULL, "-- DOMAIN-NAME|ID|UUID" },
+         { NULL, 0, 0, G_OPTION_ARG_NONE, NULL, NULL, NULL }
+     };
+ 

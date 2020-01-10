@@ -1,0 +1,33 @@
+From df30f9730d5d4156f5fb5a574f07f73760e7e793 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marc-Andr=C3=A9=20Lureau?= <marcandre.lureau@gmail.com>
+Date: Mon, 27 May 2013 14:23:35 +0200
+Subject: [PATCH] Support Spice controller "auto-display-res" flag
+
+The controller "auto-display-res" flag should be use to reconfigure
+guest to match client configuration. This is what the
+--fullscreen=auto-conf option is already made for.
+
+https://bugzilla.redhat.com/show_bug.cgi?id=967154
+---
+ src/remote-viewer.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/src/remote-viewer.c b/src/remote-viewer.c
+index a0adef7..2bb4192 100644
+--- a/src/remote-viewer.c
++++ b/src/remote-viewer.c
+@@ -547,11 +547,10 @@ spice_ctrl_notified(SpiceCtrlController *ctrl,
+         virt_viewer_app_set_title(app, g_value_get_string(&value));
+     } else if (g_str_equal(pspec->name, "display-flags")) {
+         guint flags = g_value_get_uint(&value);
+-        gboolean fullscreen = flags & CONTROLLER_SET_FULL_SCREEN;
+-        gboolean auto_res = flags & CONTROLLER_AUTO_DISPLAY_RES;
++        gboolean fullscreen = !!(flags & CONTROLLER_SET_FULL_SCREEN);
++        gboolean auto_res = !!(flags & CONTROLLER_AUTO_DISPLAY_RES);
+         g_object_set(G_OBJECT(self), "fullscreen", fullscreen, NULL);
+-        g_debug("unimplemented resize-guest %d", auto_res);
+-        /* g_object_set(G_OBJECT(self), "resize-guest", auto_res, NULL); */
++        g_object_set(G_OBJECT(self), "fullscreen-auto-conf", auto_res, NULL);
+     } else if (g_str_equal(pspec->name, "menu")) {
+         spice_ctrl_menu_updated(self);
+     } else if (g_str_equal(pspec->name, "hotkeys")) {

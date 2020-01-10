@@ -1,0 +1,23 @@
+From 16df26cf5fbb83482196cfb4f8ace774912b7f34 Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Tue, 4 Jun 2013 18:26:13 +0200
+Subject: [PATCH] spec: Add missing % in %if 0{?fedora}
+
+This was missing in previous commit.
+---
+ virt-viewer.spec.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/virt-viewer.spec.in b/virt-viewer.spec.in
+index 361511b..ade8416 100644
+--- a/virt-viewer.spec.in
++++ b/virt-viewer.spec.in
+@@ -78,7 +78,7 @@ BuildRequires: intltool
+ BuildRequires: libgovirt-devel >= 0.0.3
+ %endif
+ 
+-%if 0{?fedora} >= 20
++%if 0%{?fedora} >= 20
+ Obsoletes: spice-client < 0.12.3-2
+ %endif
+ 

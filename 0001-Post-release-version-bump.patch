@@ -1,0 +1,20 @@
+From d3de53aa5ebb976c628ca0051591457efda6337e Mon Sep 17 00:00:00 2001
+From: "Daniel P. Berrange" <berrange@redhat.com>
+Date: Wed, 1 May 2013 17:15:02 +0100
+Subject: [PATCH] Post release version bump
+
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 4b4ec07..c7fb5c8 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1,5 +1,5 @@
+ 
+-AC_INIT([virt-viewer],[0.5.6])
++AC_INIT([virt-viewer],[0.5.7])
+ AC_CONFIG_SRCDIR(src/virt-viewer-main.c)
+ AC_CONFIG_MACRO_DIR([m4])
+ AC_CONFIG_AUX_DIR([build-aux])

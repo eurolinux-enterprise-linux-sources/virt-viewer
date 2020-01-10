@@ -1,0 +1,35 @@
+From 153ec66b9ced710a787539624aa4b8b6c0ca212e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marc-Andr=C3=A9=20Lureau?= <marcandre.lureau@gmail.com>
+Date: Fri, 3 May 2013 18:46:46 +0200
+Subject: [PATCH] remote-viewer: set auto-conf before fullscreen
+
+If a monitor is already in fullscreen, setting auto-conf to true will
+not move it until it is re-fullscreen
+
+This was unnoticed, because usually, the first client window is opened
+on the first monitor. Also we may argue than relying on g_object_set()
+property order is lame and fragile, we better split it in two seperate
+calls as this might break upstream.
+
+https://bugzilla.redhat.com/show_bug.cgi?id=872288
+---
+ src/remote-viewer-main.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/src/remote-viewer-main.c b/src/remote-viewer-main.c
+index daa174f..adc234e 100644
+--- a/src/remote-viewer-main.c
++++ b/src/remote-viewer-main.c
+@@ -299,10 +299,8 @@ main(int argc, char **argv)
+         goto cleanup;
+ 
+     app = VIRT_VIEWER_APP(viewer);
+-    g_object_set(app,
+-                 "fullscreen", fullscreen,
+-                 "fullscreen-auto-conf", fullscreen_auto_conf,
+-                 NULL);
++    g_object_set(app, "fullscreen-auto-conf", fullscreen_auto_conf, NULL);
++    g_object_set(app, "fullscreen", fullscreen, NULL);
+     virt_viewer_window_set_zoom_level(virt_viewer_app_get_main_window(app), zoom);
+     virt_viewer_app_set_direct(app, direct);
+     virt_viewer_app_set_hotkeys(app, hotkeys);

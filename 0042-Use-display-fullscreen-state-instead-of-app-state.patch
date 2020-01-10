@@ -1,0 +1,47 @@
+From 1e8c66f6374588c384c092ebfdcb097b916749fa Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marc-Andr=C3=A9=20Lureau?= <marcandre.lureau@gmail.com>
+Date: Fri, 5 Jul 2013 13:21:48 +0200
+Subject: [PATCH] Use display fullscreen state instead of app state
+
+This is a recent regression introduced by independant fullscreen windows
+support, which reopened the bug "Resolution higher than native could not
+be set in fullscreen"
+
+https://bugzilla.redhat.com/show_bug.cgi?id=864929
+(cherry picked from commit 9da9305554f1c1bec8032610d51ec9b8c1569ea0)
+---
+ src/virt-viewer-display-spice.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/src/virt-viewer-display-spice.c b/src/virt-viewer-display-spice.c
+index f148542..5eb22cf 100644
+--- a/src/virt-viewer-display-spice.c
++++ b/src/virt-viewer-display-spice.c
+@@ -257,11 +257,11 @@ enable_accel_changed(VirtViewerApp *app,
+ }
+ 
+ static void
+-fullscreen_changed(VirtViewerApp *app,
++fullscreen_changed(VirtViewerDisplaySpice *self,
+                    GParamSpec *pspec G_GNUC_UNUSED,
+-                   VirtViewerDisplaySpice *self)
++                   VirtViewerApp *app)
+ {
+-    if (virt_viewer_app_get_fullscreen(app)) {
++    if (virt_viewer_display_get_fullscreen(VIRT_VIEWER_DISPLAY(self))) {
+         gboolean auto_conf;
+         g_object_get(app, "fullscreen-auto-conf", &auto_conf, NULL);
+         if (auto_conf)
+@@ -326,9 +326,9 @@ virt_viewer_display_spice_new(VirtViewerSessionSpice *session,
+     app = virt_viewer_session_get_app(VIRT_VIEWER_SESSION(session));
+     virt_viewer_signal_connect_object(app, "notify::enable-accel",
+                                       G_CALLBACK(enable_accel_changed), self, 0);
+-    virt_viewer_signal_connect_object(app, "notify::fullscreen",
+-                                      G_CALLBACK(fullscreen_changed), self, 0);
+-    fullscreen_changed(app, NULL, self);
++    virt_viewer_signal_connect_object(self, "notify::fullscreen",
++                                      G_CALLBACK(fullscreen_changed), app, 0);
++    fullscreen_changed(self, NULL, app);
+     enable_accel_changed(app, NULL, self);
+ 
+     return GTK_WIDGET(self);

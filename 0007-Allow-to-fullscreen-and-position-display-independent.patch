@@ -1,0 +1,32 @@
+From fdaa9b0ca821ed66f3e618783b662f3dda3c6c84 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marc-Andr=C3=A9=20Lureau?= <marcandre.lureau@gmail.com>
+Date: Wed, 8 May 2013 20:18:17 +0200
+Subject: [PATCH] Allow to fullscreen and position display independently
+
+Currently, going from window to fullscreen mode changes all display to
+fullscreen and realize automatic positionning on corresponding client
+monitor. However, it allows for much more flexibility to allow entering
+fullscreen on the current monitor each windows seperately. This way the
+user can decide on arbitrary monitor arrangement.
+
+https://bugzilla.redhat.com/show_bug.cgi?id=558241
+---
+ src/virt-viewer-window.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/virt-viewer-window.c b/src/virt-viewer-window.c
+index c9e1ada..5c9a9db 100644
+--- a/src/virt-viewer-window.c
++++ b/src/virt-viewer-window.c
+@@ -752,7 +752,10 @@ virt_viewer_window_menu_view_fullscreen(GtkWidget *menu,
+ {
+     gboolean fullscreen = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menu));
+ 
+-    g_object_set(self->priv->app, "fullscreen", fullscreen, NULL);
++    if (fullscreen)
++        virt_viewer_window_enter_fullscreen(self, -1);
++    else
++        virt_viewer_window_leave_fullscreen(self);
+ }
+ 
+ G_MODULE_EXPORT void

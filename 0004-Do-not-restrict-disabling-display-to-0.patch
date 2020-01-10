@@ -1,0 +1,39 @@
+From d1fd8c3f6613f081184967022fcd945d70eb3d6b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marc-Andr=C3=A9=20Lureau?= <marcandre.lureau@gmail.com>
+Date: Thu, 2 May 2013 18:12:33 +0200
+Subject: [PATCH] Do not restrict disabling display to != 0
+
+Virt-viewer hides the display window 0, but doesn't disable the display.
+This is inconsistent with other displays, and prevent the guest OS from
+reconfiguring the main display.
+
+(for monitor 0 to be really disabled in multi-monitor guest, the agent
+need to support sparse monitor config. If not, the first display windows
+will be reopened to match the new un-sparse configuration)
+
+Note also the current Linux vdagent crashes when disabling 1st monitor,
+to be solved seperately.
+
+Related bug:
+https://bugzilla.redhat.com/show_bug.cgi?id=958550
+---
+ src/virt-viewer-window.c | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
+
+diff --git a/src/virt-viewer-window.c b/src/virt-viewer-window.c
+index ab72a6b..c9e1ada 100644
+--- a/src/virt-viewer-window.c
++++ b/src/virt-viewer-window.c
+@@ -1183,11 +1183,7 @@ virt_viewer_window_hide(VirtViewerWindow *self)
+ 
+     if (self->priv->display) {
+         VirtViewerDisplay *display = self->priv->display;
+-        guint nth;
+-
+-        g_object_get(display, "nth-display", &nth, NULL);
+-        if (nth != 0)
+-            virt_viewer_display_set_enabled(display, FALSE);
++        virt_viewer_display_set_enabled(display, FALSE);
+     }
+ }
+ 

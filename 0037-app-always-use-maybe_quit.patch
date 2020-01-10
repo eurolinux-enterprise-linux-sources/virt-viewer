@@ -1,0 +1,54 @@
+From ef970a694e4d9b5144211399945ae6eb1443c874 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marc-Andr=C3=A9=20Lureau?= <marcandre.lureau@gmail.com>
+Date: Mon, 8 Jul 2013 11:57:19 +0200
+Subject: [PATCH] app: always use maybe_quit()
+
+Now that closing a window is like quiting, there is no reason to ask or
+skip the confirm dialog depending on how you quit (menu/toolbar/window).
+
+https://bugzilla.redhat.com/show_bug.cgi?id=905684
+(cherry picked from commit 307009954aa3d73511049d2ef011a9d99688c5f8)
+---
+ src/virt-viewer-app.c    | 2 +-
+ src/virt-viewer-app.h    | 1 -
+ src/virt-viewer-window.c | 2 +-
+ 3 files changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index c2ecc67..1aef22c 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -239,7 +239,7 @@ virt_viewer_app_save_config(VirtViewerApp *self)
+     g_free(data);
+ }
+ 
+-void
++static void
+ virt_viewer_app_quit(VirtViewerApp *self)
+ {
+     g_return_if_fail(VIRT_VIEWER_IS_APP(self));
+diff --git a/src/virt-viewer-app.h b/src/virt-viewer-app.h
+index 14c8a96..93bb988 100644
+--- a/src/virt-viewer-app.h
++++ b/src/virt-viewer-app.h
+@@ -64,7 +64,6 @@ const char *virt_viewer_app_get_title(VirtViewerApp *app);
+ void virt_viewer_app_set_title(VirtViewerApp *app, const char *title);
+ void virt_viewer_app_set_debug(gboolean debug);
+ gboolean virt_viewer_app_start(VirtViewerApp *app);
+-void virt_viewer_app_quit(VirtViewerApp *self);
+ void virt_viewer_app_maybe_quit(VirtViewerApp *self, VirtViewerWindow *window);
+ VirtViewerWindow* virt_viewer_app_get_main_window(VirtViewerApp *self);
+ void virt_viewer_app_trace(VirtViewerApp *self, const char *fmt, ...);
+diff --git a/src/virt-viewer-window.c b/src/virt-viewer-window.c
+index b00734c..6e672bb 100644
+--- a/src/virt-viewer-window.c
++++ b/src/virt-viewer-window.c
+@@ -690,7 +690,7 @@ G_MODULE_EXPORT void
+ virt_viewer_window_menu_file_quit(GtkWidget *src G_GNUC_UNUSED,
+                                   VirtViewerWindow *self)
+ {
+-    virt_viewer_app_quit(self->priv->app);
++    virt_viewer_app_maybe_quit(self->priv->app, self);
+ }
+ 
+ 

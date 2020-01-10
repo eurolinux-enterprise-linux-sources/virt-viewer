@@ -1,0 +1,29 @@
+From f0f52f940676706b5695428fe5ee686e9be288d5 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marc-Andr=C3=A9=20Lureau?= <marcandre.lureau@gmail.com>
+Date: Fri, 17 May 2013 16:58:09 +0200
+Subject: [PATCH] Use a more descriptive FileDescription
+
+This field is used to invite the user to close running instances, when
+updating the installation with an MSI. "A remote desktop client" isn't
+specific enough, use a VirtViewer specific description.
+---
+ src/virt-viewer.rc.in | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/virt-viewer.rc.in b/src/virt-viewer.rc.in
+index 196e631..2f52c34 100644
+--- a/src/virt-viewer.rc.in
++++ b/src/virt-viewer.rc.in
+@@ -8,10 +8,10 @@ BEGIN
+     BLOCK "040904E4"
+     BEGIN
+       VALUE "CompanyName", "virt-manager.org"
+-      VALUE "FileDescription", "A remote desktop client"
++      VALUE "FileDescription", "VirtViewer desktop client"
+       VALUE "FileVersion", "@VERSION@"
+       VALUE "InternalName", "@PACKAGE_STRING@"
+-      VALUE "LegalCopyright", "Copyright (C) 2007-2012 Red Hat, Inc."
++      VALUE "LegalCopyright", "Copyright (C) 2007-2013 Red Hat, Inc."
+       VALUE "OriginalFilename", "virt-viewer.exe"
+       VALUE "ProductName", "VirtViewer"
+       VALUE "ProductVersion", "@VERSION@"
