@@ -1,0 +1,62 @@
+From acf734476e66628e28a7280b00004ac587de8c49 Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Mon, 9 Mar 2015 11:28:16 +0100
+Subject: [PATCH] Fix crash when trying to connect to VNC display
+
+When running virt-viewer against older gtk-vnc versions (0.3.10), it
+would crash on startup:
+ #0  0x0000003c96050970 in g_logv (log_domain=0x3d3de7efc6 "Gdk", log_level=G_LOG_LEVEL_CRITICAL, format=<optimized out>, args=args@entry=0x7fffee959d60) at gmessages.c:1046
+ #1  0x0000003c96050baf in g_log (log_domain=log_domain@entry=0x3d3de7efc6 "Gdk", log_level=log_level@entry=G_LOG_LEVEL_CRITICAL, format=format@entry=0x3c960bfc1d "%s: assertion '%s' failed") at gmessages.c:1079
+ #2  0x0000003c96050be9 in g_return_if_fail_warning (log_domain=log_domain@entry=0x3d3de7efc6 "Gdk", pretty_function=pretty_function@entry=0x3d3de80380 <__FUNCTION__.32290> "IA__gdk_drawable_get_visual", expression=expression@entry=0x3d3de7f427 "GDK_IS_DRAWABLE (drawable)") at gmessages.c:1088
+ #3  0x0000003d3de22baa in IA__gdk_drawable_get_visual (drawable=0x0) at gdkdraw.c:181
+ #4  0x00007ffff7db858d in on_get_preferred_pixel_format (opaque=0x77b8c0, fmt=0x77b960) at vncdisplay.c:1028
+ #5  0x00007ffff7db4f43 in gvnc_initialize (gvnc=0x77b940, shared_flag=0) at gvnc.c:3581
+ #6  0x00007ffff7db93aa in vnc_coroutine (opaque=0x77b8c0) at vncdisplay.c:1404
+ #7  0x00007ffff7dbc2cc in coroutine_trampoline (cc=0x77b078) at coroutine_ucontext.c:52
+ #8  0x00007ffff7dbc0cb in continuation_trampoline (i0=7843960, i1=0) at continuation.c:43
+ #9  0x0000003c93448000 in __start_context () at /lib64/libc.so.6
+ #10 0x000000000077b440 in  ()
+ #11 0x0000000000000000 in  ()
+
+Currently, VirtViewerSessionVnc connects to the
+VncDisplay::vnc-connected signal, and will create a VirtViewerDisplayVnc
+instance when this signal is fired. Then VirtViewerDisplayVnc connects
+to the VncDisplay::vnc-initialized signal, and will set the display to
+'ready' when it gets the vnc-initialized signal.
+When the display is set to ready, the VncDisplay will be realized and
+set to the right size through display_show_hint().
+
+However, in gtk-vnc 0.3.10, the VncDisplay code does:
+
+        emit_signal_delayed(obj, VNC_CONNECTED, &s);
+
+        if (!gvnc_initialize(priv->gvnc, priv->shared_flag))
+                goto cleanup;
+
+        emit_signal_delayed(obj, VNC_INITIALIZED, &s);
+
+and gvnc_initialize() needs the VncDisplay widget to be realized
+already, otherwise we hit that crasher bug.
+This means we need to make sure the widget is realized at the latest in
+callbacks attached to the VNC_CONNECTED signal. Setting the 'ready' hint
+in virt_viewer_display_vnc_new() is one easy way of ensuring that. We
+could look for a way of calling ensure_window_for_display() from _new()
+without setting the READY hint if we want an improved fix, but I'm not
+sure this is worth it.
+---
+ src/virt-viewer-display-vnc.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/virt-viewer-display-vnc.c b/src/virt-viewer-display-vnc.c
+index 6605b1b..ecda431 100644
+--- a/src/virt-viewer-display-vnc.c
++++ b/src/virt-viewer-display-vnc.c
+@@ -191,6 +191,8 @@ virt_viewer_display_vnc_new(VirtViewerSessionVnc *session,
+      */
+     vnc_display_set_force_size(display->priv->vnc, FALSE);
+     vnc_display_set_scaling(display->priv->vnc, TRUE);
++    virt_viewer_display_set_show_hint(VIRT_VIEWER_DISPLAY(display),
++                                      VIRT_VIEWER_DISPLAY_SHOW_HINT_READY, TRUE);
+ 
+     /* When VNC desktop resizes, we have to resize the containing widget */
+     g_signal_connect(display->priv->vnc, "vnc-desktop-resize",

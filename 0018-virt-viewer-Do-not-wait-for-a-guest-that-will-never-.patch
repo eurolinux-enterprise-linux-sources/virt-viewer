@@ -1,0 +1,29 @@
+From e1bb8aa01decc381ee0fd81ccdc8e2fd7702b81f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabiano=20Fid=C3=AAncio?= <fidencio@redhat.com>
+Date: Thu, 26 Mar 2015 16:26:06 +0100
+Subject: [PATCH] virt-viewer: Do not wait for a guest that will never show up
+
+All the situations where virt_viewer_update_display() can fail are
+those when we won't be able to connect regardless of what changes on the
+remote host. So, propagate the error instead of waiting for the guest to
+start.
+
+Related: rhbz#1085216
+(cherry picked from commit dc2dd055d4334a5b8a1a93a460c97b35defb66e9)
+---
+ src/virt-viewer.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/virt-viewer.c b/src/virt-viewer.c
+index b22f221..c1768b3 100644
+--- a/src/virt-viewer.c
++++ b/src/virt-viewer.c
+@@ -769,7 +769,7 @@ virt_viewer_initial_connect(VirtViewerApp *app, GError **error)
+     }
+ 
+     if (!virt_viewer_update_display(self, dom, &err))
+-        goto wait;
++        goto cleanup;
+ 
+     ret = VIRT_VIEWER_APP_CLASS(virt_viewer_parent_class)->initial_connect(app, &err);
+     if (ret || err)

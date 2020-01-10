@@ -1,7 +1,7 @@
 /*
  * Virt Viewer: A virtual machine console viewer
  *
- * Copyright (C) 2007-2012 Red Hat, Inc.
+ * Copyright (C) 2007-2012, 2014 Red Hat, Inc.
  * Copyright (C) 2009-2012 Daniel P. Berrange
  * Copyright (C) 2010 Marc-André Lureau
  *
@@ -29,6 +29,8 @@
 
 #include <spice-option.h>
 #include <spice-util.h>
+#include <spice-client.h>
+
 #include <usb-device-widget.h>
 #include "virt-viewer-file.h"
 #include "virt-viewer-util.h"
@@ -40,6 +42,10 @@
 #if !GLIB_CHECK_VERSION(2, 26, 0)
 #include "gbinding.h"
 #include "gbinding.c"
+#endif
+
+#ifndef SPICE_GTK_CHECK_VERSION
+#define SPICE_GTK_CHECK_VERSION(x, y, z) 0
 #endif
 
 G_DEFINE_TYPE (VirtViewerSessionSpice, virt_viewer_session_spice, VIRT_VIEWER_TYPE_SESSION)
@@ -243,16 +249,16 @@ create_spice_session(VirtViewerSessionSpice *self)
     g_object_set(self->priv->gtk_session, "auto-clipboard", TRUE, NULL);
 
     virt_viewer_signal_connect_object(self->priv->session, "channel-new",
-        G_CALLBACK(virt_viewer_session_spice_channel_new), self, 0);
+                                      G_CALLBACK(virt_viewer_session_spice_channel_new), self, 0);
     virt_viewer_signal_connect_object(self->priv->session, "channel-destroy",
-        G_CALLBACK(virt_viewer_session_spice_channel_destroy), self, 0);
+                                      G_CALLBACK(virt_viewer_session_spice_channel_destroy), self, 0);
 
     usb_manager = spice_usb_device_manager_get(self->priv->session, NULL);
     if (usb_manager) {
-        g_signal_connect(usb_manager, "auto-connect-failed",
-                         G_CALLBACK(usb_connect_failed), self);
-        g_signal_connect(usb_manager, "device-error",
-                         G_CALLBACK(usb_connect_failed), self);
+        virt_viewer_signal_connect_object(usb_manager, "auto-connect-failed",
+                                          G_CALLBACK(usb_connect_failed), self, 0);
+        virt_viewer_signal_connect_object(usb_manager, "device-error",
+                                          G_CALLBACK(usb_connect_failed), self, 0);
     }
     g_object_bind_property(self, "auto-usbredir",
                            self->priv->gtk_session, "auto-usbredir",
@@ -262,10 +268,10 @@ create_spice_session(VirtViewerSessionSpice *self)
     if (smartcard_manager) {
         GList *readers;
         GList *it;
-        g_signal_connect(smartcard_manager, "reader-added",
-                         (GCallback)reader_added_cb, self);
-        g_signal_connect(smartcard_manager, "reader-removed",
-                         (GCallback)reader_removed_cb, self);
+        virt_viewer_signal_connect_object(smartcard_manager, "reader-added",
+                                          G_CALLBACK(reader_added_cb), self, 0);
+        virt_viewer_signal_connect_object(smartcard_manager, "reader-removed",
+                                          G_CALLBACK(reader_removed_cb), self, 0);
         readers = spice_smartcard_manager_get_readers(smartcard_manager);
         for (it = readers; it != NULL; it = it->next) {
             SpiceSmartcardReader *reader;
@@ -286,15 +292,22 @@ virt_viewer_session_spice_close(VirtViewerSession *session)
 
     g_return_if_fail(self != NULL);
 
+    g_object_add_weak_pointer(G_OBJECT(self), (gpointer*)&self);
+
     virt_viewer_session_clear_displays(session);
 
     if (self->priv->session) {
         spice_session_disconnect(self->priv->session);
+        if (!self)
+            return;
+
         g_object_unref(self->priv->session);
         self->priv->session = NULL;
         self->priv->gtk_session = NULL;
         self->priv->audio = NULL;
     }
+
+    g_object_remove_weak_pointer(G_OBJECT(self), (gpointer*)&self);
 
     /* FIXME: version 0.7 of spice-gtk allows reuse of session */
     create_spice_session(self);
@@ -342,6 +355,13 @@ fill_session(VirtViewerFile *file, SpiceSession *session)
         g_object_set(G_OBJECT(session), "tls-port", tls_port, NULL);
         g_free(tls_port);
     }
+
+    if (virt_viewer_file_is_set(file, "username")) {
+        gchar *val = virt_viewer_file_get_username(file);
+        g_object_set(G_OBJECT(session), "username", val, NULL);
+        g_free(val);
+    }
+
     if (virt_viewer_file_is_set(file, "password")) {
         gchar *val = virt_viewer_file_get_password(file);
         g_object_set(G_OBJECT(session), "password", val, NULL);
@@ -359,7 +379,10 @@ fill_session(VirtViewerFile *file, SpiceSession *session)
         g_return_if_fail(ca != NULL);
 
         GByteArray *ba = g_byte_array_new_take((guint8 *)ca, strlen(ca) + 1);
-        g_object_set(G_OBJECT(session), "ca", ba, NULL);
+        g_object_set(G_OBJECT(session),
+                     "ca", ba,
+                     "ca-file", NULL,
+                     NULL);
         g_byte_array_unref(ba);
     }
 
@@ -409,7 +432,7 @@ fill_session(VirtViewerFile *file, SpiceSession *session)
     }
 
     if (virt_viewer_file_is_set(file, "disable-channels")) {
-        DEBUG_LOG("FIXME: disable-channels is not supported atm");
+        g_debug("FIXME: disable-channels is not supported atm");
     }
 }
 
@@ -472,42 +495,69 @@ virt_viewer_session_spice_main_channel_event(SpiceChannel *channel G_GNUC_UNUSED
                                              VirtViewerSession *session)
 {
     VirtViewerSessionSpice *self = VIRT_VIEWER_SESSION_SPICE(session);
-    gchar *password = NULL;
+    gchar *password = NULL, *user = NULL;
+    gboolean ret;
+    static gboolean username_required = FALSE;
 
     g_return_if_fail(self != NULL);
 
     switch (event) {
     case SPICE_CHANNEL_OPENED:
-        DEBUG_LOG("main channel: opened");
+        g_debug("main channel: opened");
         g_signal_emit_by_name(session, "session-connected");
         break;
     case SPICE_CHANNEL_CLOSED:
-        DEBUG_LOG("main channel: closed");
+        g_debug("main channel: closed");
         /* Ensure the other channels get closed too */
         virt_viewer_session_clear_displays(session);
         if (self->priv->session)
             spice_session_disconnect(self->priv->session);
         break;
     case SPICE_CHANNEL_SWITCHING:
-        DEBUG_LOG("main channel: switching host");
+        g_debug("main channel: switching host");
         break;
     case SPICE_CHANNEL_ERROR_AUTH:
-        DEBUG_LOG("main channel: auth failure (wrong password?)");
+    {
+        const GError *error = NULL;
+        g_debug("main channel: auth failure (wrong username/password?)");
+
+#if SPICE_GTK_CHECK_VERSION(0, 26, 0)
+        {
+            error = spice_channel_get_error(channel);
+            username_required = g_error_matches(error,
+                                                SPICE_CLIENT_ERROR,
+                                                SPICE_CLIENT_ERROR_AUTH_NEEDS_PASSWORD_AND_USERNAME);
+        }
+#endif
 
         if (self->priv->pass_try > 0)
             g_signal_emit_by_name(session, "session-auth-failed",
-                                  _("invalid password"));
+                                  error != NULL ? error->message : _("Invalid password"));
         self->priv->pass_try++;
 
-        int ret = virt_viewer_auth_collect_credentials(self->priv->main_window,
-                                                       "SPICE",
-                                                       NULL,
-                                                       NULL, &password);
-        if (ret < 0) {
+        /* The username is firstly pre-filled with the username of the current
+         * user and in case where some authentication error happened, the
+         * username entry will be prefilled with the last username used.
+         * Unfortunately, we don't have a clear way to differantiate bewteen
+         * invalid username and invalid password. So, in both cases the username
+         * entry will be pre-filled with the username used in the previous attempt. */
+        if (username_required) {
+            g_object_get(self->priv->session, "username", &user, NULL);
+            if (user == NULL || *user == '\0')
+                user = g_strdup(g_get_user_name());
+        }
+
+        ret = virt_viewer_auth_collect_credentials(self->priv->main_window,
+                                                   "SPICE",
+                                                   NULL,
+                                                   username_required ? &user : NULL,
+                                                   &password);
+        if (!ret) {
             g_signal_emit_by_name(session, "session-cancelled");
         } else {
             gboolean openfd;
 
+            g_object_set(self->priv->session, "username", user, NULL);
             g_object_set(self->priv->session, "password", password, NULL);
             g_object_get(self->priv->session, "client-sockets", &openfd, NULL);
 
@@ -517,14 +567,42 @@ virt_viewer_session_spice_main_channel_event(SpiceChannel *channel G_GNUC_UNUSED
                 spice_session_connect(self->priv->session);
         }
         break;
+    }
     case SPICE_CHANNEL_ERROR_CONNECT:
-        DEBUG_LOG("main channel: failed to connect");
-        g_signal_emit_by_name(session, "session-disconnected");
+#if SPICE_GTK_CHECK_VERSION(0, 23, 21)
+    {
+        const GError *error = spice_channel_get_error(channel);
+
+        g_debug("main channel: failed to connect %s", error ? error->message : "");
+
+        if (g_error_matches(error, G_IO_ERROR, G_IO_ERROR_PROXY_NEED_AUTH) ||
+            g_error_matches(error, G_IO_ERROR, G_IO_ERROR_PROXY_AUTH_FAILED)) {
+            SpiceURI *proxy = spice_session_get_proxy_uri(self->priv->session);
+            g_warn_if_fail(proxy != NULL);
+
+            ret = virt_viewer_auth_collect_credentials(self->priv->main_window,
+                                                       "proxy", NULL,
+                                                       &user, &password);
+            if (!ret) {
+                g_signal_emit_by_name(session, "session-cancelled");
+            } else {
+                spice_uri_set_user(proxy, user);
+                spice_uri_set_password(proxy, password);
+                spice_session_connect(self->priv->session);
+            }
+        } else {
+            g_signal_emit_by_name(session, "session-disconnected", error ? error->message : NULL);
+        }
+    }
+#else
+        g_debug("main channel: failed to connect");
+        g_signal_emit_by_name(session, "session-disconnected", NULL);
+#endif
         break;
     case SPICE_CHANNEL_ERROR_IO:
     case SPICE_CHANNEL_ERROR_LINK:
     case SPICE_CHANNEL_ERROR_TLS:
-        g_signal_emit_by_name(session, "session-disconnected");
+        g_signal_emit_by_name(session, "session-disconnected", NULL);
         break;
     default:
         g_warning("unhandled spice main channel event: %d", event);
@@ -532,6 +610,7 @@ virt_viewer_session_spice_main_channel_event(SpiceChannel *channel G_GNUC_UNUSED
     }
 
     g_free(password);
+    g_free(user);
 }
 
 static void remove_cb(GtkContainer   *container G_GNUC_UNUSED,
@@ -562,13 +641,13 @@ virt_viewer_session_spice_usb_device_selection(VirtViewerSession *session,
 
     usb_device_widget = spice_usb_device_widget_new(priv->session,
                                                     "%s %s");
-    g_signal_connect(usb_device_widget, "connect-failed",
-                     G_CALLBACK(usb_connect_failed), self);
+    virt_viewer_signal_connect_object(usb_device_widget, "connect-failed",
+                                      G_CALLBACK(usb_connect_failed), self, 0);
     gtk_box_pack_start(GTK_BOX(area), usb_device_widget, TRUE, TRUE, 0);
 
     /* This shrinks the dialog when USB devices are unplugged */
-    g_signal_connect(usb_device_widget, "remove",
-                     G_CALLBACK(remove_cb), dialog);
+    virt_viewer_signal_connect_object(usb_device_widget, "remove",
+                                      G_CALLBACK(remove_cb), dialog, 0);
 
     /* show and run */
     gtk_widget_show_all(dialog);
@@ -583,6 +662,10 @@ agent_connected_changed(SpiceChannel *cmain G_GNUC_UNUSED,
 {
     // this will force refresh of application menu
     g_signal_emit_by_name(self, "session-display-updated");
+
+    /* this will force update displays geometry when the agent has connected
+     * after the application (eg: rebooting the guest) */
+    virt_viewer_session_update_displays_geometry(VIRT_VIEWER_SESSION(self));
 }
 
 static void
@@ -591,7 +674,7 @@ destroy_display(gpointer data)
     VirtViewerDisplay *display = VIRT_VIEWER_DISPLAY(data);
     VirtViewerSession *session = virt_viewer_display_get_session(display);
 
-    DEBUG_LOG("Destroying spice display %p", display);
+    g_debug("Destroying spice display %p", display);
     virt_viewer_session_remove_display(session, display);
     g_object_unref(display);
 }
@@ -627,8 +710,8 @@ virt_viewer_session_spice_display_monitors(SpiceChannel *channel,
         display = g_ptr_array_index(displays, i);
         if (display == NULL) {
             display = virt_viewer_display_spice_new(self, channel, i);
-            DEBUG_LOG("creating spice display (#:%d)", i);
-            g_ptr_array_index(displays, i) = g_object_ref(display);
+            g_debug("creating spice display (#:%d)", i);
+            g_ptr_array_index(displays, i) = g_object_ref_sink(display);
         }
 
         virt_viewer_session_add_display(VIRT_VIEWER_SESSION(self),
@@ -662,50 +745,51 @@ virt_viewer_session_spice_channel_new(SpiceSession *s,
 
     g_return_if_fail(self != NULL);
 
-    g_signal_connect(channel, "open-fd",
-                     G_CALLBACK(virt_viewer_session_spice_channel_open_fd_request), self);
+    virt_viewer_signal_connect_object(channel, "open-fd",
+                                      G_CALLBACK(virt_viewer_session_spice_channel_open_fd_request), self, 0);
 
     g_object_get(channel, "channel-id", &id, NULL);
 
-    DEBUG_LOG("New spice channel %p %s %d", channel, g_type_name(G_OBJECT_TYPE(channel)), id);
+    g_debug("New spice channel %p %s %d", channel, g_type_name(G_OBJECT_TYPE(channel)), id);
 
     if (SPICE_IS_MAIN_CHANNEL(channel)) {
         if (self->priv->main_channel != NULL)
             g_signal_handlers_disconnect_by_func(self->priv->main_channel,
                                                  virt_viewer_session_spice_main_channel_event, self);
 
-        g_signal_connect(channel, "channel-event",
-                         G_CALLBACK(virt_viewer_session_spice_main_channel_event), self);
+        virt_viewer_signal_connect_object(channel, "channel-event",
+                                          G_CALLBACK(virt_viewer_session_spice_main_channel_event), self, 0);
         self->priv->main_channel = SPICE_MAIN_CHANNEL(channel);
         g_object_set(G_OBJECT(channel),
                      "disable-display-position", FALSE,
                      "disable-display-align", TRUE,
                      NULL);
 
-        g_signal_connect(channel, "notify::agent-connected", G_CALLBACK(agent_connected_changed), self);
+        virt_viewer_signal_connect_object(channel, "notify::agent-connected",
+                                          G_CALLBACK(agent_connected_changed), self, 0);
     }
 
     if (SPICE_IS_DISPLAY_CHANNEL(channel)) {
         g_signal_emit_by_name(session, "session-initialized");
 
-        g_signal_connect(channel, "notify::monitors",
-                         G_CALLBACK(virt_viewer_session_spice_display_monitors), self);
+        virt_viewer_signal_connect_object(channel, "notify::monitors",
+                                          G_CALLBACK(virt_viewer_session_spice_display_monitors), self, 0);
 
         spice_channel_connect(channel);
     }
 
     if (SPICE_IS_INPUTS_CHANNEL(channel)) {
-        DEBUG_LOG("new inputs channel");
+        g_debug("new inputs channel");
     }
 
     if (SPICE_IS_PLAYBACK_CHANNEL(channel)) {
-        DEBUG_LOG("new audio channel");
+        g_debug("new audio channel");
         if (self->priv->audio == NULL)
             self->priv->audio = spice_audio_get(s, NULL);
     }
 
     if (SPICE_IS_USBREDIR_CHANNEL(channel)) {
-        DEBUG_LOG("new usbredir channel");
+        g_debug("new usbredir channel");
         self->priv->usbredir_channel_count++;
         if (spice_usb_device_manager_get(self->priv->session, NULL))
             virt_viewer_session_set_has_usbredir(session, TRUE);
@@ -728,7 +812,7 @@ virt_viewer_session_spice_fullscreen_auto_conf(VirtViewerSessionSpice *self)
     GdkScreen *screen = gdk_screen_get_default();
     SpiceMainChannel* cmain = virt_viewer_session_spice_get_main_channel(self);
     VirtViewerApp *app = NULL;
-    GdkRectangle dest;
+    GdkRectangle *displays;
     gboolean agent_connected;
     gint i;
     gsize ndisplays = 0;
@@ -736,7 +820,7 @@ virt_viewer_session_spice_fullscreen_auto_conf(VirtViewerSessionSpice *self)
     /* only do auto-conf once at startup. Avoid repeating auto-conf later due to
      * agent disconnection/re-connection, etc */
     if (self->priv->did_auto_conf) {
-        DEBUG_LOG("Already did auto-conf, skipping");
+        g_debug("Already did auto-conf, skipping");
         return FALSE;
     }
 
@@ -744,33 +828,47 @@ virt_viewer_session_spice_fullscreen_auto_conf(VirtViewerSessionSpice *self)
     g_return_val_if_fail(VIRT_VIEWER_IS_APP(app), TRUE);
 
     if (!virt_viewer_app_get_fullscreen(app)) {
-        DEBUG_LOG("app is not in full screen");
+        g_debug("app is not in full screen");
         return FALSE;
     }
     if (cmain == NULL) {
-        DEBUG_LOG("no main channel yet");
+        g_debug("no main channel yet");
         return FALSE;
     }
     g_object_get(cmain, "agent-connected", &agent_connected, NULL);
     if (!agent_connected) {
-        DEBUG_LOG("Agent not connected, skipping autoconf");
-        g_signal_connect(cmain, "notify::agent-connected", G_CALLBACK(property_notify_do_auto_conf), self);
+        g_debug("Agent not connected, skipping autoconf");
+        virt_viewer_signal_connect_object(cmain, "notify::agent-connected",
+                                          G_CALLBACK(property_notify_do_auto_conf), self, 0);
         return FALSE;
     }
 
     spice_main_set_display_enabled(cmain, -1, FALSE);
 
     ndisplays = virt_viewer_app_get_n_initial_displays(app);
-    DEBUG_LOG("Performing full screen auto-conf, %zd host monitors", ndisplays);
+    g_debug("Performing full screen auto-conf, %" G_GSIZE_FORMAT " host monitors", ndisplays);
+    displays = g_new0(GdkRectangle, ndisplays);
 
     for (i = 0; i < ndisplays; i++) {
+        GdkRectangle* rect = &displays[i];
         gint j = virt_viewer_app_get_initial_monitor_for_display(app, i);
-        gdk_screen_get_monitor_geometry(screen, j, &dest);
-        DEBUG_LOG("Set SPICE display %d to (%d,%d)-(%dx%d)",
-                  i, dest.x, dest.y, dest.width, dest.height);
-        spice_main_set_display(cmain, i, dest.x, dest.y, dest.width, dest.height);
-        spice_main_set_display_enabled(cmain, i, TRUE);
+        if (j == -1)
+            continue;
+
+        gdk_screen_get_monitor_geometry(screen, j, rect);
     }
+
+    virt_viewer_shift_monitors_to_origin(displays, ndisplays);
+
+    for (i = 0; i < ndisplays; i++) {
+        GdkRectangle *rect = &displays[i];
+
+        spice_main_set_display(cmain, i, rect->x, rect->y, rect->width, rect->height);
+        spice_main_set_display_enabled(cmain, i, TRUE);
+        g_debug("Set SPICE display %d to (%d,%d)-(%dx%d)",
+                  i, rect->x, rect->y, rect->width, rect->height);
+    }
+    g_free(displays);
 
     spice_main_send_monitor_config(cmain);
     self->priv->did_auto_conf = TRUE;
@@ -788,26 +886,26 @@ virt_viewer_session_spice_channel_destroy(G_GNUC_UNUSED SpiceSession *s,
     g_return_if_fail(self != NULL);
 
     g_object_get(channel, "channel-id", &id, NULL);
-    DEBUG_LOG("Destroy SPICE channel %s %d", g_type_name(G_OBJECT_TYPE(channel)), id);
+    g_debug("Destroy SPICE channel %s %d", g_type_name(G_OBJECT_TYPE(channel)), id);
 
     if (SPICE_IS_MAIN_CHANNEL(channel)) {
-        DEBUG_LOG("zap main channel");
+        g_debug("zap main channel");
         if (channel == SPICE_CHANNEL(self->priv->main_channel))
             self->priv->main_channel = NULL;
     }
 
     if (SPICE_IS_DISPLAY_CHANNEL(channel)) {
-        DEBUG_LOG("zap display channel (#%d)", id);
+        g_debug("zap display channel (#%d)", id);
         g_object_set_data(G_OBJECT(channel), "virt-viewer-displays", NULL);
     }
 
     if (SPICE_IS_PLAYBACK_CHANNEL(channel) && self->priv->audio) {
-        DEBUG_LOG("zap audio channel");
+        g_debug("zap audio channel");
         self->priv->audio = NULL;
     }
 
     if (SPICE_IS_USBREDIR_CHANNEL(channel)) {
-        DEBUG_LOG("zap usbredir channel");
+        g_debug("zap usbredir channel");
         self->priv->usbredir_channel_count--;
         if (self->priv->usbredir_channel_count == 0)
             virt_viewer_session_set_has_usbredir(session, FALSE);
@@ -815,7 +913,7 @@ virt_viewer_session_spice_channel_destroy(G_GNUC_UNUSED SpiceSession *s,
 
     self->priv->channel_count--;
     if (self->priv->channel_count == 0)
-        g_signal_emit_by_name(self, "session-disconnected");
+        g_signal_emit_by_name(self, "session-disconnected", NULL);
 }
 
 #define UUID_LEN 16
@@ -840,13 +938,27 @@ uuid_changed(GObject *gobject G_GNUC_UNUSED,
         }
 
         if (!uuid_empty) {
-            gchar* uuid_str = spice_uuid_to_string(uuid);
-            virt_viewer_app_set_uuid_string(app, uuid_str);
+            gchar *uuid_str = spice_uuid_to_string(uuid);
+            g_object_set(app, "uuid", uuid_str, NULL);
             g_free(uuid_str);
         }
     }
 
     virt_viewer_session_spice_fullscreen_auto_conf(self);
+}
+
+static void
+name_changed(GObject *gobject G_GNUC_UNUSED,
+              GParamSpec *pspec G_GNUC_UNUSED,
+              VirtViewerSessionSpice *self)
+{
+    gchar *name = NULL;
+    VirtViewerApp *app = virt_viewer_session_get_app(VIRT_VIEWER_SESSION(self));
+
+    g_object_get(self->priv->session, "name", &name, NULL);
+
+    g_object_set(app, "guest-name", name, NULL);
+    g_free(name);
 }
 
 VirtViewerSession *
@@ -859,11 +971,15 @@ virt_viewer_session_spice_new(VirtViewerApp *app, GtkWindow *main_window)
     create_spice_session(self);
     self->priv->main_window = g_object_ref(main_window);
 
-    g_signal_connect(app, "notify::fullscreen", G_CALLBACK(property_notify_do_auto_conf), self);
+    virt_viewer_signal_connect_object(app, "notify::fullscreen",
+                                      G_CALLBACK(property_notify_do_auto_conf), self, 0);
 
     /* notify::uuid is guaranteed to be emitted during connection startup even
      * if the server is too old to support sending uuid */
-    g_signal_connect(self->priv->session, "notify::uuid", G_CALLBACK(uuid_changed), self);
+    virt_viewer_signal_connect_object(self->priv->session, "notify::uuid",
+                                      G_CALLBACK(uuid_changed), self, 0);
+    virt_viewer_signal_connect_object(self->priv->session, "notify::name",
+                                      G_CALLBACK(name_changed), self, 0);
 
     return VIRT_VIEWER_SESSION(self);
 }

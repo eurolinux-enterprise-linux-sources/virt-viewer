@@ -78,7 +78,7 @@ struct _VirtViewerSessionClass {
     /* signals */
     void (*session_connected)(VirtViewerSession *session);
     void (*session_initialized)(VirtViewerSession *session);
-    void (*session_disconnected)(VirtViewerSession *session);
+    void (*session_disconnected)(VirtViewerSession *session, const gchar *msg);
     void (*session_auth_refused)(VirtViewerSession *session, const gchar *msg);
     void (*session_auth_failed)(VirtViewerSession *session, const gchar *msg);
     void (*session_usb_failed)(VirtViewerSession *session, const gchar *msg);
@@ -107,6 +107,7 @@ void virt_viewer_session_add_display(VirtViewerSession *session,
 void virt_viewer_session_remove_display(VirtViewerSession *session,
                                         VirtViewerDisplay *display);
 void virt_viewer_session_clear_displays(VirtViewerSession *session);
+void virt_viewer_session_update_displays_geometry(VirtViewerSession *session);
 
 void virt_viewer_session_close(VirtViewerSession* session);
 gboolean virt_viewer_session_open_fd(VirtViewerSession* session, int fd);

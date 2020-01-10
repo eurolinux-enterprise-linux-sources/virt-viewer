@@ -1,5 +1,5 @@
+ach
 af
-af_ZA
 aln
 am
 ar
@@ -16,7 +16,6 @@ br
 brx
 bs
 ca
-cs_CZ
 cs
 cy
 da
@@ -27,12 +26,9 @@ el
 en_GB
 en_US
 eo
-es_ES
 es
 et
-eu_ES
 eu
-fa_IR
 fa
 fi
 fr
@@ -41,7 +37,6 @@ gl
 gu
 he
 hi
-hr_HR
 hr
 hu
 hy
@@ -49,9 +44,7 @@ ia
 id
 ilo
 is
-it_IT
 it
-ja_JP
 ja
 ka
 kk
@@ -71,7 +64,6 @@ mk
 ml
 mn
 mr
-ms_MY
 ms
 my
 nb
@@ -96,7 +88,6 @@ sq
 sr@latin
 sr
 sv
-ta_IN
 ta
 te
 tg
@@ -104,12 +95,14 @@ th
 tl
 tr
 uk
-uk_UA
 ur
+uz
 vi
 wo
 xh
+zh_CN.GB2312
 zh_CN
 zh_HK
+zh_TW.Big5
 zh_TW
 zu

@@ -1,0 +1,24 @@
+From d86c76cfe28497af05887fa45d4963ee834eb476 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabiano=20Fid=C3=AAncio?= <fidencio@redhat.com>
+Date: Tue, 10 Mar 2015 13:31:50 +0100
+Subject: [PATCH] foreign-menu: Fix build with GLib older than 2.32
+
+G_SOURCE_REMOVE was introduced in GLib 2.32 and it is just a
+\#define G_SOURCE_REMOVE  FALSE.
+---
+ src/ovirt-foreign-menu.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/ovirt-foreign-menu.c b/src/ovirt-foreign-menu.c
+index 0de13e5..7d53a0c 100644
+--- a/src/ovirt-foreign-menu.c
++++ b/src/ovirt-foreign-menu.c
+@@ -815,7 +815,7 @@ static gboolean ovirt_foreign_menu_refresh_iso_list(gpointer user_data)
+      * that function through iso_list_fetched_cb() when it has finished
+      * fetching the iso list
+      */
+-    return G_SOURCE_REMOVE;
++    return FALSE;
+ }
+ 
+ 

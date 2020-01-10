@@ -1,11 +1,11 @@
 
-AC_INIT([virt-viewer],[0.6.0])
+AC_INIT([virt-viewer],[2.0])
 AC_CONFIG_SRCDIR(src/virt-viewer-main.c)
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([config.h])
 dnl Make automake keep quiet about wildcards & other GNUmake-isms
-AM_INIT_AUTOMAKE([-Wno-portability])
+AM_INIT_AUTOMAKE([subdir-objects -Wno-portability])
 AC_CANONICAL_HOST
 
 # Use the silent-rules feature when possible.
@@ -21,7 +21,7 @@ GTK_VNC1_REQUIRED="0.3.8"
 GTK_VNC2_REQUIRED="0.4.0"
 SPICE_GTK_REQUIRED="0.22"
 SPICE_PROTOCOL_REQUIRED="0.10.1"
-GOVIRT_REQUIRED="0.3.0"
+GOVIRT_REQUIRED="0.3.2"
 
 AC_SUBST([GLIB2_REQUIRED])
 AC_SUBST([LIBXML2_REQUIRED])
@@ -117,6 +117,14 @@ AS_IF([test "x$have_libvirt" = "xyes"],
 ])
 AM_CONDITIONAL([HAVE_LIBVIRT], [test "x$have_libvirt" = "xyes"])
 
+old_LIBS=$LIBS
+LIBS=$LIBVIRT_LIBS
+# virDomainOpenGraphicsFD was introduced in libvirt 1.2.8
+AC_CHECK_LIB([virt],
+             [virDomainOpenGraphicsFD],
+             [AC_DEFINE([HAVE_VIR_DOMAIN_OPEN_GRAPHICS_FD], 1, [Have virDomainOpenGraphicsFD?])])
+LIBS=$old_LIBS
+
 AC_MSG_CHECKING([which gtk+ version to compile against])
 AC_ARG_WITH([gtk],
   [AS_HELP_STRING([--with-gtk=2.0|3.0],[which gtk+ version to compile against (default: 3.0)])],
@@ -200,6 +208,7 @@ AS_IF([test "x$have_ovirt" = "xyes"],
              [AC_MSG_ERROR([oVirt support requested but libgovirt not found])
       ])
 ])
+AM_CONDITIONAL([HAVE_OVIRT], [test "x$have_ovirt" = "xyes"])
 
 dnl Decide if this platform can support the SSH tunnel feature.
 AC_CHECK_HEADERS([sys/socket.h sys/un.h windows.h])
@@ -211,21 +220,14 @@ if test "x$have_gtk_vnc" != "xyes" && test "x$have_spice_gtk" != "xyes"; then
 fi
 
 AC_ARG_WITH([buildid],
-    AS_HELP_STRING([--with-buildid=id], [Set additional build version details]))
-AC_DEFINE_UNQUOTED([BUILDID], "$with_buildid", [Build version details])
-if test "x$with_buildid" != x; then
-    AC_SUBST([BUILDID], "-$with_buildid")
-fi
+    AS_HELP_STRING([--with-buildid=id], [Set additional build version details]),
+    [buildid="$with_buildid"], [buildid="0"])
+AC_DEFINE_UNQUOTED([BUILDID], "$buildid", [Build version details])
+AC_SUBST([BUILDID], "$buildid")
 
 major=`echo $PACKAGE_VERSION | cut -d. -f1`
 minor=`echo $PACKAGE_VERSION | cut -d. -f2`
-micro=`echo $PACKAGE_VERSION | cut -d. -f3`
-buildid=`echo $with_buildid | cut -d. -f1`
-if test "x$buildid" = x; then
-   buildid=0
-fi
-build=`expr $micro \* 256 + $buildid`
-WINDOWS_PRODUCTVERSION="$major.$minor.$build"
+WINDOWS_PRODUCTVERSION="$major.$minor.$buildid"
 AC_SUBST([WINDOWS_PRODUCTVERSION])
 
 
@@ -241,6 +243,7 @@ AM_CONDITIONAL(ENABLE_UPDATE_MIMEDB, test x$enable_update_mimedb = xyes)
 AC_CONFIG_FILES([
     Makefile
     data/Makefile
+    data/adwaita-icons-needed.wxi
     data/virt-viewer.wxs
     data/virt-viewer.nsis
     data/virt-viewer-debug.nsis

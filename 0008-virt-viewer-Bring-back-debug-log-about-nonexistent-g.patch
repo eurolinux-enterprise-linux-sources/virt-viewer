@@ -1,0 +1,29 @@
+From 9fcf15629f6ea9178b6b473e10a21da5f334bbe3 Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Thu, 19 Mar 2015 11:39:42 +0100
+Subject: [PATCH] virt-viewer: Bring back debug log about nonexistent guest
+
+Although commit 88f6341 allowed to use virt-viewer with a wrong guest name,
+the user is informed about the nonexistent guest only by a dialog showing
+the list of running machines or informing about the connection error.
+
+Resolves https://bugzilla.redhat.com/show_bug.cgi?id=1201177
+
+(cherry picked from commit aec2248cf86cacfc8950f48ccf0fc8fcaa261908)
+---
+ src/virt-viewer.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/virt-viewer.c b/src/virt-viewer.c
+index aeed5c1..d95d1eb 100644
+--- a/src/virt-viewer.c
++++ b/src/virt-viewer.c
+@@ -726,6 +726,8 @@ virt_viewer_initial_connect(VirtViewerApp *app, GError **error)
+             goto wait;
+         } else {
+             VirtViewerWindow *main_window = virt_viewer_app_get_main_window(app);
++            if (priv->domkey != NULL)
++                g_debug("Cannot find guest %s", priv->domkey);
+             dom = choose_vm(virt_viewer_window_get_window(main_window),
+                             &priv->domkey,
+                             priv->conn,

@@ -57,12 +57,6 @@ virt_viewer_notebook_set_property (GObject *object, guint property_id,
 }
 
 static void
-virt_viewer_notebook_dispose (GObject *object)
-{
-    G_OBJECT_CLASS (virt_viewer_notebook_parent_class)->dispose (object);
-}
-
-static void
 virt_viewer_notebook_class_init (VirtViewerNotebookClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
@@ -71,7 +65,6 @@ virt_viewer_notebook_class_init (VirtViewerNotebookClass *klass)
 
     object_class->get_property = virt_viewer_notebook_get_property;
     object_class->set_property = virt_viewer_notebook_set_property;
-    object_class->dispose = virt_viewer_notebook_dispose;
 }
 
 static void
@@ -98,7 +91,7 @@ virt_viewer_notebook_show_status_va(VirtViewerNotebook *self, const gchar *fmt, 
     VirtViewerNotebookPrivate *priv;
     gchar *text;
 
-    DEBUG_LOG("notebook show status %p", self);
+    g_debug("notebook show status %p", self);
     g_return_if_fail(VIRT_VIEWER_IS_NOTEBOOK(self));
 
     text = g_strdup_vprintf(fmt, args);
@@ -126,12 +119,12 @@ virt_viewer_notebook_show_display(VirtViewerNotebook *self)
 {
     GtkWidget *display;
 
-    DEBUG_LOG("notebook show display %p", self);
+    g_debug("notebook show display %p", self);
     g_return_if_fail(VIRT_VIEWER_IS_NOTEBOOK(self));
 
     display = gtk_notebook_get_nth_page(GTK_NOTEBOOK(self), 1);
     if (display == NULL)
-        DEBUG_LOG("FIXME: showing display although it's not ready yet");
+        g_debug("FIXME: showing display although it's not ready yet");
     else
         gtk_widget_grab_focus(display);
 

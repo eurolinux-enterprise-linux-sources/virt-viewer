@@ -32,9 +32,6 @@ enum {
     VIRT_VIEWER_ERROR_FAILED,
 };
 
-#define DEBUG_LOG(s, ...) do { if (doDebug) g_debug(s, ## __VA_ARGS__); } while (0)
-#define ARRAY_CARDINALITY(Array) (sizeof (Array) / sizeof *(Array))
-
 #define VIRT_VIEWER_ERROR virt_viewer_error_quark ()
 
 GQuark virt_viewer_error_quark(void);
@@ -57,6 +54,10 @@ gulong virt_viewer_signal_connect_object(gpointer instance,
 
 gchar* spice_hotkey_to_gtk_accelerator(const gchar *key);
 gint virt_viewer_compare_version(const gchar *s1, const gchar *s2);
+
+/* monitor alignment */
+void virt_viewer_align_monitors_linear(GdkRectangle *displays, guint ndisplays);
+void virt_viewer_shift_monitors_to_origin(GdkRectangle *displays, guint ndisplays);
 
 #endif
 

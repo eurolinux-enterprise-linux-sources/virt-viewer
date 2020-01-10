@@ -1,0 +1,42 @@
+From e1bc4253ad116e12dd3f4e79a0a6454bc994fcfa Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Tue, 14 Apr 2015 11:32:37 +0200
+Subject: [PATCH] virt-viewer-window: Allow any zoom level for vnc
+
+This downstream only patch solves the wrong zoom level issue for older
+gtk-vnc by allowing any zoom level change. The minimal zoom level is
+calculated when the display is ready, i.e. when it has desktop dimensions.
+However we set display as ready at the moment when it's created in order
+to fix the gtk-vnc crash (commit acf734476e66628e28a7280b00004ac587de8c49),
+so the calculated zoom level is much higher than it should be.
+
+Resolves: rhbz#1211216
+---
+ src/virt-viewer-window.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/src/virt-viewer-window.c b/src/virt-viewer-window.c
+index 6a337da..b3e6d7e 100644
+--- a/src/virt-viewer-window.c
++++ b/src/virt-viewer-window.c
+@@ -43,6 +43,9 @@
+ #include "virt-viewer-app.h"
+ #include "virt-viewer-util.h"
+ #include "view/autoDrawer.h"
++#ifdef HAVE_GTK_VNC
++#include "virt-viewer-display-vnc.h"
++#endif
+ 
+ /* Signal handlers for main window (move in a VirtViewerMainWindow?) */
+ void virt_viewer_window_menu_view_zoom_out(GtkWidget *menu, VirtViewerWindow *self);
+@@ -1516,6 +1519,10 @@ virt_viewer_window_get_minimal_zoom_level(VirtViewerWindow *self)
+ 
+     g_return_val_if_fail(VIRT_VIEWER_IS_WINDOW(self) &&
+                          self->priv->display != NULL, MIN_ZOOM_LEVEL);
++#ifdef HAVE_GTK_VNC
++    if (VIRT_VIEWER_IS_DISPLAY_VNC(self->priv->display))
++        return MIN_ZOOM_LEVEL;
++#endif
+ 
+     virt_viewer_window_get_minimal_dimensions(self, &min_width, &min_height);
+     virt_viewer_display_get_desktop_size(virt_viewer_window_get_display(self), &width, &height);

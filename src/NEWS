@@ -1,6 +1,71 @@
   Virt Viewer News
   ================
 
+2.0: Jan 12, 2015
+-----------------
+
+  - Fix handling of zoom in/out accelerators
+  - Fix warning going in/out of fullscreen
+  - Add dialog showing info about the current guest
+  - Change format of fullscreen config setting to
+    allow for sparse guest displays
+  - Write VM name to config file as a comment
+  - Never use fallback CA certs when loading vv-file
+  - Remove extraneous '/' from oVirt URIs
+  - Support oVirt foreign menus
+  - Allow using numapad for zoom in/out accelerators
+  - Force geometry update when agent connects
+  - Fix misc crash bugs
+  - Fix misc memory leaks
+  - Allow viewing of password entry characters
+  - Don't fail when auth dialog is cancelled
+  - Only create extra windows on demand
+  - Use more sensible default window size
+  - Improve docs for URIs and config files
+  - Allow cancellation of SPICE auth dialog
+  - Use new libvirt API for --attach to avoid SELinux AVC
+  - Allow removable of CD images with oVirt connections
+  - Show VM choose dialog when oVirt VM name is missing
+  - Support usernames request with SASL auth
+  - Use socat instead of nc if available
+  - Use PNG instead of SVG for icons
+  - Support connection to UNIX sockets instead of TCP
+  - Honour zoom level from CLI args with VNC
+  - Switch to GTK3 instead of GKT2 for Windows builds
+  - Ensure dialogs have transient parent set
+  - Switch to gstreamer 1.0 instead of 0.10 for Windows builds
+  - Avoid accidentally connecting to localhost with VNC/SPICE
+  - Use a versioned install directory for Windows builds
+
+1.0: Jul 21, 2014
+-----------------
+
+  - Switched to 2-digit version numbering.
+  - Improve error reporting when failing to find
+    the GtkBuilder UI files
+  - Honour title provided by SPICE server if available
+  - Don't hide main window when disconnecting in multi-monitor
+    configurations
+  - Don't show VNC widget until authentication has completed
+  - Fix session handling when re-authenticating
+  - Improve docs for --attach flag
+  - Ask for credentials for SPICE proxy
+  - Fix scaling of windows when resizing
+  - Remove 'Automatically resize' menu, leaving the behaviour
+    permanently enabled
+  - Improve USB icon in full screen toolbar
+  - Don't resize guest when changing zoom level
+  - Don't create windows at startup if kiosk mode isn't enabled
+  - Don't show quit confirmation dialog in kiosk mode
+  - Misc typos / fixes in man pages
+  - Fix race with metacity window manager in fullscreen mode
+  - Avoid accidentally connecting to localhost with --direct flag
+  - Use custom log handler to silence debug messages on old glib2
+  - Fix tiny windows for secondary displays with gtk2 build
+  - Take zoom into account when checkign display limits
+  - Fix unshrinkable displays with windows guests
+  - Allow  ctrl-[+-] to zoom in fullscreen mode
+
 0.6.0: Jan 24, 2014
 -------------------
 

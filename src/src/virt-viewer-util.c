@@ -58,7 +58,12 @@ GtkBuilder *virt_viewer_util_load_ui(const char *name)
         gtk_builder_add_from_file(builder, name, &error);
     } else {
         gchar *path = g_build_filename(PACKAGE_DATADIR, "ui", name, NULL);
-        gboolean success = (gtk_builder_add_from_file(builder, path, NULL) != 0);
+        gboolean success = (gtk_builder_add_from_file(builder, path, &error) != 0);
+        if (error) {
+            if (!(error->domain == G_FILE_ERROR && error->code == G_FILE_ERROR_NOENT))
+                g_warning("Failed to add ui file '%s': %s", path, error->message);
+            g_clear_error(&error);
+        }
         g_free(path);
 
         if (!success) {
@@ -112,7 +117,7 @@ virt_viewer_util_extract_host(const char *uristr,
     g_return_val_if_fail(uri != NULL, 1);
 
     if (host) {
-        if (!uri || !uri->server) {
+        if (!uri->server) {
             *host = g_strdup("localhost");
         } else {
             if (uri->server[0] == '[') {
@@ -273,6 +278,18 @@ gulong virt_viewer_signal_connect_object(gpointer instance,
     return ctx->handler_id;
 }
 
+static void log_handler(const gchar *log_domain,
+                        GLogLevelFlags log_level,
+                        const gchar *message,
+                        gpointer unused_data)
+{
+    if (glib_check_version(2, 32, 0) != NULL)
+        if (log_level >= G_LOG_LEVEL_DEBUG && !doDebug)
+            return;
+
+    g_log_default_handler(log_domain, log_level, message, unused_data);
+}
+
 void virt_viewer_util_init(const char *appname)
 {
 #ifdef G_OS_WIN32
@@ -305,6 +322,8 @@ void virt_viewer_util_init(const char *appname)
     textdomain(GETTEXT_PACKAGE);
 
     g_set_application_name(appname);
+
+    g_log_set_handler(G_LOG_DOMAIN, G_LOG_LEVEL_MASK, log_handler, NULL);
 }
 
 static gchar *
@@ -469,6 +488,98 @@ end:
     g_strfreev(v2);
     return retval;
 }
+
+/* simple sorting of monitors. Primary sort left-to-right, secondary sort from
+ * top-to-bottom, finally by monitor id */
+static int
+displays_cmp(const void *p1, const void *p2, gpointer user_data)
+{
+    guint diff;
+    GdkRectangle *displays = user_data;
+    guint i = *(guint*)p1;
+    guint j = *(guint*)p2;
+    GdkRectangle *m1 = &displays[i];
+    GdkRectangle *m2 = &displays[j];
+    diff = m1->x - m2->x;
+    if (diff == 0)
+        diff = m1->y - m2->y;
+    if (diff == 0)
+        diff = i - j;
+
+    return diff;
+}
+
+void
+virt_viewer_align_monitors_linear(GdkRectangle *displays, guint ndisplays)
+{
+    gint i, x = 0;
+    guint *sorted_displays;
+
+    g_return_if_fail(displays != NULL);
+
+    if (ndisplays == 0)
+        return;
+
+    sorted_displays = g_new0(guint, ndisplays);
+    for (i = 0; i < ndisplays; i++)
+        sorted_displays[i] = i;
+    g_qsort_with_data(sorted_displays, ndisplays, sizeof(guint), displays_cmp, displays);
+
+    /* adjust monitor positions so that there's no gaps or overlap between
+     * monitors */
+    for (i = 0; i < ndisplays; i++) {
+        guint nth = sorted_displays[i];
+        g_assert(nth < ndisplays);
+        GdkRectangle *rect = &displays[nth];
+        rect->x = x;
+        rect->y = 0;
+        x += rect->width;
+    }
+    g_free(sorted_displays);
+}
+
+/* Shift all displays so that the monitor origin is at (0,0). This reduces the
+ * size of the screen that will be required on the guest when all client
+ * monitors are fullscreen but do not begin at the origin. For example, instead
+ * of sending down the following configuration:
+ *   1280x1024+4240+0
+ * (which implies that the guest screen must be at least 5520x1024), we'd send
+ *   1280x1024+0+0
+ * (which implies the guest screen only needs to be 1280x1024). The first
+ * version might fail if the guest video memory is not large enough to handle a
+ * screen of that size.
+ */
+void
+virt_viewer_shift_monitors_to_origin(GdkRectangle *displays, guint ndisplays)
+{
+    gint xmin = G_MAXINT;
+    gint ymin = G_MAXINT;
+    gint i;
+
+    g_return_if_fail(ndisplays > 0);
+
+    for (i = 0; i < ndisplays; i++) {
+        GdkRectangle *display = &displays[i];
+        if (display->width > 0 && display->height > 0) {
+            xmin = MIN(xmin, display->x);
+            ymin = MIN(ymin, display->y);
+        }
+    }
+    g_return_if_fail(xmin < G_MAXINT && ymin < G_MAXINT);
+
+    if (xmin > 0 || ymin > 0) {
+        g_debug("%s: Shifting all monitors by (%i, %i)", G_STRFUNC, xmin, ymin);
+        for (i = 0; i < ndisplays; i++) {
+            GdkRectangle *display = &displays[i];
+            if (display->width > 0 && display->height > 0) {
+                display->x -= xmin;
+                display->y -= ymin;
+            }
+        }
+    }
+}
+
+
 /*
  * Local variables:
  *  c-indent-level: 4

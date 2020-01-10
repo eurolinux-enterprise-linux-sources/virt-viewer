@@ -6,17 +6,18 @@
 %{!?enable_autotools:%define enable_autotools 1}
 
 %define with_gtk3 0
-%if 0%{?fedora} >= 15
+%if 0%{?fedora} >= 15 || 0%{?rhel} >= 7
 %define with_gtk3 1
 %endif
 
 %define with_spice 0
-%if 0%{?fedora} >= 16
+%if 0%{?fedora} >= 17 || 0%{?rhel} >= 6
 %define with_spice 1
 %endif
 
-%if 0%{?rhel} >= 6
-%define with_spice 1
+%define with_govirt 0
+%if 0%{?fedora} >= 19 || 0%{?rhel} >= 6
+%define with_govirt 1
 %endif
 
 # spice-gtk is x86 x86_64 only currently:
@@ -25,47 +26,44 @@
 %endif
 
 Name: virt-viewer
-Version: 0.6.0
-Release: 11%{?dist}%{?extra_release}
+Version: 2.0
+Release: 7%{?dist}%{?extra_release}
 Summary: Virtual Machine Viewer
 Group: Applications/System
 License: GPLv2+
 URL: http://virt-manager.org/
 Source0: http://virt-manager.org/download/sources/%{name}/%{name}-%{version}.tar.gz
-Patch1: 0001-Fix-race-with-metacity-in-fullscreen.patch
-Patch2: 0002-Fix-scaling-of-window-upon-resize.patch
-Patch3: 0003-Silence-a-message-about-missing-configuration-file.patch
-Patch4: 0004-Remove-Automatically-resize-menu.patch
-Patch5: 0005-Use-a-USB-icon-in-the-fullscreen-toolbar.patch
-Patch6: 0006-build-sys-Always-prepend-to-build-id.patch
-Patch7: 0007-Update-user-visible-copyright-information.patch
-Patch8: 0008-man-Add-missing-.-at-end-of-one-sentence.patch
-Patch9: 0009-man-Fix-link-to-GPLv2-text.patch
-Patch10: 0010-man-Fix-concatonated-typo.patch
-Patch11: 0011-man-Use-nicer-link-to-GPLv2.patch
-Patch12: 0012-man-remove-Perl-header.patch
-Patch13: 0013-Don-t-show-do-you-want-to-quit-dialog-in-kiosk-mode.patch
-#Patch14: 0014-set-auto-conf-when-fullscreen-is-set-in-vv-file.patch
-#Patch15: 0015-Propagate-SEND_CAD-from-controller-to-SpiceSession.patch
-Patch16: 0016-Set-freed-variables-to-NULL-in-remote_viewer_start.patch
-Patch17: 0017-Don-t-resize-guest-display-on-zoom-change.patch
-Patch18: 0018-Fix-regression-with-enabling-additional-displays.patch
-Patch19: 0019-Fix-gtk2-build.patch
-Patch20: 0020-rhbz-1007306-Don-t-free-session-if-we-re-re-trying-a.patch
-Patch21: 0021-Fix-broken-release-cursor-accel-when-not-specified-i.patch
-Patch22: 0022-Fix-tiny-windows-for-secondary-displays-in-gtk2-buil.patch
-Patch23: 0023-Fix-tiny-window-when-resetting-zoom-factor-in-gtk2-b.patch
-Patch24: 0024-window-take-zoom-level-into-account-for-display-limi.patch
-Patch25: 0025-Remove-warning-when-removing-display.patch
-Patch26: 0026-Replace-DEBUG_LOG-with-g_debug.patch
-Patch27: 0027-kiosk-don-t-attempt-to-hide-windows-when-disconnecti.patch
-Patch28: 0028-Use-a-custom-log-handler-to-silence-debug-messages.patch
-Patch29: 0029-kiosk-remove-invalid-unref.patch
-Patch30: 0030-Fix-a-floating-display-warning.patch
-Patch31: 0031-man-fix-zoom-level-range.patch
-Patch32: 0032-rhbz-1111514-Fix-un-shrinkable-displays-on-windows-g.patch
-Patch33: 0033-Only-filter-virt-viewer-debug-messages.patch
-Patch34: 0034-Always-set-ask-quit-setting.patch
+Patch1: 0001-foreign-menu-Fix-build-with-GLib-older-than-2.32.patch
+Patch2: 0002-Fix-crash-when-trying-to-connect-to-VNC-display.patch
+Patch3: 0003-Take-direct-into-consideration-when-checking-if-a-gu.patch
+Patch4: 0004-Update-geometry-when-enabling-disabling-displays.patch
+Patch5: 0005-VirtViewerApp-create-main-window-after-constructor.patch
+Patch6: 0006-Use-constructed-vfunc-instead-of-constructor.patch
+Patch7: 0007-Monitor-config-at-sometimes-leaves-additional-monito.patch
+Patch8: 0008-virt-viewer-Bring-back-debug-log-about-nonexistent-g.patch
+Patch9: 0009-foreign-menu-Don-t-show-empty-foreign-menu-on-second.patch
+Patch10: 0010-Do-not-add-https-and-api-to-oVirt-URI.patch
+Patch11: 0011-Revert-display-vnc-fix-zoom-level-set-by-command-lin.patch
+Patch12: 0012-virt-viewer-Add-a-GError-arg-to-extract_connect_info.patch
+Patch13: 0013-virt-viewer-Add-a-GError-arg-to-update_display.patch
+Patch14: 0014-virt-viewer-app-Add-a-GError-arg-to-create_session.patch
+Patch15: 0015-virt-viewer-app-create_session-should-return-a-boole.patch
+Patch16: 0016-virt-viewer-Avoid-simple_message_dialog-when-errors-.patch
+Patch17: 0017-remote-viewer-Avoid-simple_message_dialog-when-error.patch
+Patch18: 0018-virt-viewer-Do-not-wait-for-a-guest-that-will-never-.patch
+Patch19: 0019-virt-viewer-app-Do-not-show-error-dialog-twice-for-u.patch
+Patch20: 0020-Use-ZOOM-constants-instead-of-numbers.patch
+Patch21: 0021-virt-viewer-display-Use-MIN_DISPLAY_WIDTH-HEIGHT-ins.patch
+Patch22: 0022-virt-viewer-window-Change-zoom-of-the-display-only-w.patch
+Patch23: 0023-virt-viewer-window-Set-zoom-when-display-is-enabled-.patch
+Patch24: 0024-virt-viewer-window-Return-early-when-zoom-of-window-.patch
+Patch25: 0025-display-spice-Do-not-ignore-change-of-position.patch
+Patch26: 0026-virt-viewer-main-Require-domain-name-as-argument-for.patch
+Patch27: 0027-virt-viewer-app-Set-hotkeys-when-app-is-constructed.patch
+Patch28: 0028-Revert-virt-viewer-main-Require-domain-name-as-argum.patch
+Patch29: 0029-virt-viewer-main-wait-should-not-be-used-without-dom.patch
+Patch30: 0030-virt-viewer-window-Allow-any-zoom-level-for-vnc.patch
+Patch31: 0031-virt-viewer-window-Make-sure-that-minimum-zoom-level.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: openssh-clients
@@ -105,6 +103,9 @@ BuildRequires: spice-protocol >= 0.10.1
 BuildRequires: /usr/bin/pod2man
 BuildRequires: intltool
 Requires: glib2 >= 2.26
+%if %{with_govirt}
+BuildRequires: libgovirt-devel >= 0.3.2
+%endif
 
 %description
 Virtual Machine Viewer provides a graphical console client for connecting
@@ -126,8 +127,8 @@ the display, and libvirt for looking up VNC/SPICE server details.
 %patch11 -p1
 %patch12 -p1
 %patch13 -p1
-#%patch14 -p1
-#%patch15 -p1
+%patch14 -p1
+%patch15 -p1
 %patch16 -p1
 %patch17 -p1
 %patch18 -p1
@@ -144,9 +145,6 @@ the display, and libvirt for looking up VNC/SPICE server details.
 %patch29 -p1
 %patch30 -p1
 %patch31 -p1
-%patch32 -p1
-%patch33 -p1
-%patch34 -p1
 
 %build
 
@@ -166,7 +164,11 @@ autoreconf -if
 %define gtk_arg --with-gtk=2.0
 %endif
 
-%configure %{spice_arg} %{gtk_arg} --disable-update-mimedb
+%if %{with_govirt}
+%define govirt_arg --with-ovirt
+%endif
+
+%configure %{spice_arg} %{gtk_arg} %{govirt_arg} --disable-update-mimedb
 %__make %{?_smp_mflags}
 
 
@@ -210,6 +212,8 @@ update-desktop-database -q %{_datadir}/applications
 %{_datadir}/%{name}/ui/virt-viewer.xml
 %{_datadir}/%{name}/ui/virt-viewer-auth.xml
 %{_datadir}/%{name}/ui/virt-viewer-about.xml
+%{_datadir}/%{name}/ui/virt-viewer-guest-details.xml
+%{_datadir}/%{name}/ui/virt-viewer-vm-connection.xml
 %{_datadir}/icons/hicolor/*/apps/*
 %{_datadir}/icons/hicolor/*/devices/*
 %ghost %{_libexecdir}/spice-xpi-client
@@ -220,6 +224,58 @@ update-desktop-database -q %{_datadir}/applications
 %{_datadir}/mime/packages/virt-viewer-mime.xml
 
 %changelog
+* Tue May 12 2015 Fabiano Fidêncio <fidencio@redhat.com> - 2.0-7
+- Allow any zoom level for VNC connections
+  Resolves: rhbz#1211216
+- Make sure that minimum zoom level is lower than NORMAL_ZOOM_LEVEL
+  Related: rhbz#1206460
+
+* Tue Apr 14 2015 Fabiano Fidêncio <fidencio@redhat.com> - 2.0-6
+- Fix command-line API breakage
+  Related: rhbz#1209398
+
+* Fri Apr 10 2015 Fabiano Fidêncio <fidencio@redhat.com> - 2.0-5
+- Clean up on connection's errors treatment
+  Related: rhbz#1085216
+- Zooming out changes display resolution of spice guest
+  Resolves: rhbz#1206460
+- Virtual desktops, mouse actions goes to wrong display
+  Resolves: rhbz#1206216
+- virt-viewer --wait option should require a domain name
+  Resolves: rhbz#1209398
+- virt-viewer set hotkeys for release-cursor doesn't work
+  Resolves: rhbz#1206106
+
+* Tue Mar 24 2015 Fabiano Fidêncio <fidencio@redhat.com> - 2.0-4
+- Take --direct into consideration when checking if a guest is reachable
+  Resolves: rhbz#1085216
+- Update geometry when enabling/disabling displays
+  Resolves: rhbz#1111425
+- Monitor config at sometimes leaves additional monitors enabled
+  Resolves: rhbz#1200750
+- Bring back debug log about nonexistent guest
+  Resolves: rhbz#1201177
+- Don't show empty foreign menu on secondary displays
+  Resolves: rhbz#1201605
+- Do not add "https://" and "/api" to oVirt URI
+  Resolves: rhbz#1201599
+- Fix tiny window when opening a vnc guest
+  Resolves: rhbz#1201679
+
+* Tue Mar 10 2015 Fabiano Fidêncio <fidencio@redhat.com> - 2.0-3
+- Fix crash when trying to connect to VNC dusplay
+  Resolves: rhbz#1196517
+
+* Fri Feb 20 2015 Jonathon Jongsma <jjongsma@redhat.com> - 2.0-2
+- enable ovirt support
+  Resolves: rhbz#975834
+
+* Tue Jan 06 2015 Jonathon Jongsma <jjongsma@redhat.com> - 2.0-1
+- Rebase to 2.0 release
+  Resolves: rhbz#1179477, rhbz#1108523, rhbz#1085216, rhbz#1129479,
+  rhbz#1085210, rhbz#1083786, rhbz#1032936, rhbz#1021841, rhbz#987549,
+  rhbz#1146998
+
 * Wed Jul 23 2014 Marc-André Lureau <marcandre.lureau@redhat.com> 0.6.0-11
 - Always set ask-quit setting
   Resolves: rhbz#1006737

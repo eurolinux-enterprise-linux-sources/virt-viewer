@@ -220,9 +220,10 @@ virt_viewer_session_class_init(VirtViewerSessionClass *class)
                  G_SIGNAL_RUN_FIRST,
                  G_STRUCT_OFFSET(VirtViewerSessionClass, session_disconnected),
                  NULL, NULL,
-                 g_cclosure_marshal_VOID__VOID,
+                 g_cclosure_marshal_VOID__STRING,
                  G_TYPE_NONE,
-                 0);
+                 1,
+                 G_TYPE_STRING);
 
     g_signal_new("session-channel-open",
                  G_OBJECT_CLASS_TYPE(object_class),
@@ -338,55 +339,6 @@ virt_viewer_session_init(VirtViewerSession *session)
     session->priv = VIRT_VIEWER_SESSION_GET_PRIVATE(session);
 }
 
-/* simple sorting of monitors. Primary sort left-to-right, secondary sort from
- * top-to-bottom, finally by monitor id */
-static int
-displays_cmp(const void *p1, const void *p2, gpointer user_data)
-{
-    guint diff;
-    GdkRectangle *displays = user_data;
-    guint i = *(guint*)p1;
-    guint j = *(guint*)p2;
-    GdkRectangle *m1 = &displays[i];
-    GdkRectangle *m2 = &displays[j];
-    diff = m1->x - m2->x;
-    if (diff == 0)
-        diff = m1->y - m2->y;
-    if (diff == 0)
-        diff = i - j;
-
-    return diff;
-}
-
-static void
-virt_viewer_session_align_monitors_linear(GdkRectangle *displays, guint ndisplays)
-{
-    gint i, x = 0;
-    guint *sorted_displays;
-
-    g_return_if_fail(displays != NULL);
-
-    if (ndisplays == 0)
-        return;
-
-    sorted_displays = g_new0(guint, ndisplays);
-    for (i = 0; i < ndisplays; i++)
-        sorted_displays[i] = i;
-    g_qsort_with_data(sorted_displays, ndisplays, sizeof(guint), displays_cmp, displays);
-
-    /* adjust monitor positions so that there's no gaps or overlap between
-     * monitors */
-    for (i = 0; i < ndisplays; i++) {
-        guint nth = sorted_displays[i];
-        g_assert(nth < ndisplays);
-        GdkRectangle *rect = &displays[nth];
-        rect->x = x;
-        rect->y = 0;
-        x += rect->width;
-    }
-    g_free(sorted_displays);
-}
-
 static void
 virt_viewer_session_on_monitor_geometry_changed(VirtViewerSession* self,
                                                 VirtViewerDisplay* display G_GNUC_UNUSED)
@@ -395,13 +347,14 @@ virt_viewer_session_on_monitor_geometry_changed(VirtViewerSession* self,
     gboolean all_fullscreen = TRUE;
     guint nmonitors = 0;
     GdkRectangle *monitors = NULL;
+    GList *l;
 
     klass = VIRT_VIEWER_SESSION_GET_CLASS(self);
     if (!klass->apply_monitor_geometry)
         return;
 
     /* find highest monitor ID so we can create the sparse array */
-    for (GList *l = self->priv->displays; l; l = l->next) {
+    for (l = self->priv->displays; l; l = l->next) {
         VirtViewerDisplay *d = VIRT_VIEWER_DISPLAY(l->data);
         guint nth = 0;
         g_object_get(d, "nth-display", &nth, NULL);
@@ -409,8 +362,11 @@ virt_viewer_session_on_monitor_geometry_changed(VirtViewerSession* self,
         nmonitors = MAX(nth + 1, nmonitors);
     }
 
+    if (nmonitors == 0)
+        return;
+
     monitors = g_new0(GdkRectangle, nmonitors);
-    for (GList *l = self->priv->displays; l; l = l->next) {
+    for (l = self->priv->displays; l; l = l->next) {
         VirtViewerDisplay *d = VIRT_VIEWER_DISPLAY(l->data);
         guint nth = 0;
         GdkRectangle *rect = NULL;
@@ -426,7 +382,9 @@ virt_viewer_session_on_monitor_geometry_changed(VirtViewerSession* self,
     }
 
     if (!all_fullscreen)
-        virt_viewer_session_align_monitors_linear(monitors, nmonitors);
+        virt_viewer_align_monitors_linear(monitors, nmonitors);
+
+    virt_viewer_shift_monitors_to_origin(monitors, nmonitors);
 
     klass->apply_monitor_geometry(self, monitors, nmonitors);
     g_free(monitors);
@@ -474,6 +432,10 @@ void virt_viewer_session_clear_displays(VirtViewerSession *session)
     session->priv->displays = NULL;
 }
 
+void virt_viewer_session_update_displays_geometry(VirtViewerSession *session)
+{
+    virt_viewer_session_on_monitor_geometry_changed(session, NULL);
+}
 
 
 void virt_viewer_session_close(VirtViewerSession *session)

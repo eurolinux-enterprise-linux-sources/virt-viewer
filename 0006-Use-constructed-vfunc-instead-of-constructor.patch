@@ -1,0 +1,56 @@
+From 9bc5cc85049ae63e740d0653ce6fc8dc79e060f4 Mon Sep 17 00:00:00 2001
+From: Jonathon Jongsma <jjongsma@redhat.com>
+Date: Thu, 19 Mar 2015 10:20:06 -0500
+Subject: [PATCH] Use 'constructed' vfunc instead of 'constructor'
+
+We don't need the added complexity of 'constructor', since we only want
+to do some final initializing after all of the properties have been set,
+etc. So just use the simpler 'constructed'.
+
+(cherry picked from commit b368761ea1ed461e175af175ba4d5b268debc9a8)
+---
+ src/virt-viewer-app.c | 16 ++++------------
+ 1 file changed, 4 insertions(+), 12 deletions(-)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index 431f897..3ab9462 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -1809,16 +1809,10 @@ virt_viewer_update_smartcard_accels(VirtViewerApp *self)
+     }
+ }
+ 
+-static GObject *
+-virt_viewer_app_constructor (GType gtype,
+-                             guint n_properties,
+-                             GObjectConstructParam *properties)
++static void
++virt_viewer_app_constructed(GObject *object)
+ {
+-    GObject *obj;
+-    VirtViewerApp *self;
+-
+-    obj = G_OBJECT_CLASS (virt_viewer_app_parent_class)->constructor (gtype, n_properties, properties);
+-    self = VIRT_VIEWER_APP(obj);
++    VirtViewerApp *self = VIRT_VIEWER_APP(object);
+ 
+     self->priv->main_window = virt_viewer_app_window_new(self,
+                                                          virt_viewer_app_get_first_monitor(self));
+@@ -1838,8 +1832,6 @@ virt_viewer_app_constructor (GType gtype,
+     virt_viewer_app_set_fullscreen(self, opt_fullscreen);
+     virt_viewer_app_set_hotkeys(self, opt_hotkeys);
+     virt_viewer_app_set_kiosk(self, opt_kiosk);
+-
+-    return obj;
+ }
+ 
+ static void
+@@ -1849,7 +1841,7 @@ virt_viewer_app_class_init (VirtViewerAppClass *klass)
+ 
+     g_type_class_add_private (klass, sizeof (VirtViewerAppPrivate));
+ 
+-    object_class->constructor = virt_viewer_app_constructor;
++    object_class->constructed = virt_viewer_app_constructed;
+     object_class->get_property = virt_viewer_app_get_property;
+     object_class->set_property = virt_viewer_app_set_property;
+     object_class->dispose = virt_viewer_app_dispose;

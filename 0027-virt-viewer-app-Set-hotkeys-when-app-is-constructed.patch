@@ -1,0 +1,35 @@
+From 618827696b6f90ef606f358856d5a80946f7252f Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Sat, 28 Mar 2015 14:26:47 +0100
+Subject: [PATCH] virt-viewer-app: Set hotkeys when app is constructed
+
+virt_viewer_app_set_hotkeys() calls virt_viewer_app_set_enable_accel()
+which notify the display about "enable-accel". However the display
+begins to exist after the virt_viewer_app initialization.
+
+Resolves: https://bugzilla.redhat.com/show_bug.cgi?id=1206106
+(cherry picked from commit a66a8fbc9295a730a735378b3bb7b7e52ea7e360)
+---
+ src/virt-viewer-app.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index f6d9869..d7a8e56 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -1739,7 +1739,6 @@ virt_viewer_app_init(VirtViewerApp *self)
+     gtk_window_set_default_icon_name("virt-viewer");
+     virt_viewer_app_set_debug(opt_debug);
+     virt_viewer_app_set_fullscreen(self, opt_fullscreen);
+-    virt_viewer_app_set_hotkeys(self, opt_hotkeys);
+ 
+     self->priv->displays = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
+     self->priv->config = g_key_file_new();
+@@ -1830,6 +1829,7 @@ virt_viewer_app_constructed(GObject *object)
+     self->priv->main_notebook = GTK_WIDGET(virt_viewer_window_get_notebook(self->priv->main_window));
+ 
+     virt_viewer_app_set_kiosk(self, opt_kiosk);
++    virt_viewer_app_set_hotkeys(self, opt_hotkeys);
+     virt_viewer_window_set_zoom_level(self->priv->main_window, opt_zoom);
+ 
+     virt_viewer_set_insert_smartcard_accel(self, GDK_F8, GDK_SHIFT_MASK);

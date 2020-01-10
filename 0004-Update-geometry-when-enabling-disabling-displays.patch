@@ -1,0 +1,76 @@
+From 65165ecf016f0fba77cdcb711dbd7c4281304b0b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabiano=20Fid=C3=AAncio?= <fidencio@redhat.com>
+Date: Wed, 4 Mar 2015 23:40:37 +0100
+Subject: [PATCH] Update geometry when enabling/disabling displays
+
+_update_displays_geometry() must be called every time a display is
+enabled/disabled, avoiding gaps (when a display is disabled) or overlaps
+(when a display is enabled) between the monitors.
+
+This is what happens when we have 3 displays enabled (each one
+represented by: width x height + x position + y position) ...
+
+  Display #0       Display #1         Display #2
+ +---------+      +----------+       +---------+
+ |         |      |          |       |         |
+ |         |      |          |       |         |
+ |         |      |          |       |         |
+ |         |      |          |       |         |
+ |         |      |          |       |         |
+ |         |      |          |       |         |
+ +---------+      +----------+       +---------+
+(680x804+0+0)   (504x804+680+0)    (408x804+1184+0)
+
+Whether the Display #1 is disable, a message will be sent down to the
+vdagent, representing the new arrangement of the monitors:
+
+  Display #0     Display #2
+ +---------+     +---------+
+ |         |     |         |
+ |         |     |         |
+ |         |     |         |
+ |         |     |         |
+ |         |     |         |
+ |         |     |         |
+ +---------+     +---------+
+(680x804+0+0)  (408x804+1184+0)
+
+However, taking a look on the x position, a gap can be identified as
+Display #0 starts at position (0,0) and has 680 pixels of width. But
+Display #1 only starts at position (1184, 0), leaving 504 pixels as a
+gap. The proper message, however, should represent the following
+arrangement ...
+
+  Display #0       Display #2
+ +---------+      +---------+
+ |         |      |         |
+ |         |      |         |
+ |         |      |         |
+ |         |      |         |
+ |         |      |         |
+ |         |      |         |
+ +---------+      +---------+
+(680x804+0+0)   (408x804+680+0)
+
+... avoiding then gaps and overlaps.
+
+Resolves: rhbz#1111425
+https://bugzilla.redhat.com/show_bug.cgi?id=1111425
+(cherry picked from commit 4de3379f34a693a3ec81cce4f0ed741213ba00cb)
+---
+ src/virt-viewer-app.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index 4800beb..2315167 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -2175,6 +2175,8 @@ menu_display_visible_toggled_cb(GtkCheckMenuItem *checkmenuitem,
+ 
+     gtk_check_menu_item_set_active(checkmenuitem, /* will be toggled again */ !visible);
+     reentering = FALSE;
++
++    virt_viewer_session_update_displays_geometry(virt_viewer_display_get_session(display));
+ }
+ 
+ static gint

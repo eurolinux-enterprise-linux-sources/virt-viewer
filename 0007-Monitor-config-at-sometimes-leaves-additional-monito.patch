@@ -1,0 +1,151 @@
+From 0eef8699a8796822e21e0aed1dfdbb2eaf32c93b Mon Sep 17 00:00:00 2001
+From: Jonathon Jongsma <jjongsma@redhat.com>
+Date: Thu, 19 Mar 2015 10:53:55 -0500
+Subject: [PATCH] Monitor config at sometimes leaves additional monitors
+ enabled
+
+When using the configuration file to specify which remote monitors should be
+enabled when using the --full-screen option, it sometimes left additional
+displays enabled, or didn't place the displays on the right monitor, or didn't
+fullscreen them.
+
+This was especially true when not enabling the first display on the remote
+host. For example:
+
+  monitor-mapping=2:2;3:3
+
+(note that configuration file uses 1-based indexes, rather than 0-based
+indexes, so the numbers used below will be 1 less than those above)
+
+Previously, when performing fullscreen auto-conf, we were configuring displays
+starting at #0 and ending at ndisplays. So for the previous configuration, we
+looped from i = 0 to i < 2 (i.e. display #0 and #1) even though we should have
+configured display #1 and #2. After this fix, we configure the exact displays
+that were specified in the monitor-mapping configuration.
+
+Resolves: rhbz#1200750
+(cherry picked from commit c586dc8c2bf84c2eda4db8759907e954dfb6ad6a)
+---
+ src/virt-viewer-app.c           | 26 ++++++++++++++++----------
+ src/virt-viewer-app.h           |  2 +-
+ src/virt-viewer-session-spice.c | 13 ++++++++-----
+ 3 files changed, 25 insertions(+), 16 deletions(-)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index 3ab9462..a2328d7 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -300,12 +300,19 @@ virt_viewer_app_quit(VirtViewerApp *self)
+     gtk_main_quit();
+ }
+ 
+-gint virt_viewer_app_get_n_initial_displays(VirtViewerApp* self)
++GList* virt_viewer_app_get_initial_displays(VirtViewerApp* self)
+ {
+-    if (self->priv->initial_display_map)
+-        return g_hash_table_size(self->priv->initial_display_map);
++    if (!self->priv->initial_display_map) {
++        GList *l = NULL;
++        gint i;
++        gint n = gdk_screen_get_n_monitors(gdk_screen_get_default());
+ 
+-    return gdk_screen_get_n_monitors(gdk_screen_get_default());
++        for (i = 0; i < n; i++) {
++            l = g_list_append(l, GINT_TO_POINTER(i));
++        }
++        return l;
++    }
++    return g_hash_table_get_keys(self->priv->initial_display_map);
+ }
+ 
+ static gint virt_viewer_app_get_first_monitor(VirtViewerApp *self)
+@@ -1722,14 +1729,16 @@ title_maybe_changed(VirtViewerApp *self, GParamSpec* pspec G_GNUC_UNUSED, gpoint
+ }
+ 
+ static void
+-virt_viewer_app_init (VirtViewerApp *self)
++virt_viewer_app_init(VirtViewerApp *self)
+ {
+     GError *error = NULL;
++    self->priv = GET_PRIVATE(self);
+ 
+     gtk_window_set_default_icon_name("virt-viewer");
+     virt_viewer_app_set_debug(opt_debug);
++    virt_viewer_app_set_fullscreen(self, opt_fullscreen);
++    virt_viewer_app_set_hotkeys(self, opt_hotkeys);
+ 
+-    self->priv = GET_PRIVATE(self);
+     self->priv->displays = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
+     self->priv->config = g_key_file_new();
+     self->priv->config_file = g_build_filename(g_get_user_config_dir(),
+@@ -1818,6 +1827,7 @@ virt_viewer_app_constructed(GObject *object)
+                                                          virt_viewer_app_get_first_monitor(self));
+     self->priv->main_notebook = GTK_WIDGET(virt_viewer_window_get_notebook(self->priv->main_window));
+ 
++    virt_viewer_app_set_kiosk(self, opt_kiosk);
+     virt_viewer_window_set_zoom_level(self->priv->main_window, opt_zoom);
+ 
+     virt_viewer_set_insert_smartcard_accel(self, GDK_F8, GDK_SHIFT_MASK);
+@@ -1828,10 +1838,6 @@ virt_viewer_app_constructed(GObject *object)
+     gtk_accel_map_add_entry("<virt-viewer>/view/zoom-out", GDK_minus, GDK_CONTROL_MASK);
+     gtk_accel_map_add_entry("<virt-viewer>/view/zoom-in", GDK_plus, GDK_CONTROL_MASK);
+     gtk_accel_map_add_entry("<virt-viewer>/send/secure-attention", GDK_End, GDK_CONTROL_MASK | GDK_MOD1_MASK);
+-
+-    virt_viewer_app_set_fullscreen(self, opt_fullscreen);
+-    virt_viewer_app_set_hotkeys(self, opt_hotkeys);
+-    virt_viewer_app_set_kiosk(self, opt_kiosk);
+ }
+ 
+ static void
+diff --git a/src/virt-viewer-app.h b/src/virt-viewer-app.h
+index f127b32..c9b347d 100644
+--- a/src/virt-viewer-app.h
++++ b/src/virt-viewer-app.h
+@@ -97,7 +97,7 @@ VirtViewerSession* virt_viewer_app_get_session(VirtViewerApp *self);
+ gboolean virt_viewer_app_get_fullscreen(VirtViewerApp *app);
+ GOptionGroup* virt_viewer_app_get_option_group(void);
+ void virt_viewer_app_clear_hotkeys(VirtViewerApp *app);
+-gint virt_viewer_app_get_n_initial_displays(VirtViewerApp* self);
++GList* virt_viewer_app_get_initial_displays(VirtViewerApp* self);
+ gint virt_viewer_app_get_initial_monitor_for_display(VirtViewerApp* self, gint display);
+ void virt_viewer_app_set_enable_accel(VirtViewerApp *app, gboolean enable);
+ 
+diff --git a/src/virt-viewer-session-spice.c b/src/virt-viewer-session-spice.c
+index ebe78fc..85e5360 100644
+--- a/src/virt-viewer-session-spice.c
++++ b/src/virt-viewer-session-spice.c
+@@ -815,7 +815,8 @@ virt_viewer_session_spice_fullscreen_auto_conf(VirtViewerSessionSpice *self)
+     GdkRectangle *displays;
+     gboolean agent_connected;
+     gint i;
+-    gsize ndisplays = 0;
++    GList *initial_displays, *l;
++    guint ndisplays;
+ 
+     /* only do auto-conf once at startup. Avoid repeating auto-conf later due to
+      * agent disconnection/re-connection, etc */
+@@ -845,18 +846,20 @@ virt_viewer_session_spice_fullscreen_auto_conf(VirtViewerSessionSpice *self)
+ 
+     spice_main_set_display_enabled(cmain, -1, FALSE);
+ 
+-    ndisplays = virt_viewer_app_get_n_initial_displays(app);
+-    g_debug("Performing full screen auto-conf, %" G_GSIZE_FORMAT " host monitors", ndisplays);
++    initial_displays = virt_viewer_app_get_initial_displays(app);
++    ndisplays = g_list_length(initial_displays);
++    g_debug("Performing full screen auto-conf, %u host monitors", ndisplays);
+     displays = g_new0(GdkRectangle, ndisplays);
+ 
+-    for (i = 0; i < ndisplays; i++) {
++    for (i = 0, l = initial_displays; l != NULL; l = l->next, i++) {
+         GdkRectangle* rect = &displays[i];
+-        gint j = virt_viewer_app_get_initial_monitor_for_display(app, i);
++        gint j = virt_viewer_app_get_initial_monitor_for_display(app, GPOINTER_TO_INT(l->data));
+         if (j == -1)
+             continue;
+ 
+         gdk_screen_get_monitor_geometry(screen, j, rect);
+     }
++    g_list_free(initial_displays);
+ 
+     virt_viewer_shift_monitors_to_origin(displays, ndisplays);
+ 

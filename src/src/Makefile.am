@@ -8,6 +8,8 @@ builderxml_DATA =				\
 	virt-viewer.xml				\
 	virt-viewer-about.xml			\
 	virt-viewer-auth.xml			\
+	virt-viewer-guest-details.xml	\
+	virt-viewer-vm-connection.xml	\
 	$(NULL)
 
 EXTRA_DIST =					\
@@ -45,6 +47,7 @@ COMMON_SOURCES =					\
 	virt-viewer-display.h virt-viewer-display.c	\
 	virt-viewer-notebook.h virt-viewer-notebook.c	\
 	virt-viewer-window.h virt-viewer-window.c	\
+	virt-viewer-vm-connection.h virt-viewer-vm-connection.c	\
 	view/autoDrawer.c				\
 	view/autoDrawer.h				\
 	view/drawer.c					\
@@ -67,6 +70,10 @@ COMMON_SOURCES +=						\
 	$(NULL)
 endif
 
+if HAVE_OVIRT
+COMMON_SOURCES +=					\
+	ovirt-foreign-menu.h ovirt-foreign-menu.c
+endif
 
 if HAVE_LIBVIRT
 bin_PROGRAMS += virt-viewer
