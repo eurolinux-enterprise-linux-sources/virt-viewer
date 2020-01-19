@@ -16,28 +16,21 @@
       <?define Win64 = "no"?>
   <?endif?>
 
-  <?if $(var.GtkVersion) = "2.0"?>
-    <?if $(var.HaveSpiceGtk) = "True"?>
-      <?require spice-gtk.wxi?>
-    <?endif?>
-    <?if $(var.HaveGtkVnc) = "True"?>
-      <?require gtk-vnc.wxi?>
-    <?endif?>
-  <?else?>
-    <?if $(var.HaveSpiceGtk) = "True"?>
-      <?require spice-gtk3.wxi?>
-    <?endif?>
-    <?if $(var.HaveGtkVnc) = "True"?>
-      <?require gtk-vnc2.wxi?>
-    <?endif?>
-      <?require adwaita-icons-needed.wxi?>
+  <?if $(var.HaveSpiceGtk) = "True"?>
+    <?require spice-gtk3.wxi?>
   <?endif?>
+  <?if $(var.HaveGtkVnc) = "True"?>
+    <?require gtk-vnc2.wxi?>
+  <?endif?>
+  <?require adwaita-icon-theme.wxi?>
   <?if $(var.HaveLibvirt) = "True"?>
     <?require libvirt.wxi?>
+    <?require libvirt-glib.wxi?>
   <?endif?>
   <?if $(var.HaveOVirt) = "True"?>
     <?require libgovirt.wxi?>
   <?endif?>
+  <?require libxml2.wxi?>
 
   <?define UpgradeCode = "5B027138-1A63-49E6-877E-055E5EEC1903"?>
   <Product Id="*"
@@ -47,7 +40,7 @@
            UpgradeCode="$(var.UpgradeCode)"
            Language="1033">
 
-    <Package InstallerVersion="200" Compressed="yes" Comments="comments"/>
+    <Package InstallerVersion="200" Compressed="yes" Comments="comments" InstallScope="perMachine"/>
     <Media Id="1" Cabinet="cabinet.cab" EmbedCab="yes"/>
 
     <Property Id="ARPHELPLINK" Value="http://www.virt-tools.org"/>
@@ -75,7 +68,7 @@
       <Component Id="CProgIds" Guid="89D6F46D-9C5E-4D65-8456-58FC361E553E">
         <ProgId Id='VirtViewer.vvfile' Description='VirtViewer connection file'>
           <Extension Id='vv' ContentType='application/x-virt-viewer'>
-            <Verb Id='open' Command='Open' TargetFile='fil808B4A5BAB4ACD727D3823632E798743' Argument='"%1"' />
+            <Verb Id='open' Command='Open' TargetFile='fil610DF9E49759B1DEC646290195F96F8A' Argument='"%1"' />
             <MIME ContentType="application/x-virt-viewer" Default="yes"/>
           </Extension>
         </ProgId>
@@ -102,19 +95,6 @@
             <File Id="FHwdataUSB" KeyPath="yes" Source="/usr/share/hwdata/usb.ids"/>
           </Component>
         </Directory>
-
-        <Directory Id="DirIcons" Name="icons">
-          <Directory Id="DirIconsHi" Name="hicolor">
-            <Directory Id="DirIconsHi16x16" Name="16x16">
-              <Directory Id="DirIconsHi16x16Apps" Name="apps">
-                <Component Id="CIconsHi16x16Apps" Guid="*">
-                  <File Id="FIconskeyboardshortcuts" KeyPath="yes"
-                        Source="/usr/share/icons/Adwaita/16x16/apps/preferences-desktop-keyboard-shortcuts.png"/>
-                </Component>
-              </Directory>
-            </Directory>
-          </Directory>
-        </Directory>
       </Directory>
     </DirectoryRef>
 
@@ -131,34 +111,26 @@
     </DirectoryRef>
 
     <Feature Id="Complete"  Level="1">
-      <?if $(var.GtkVersion) = "2.0"?>
-        <?if $(var.HaveSpiceGtk) = "True"?>
-          <ComponentGroupRef Id="CG.spice-gtk"/>
-        <?endif?>
-        <?if $(var.HaveGtkVnc) = "True"?>
-          <ComponentGroupRef Id="CG.gtk-vnc"/>
-        <?endif?>
-      <?else?>
-        <?if $(var.HaveSpiceGtk) = "True"?>
-          <ComponentGroupRef Id="CG.spice-gtk3"/>
-        <?endif?>
-        <?if $(var.HaveGtkVnc) = "True"?>
-          <ComponentGroupRef Id="CG.gtk-vnc2"/>
-        <?endif?>
-        <ComponentGroupRef Id="CG.adwaita-icons-needed"/>
+      <?if $(var.HaveSpiceGtk) = "True"?>
+        <ComponentGroupRef Id="CG.spice-gtk3"/>
       <?endif?>
+      <?if $(var.HaveGtkVnc) = "True"?>
+        <ComponentGroupRef Id="CG.gtk-vnc2"/>
+      <?endif?>
+      <ComponentGroupRef Id="CG.adwaita-icon-theme"/>
       <?if $(var.HaveLibvirt) = "True"?>
         <ComponentGroupRef Id="CG.libvirt"/>
+        <ComponentGroupRef Id="CG.libvirt-glib"/>
       <?endif?>
       <?if $(var.HaveOVirt) = "True"?>
         <ComponentGroupRef Id="CG.libgovirt"/>
       <?endif?>
+      <ComponentGroupRef Id="CG.libxml2"/>
       <ComponentGroupRef Id="CG.virt-viewer"/>
       <ComponentRef Id="CDepsFile"/>
       <ComponentRef Id="CShortcut"/>
       <ComponentRef Id="CRegistryEntries"/>
       <ComponentRef Id="CProgIds"/>
-      <ComponentRef Id="CIconsHi16x16Apps"/>
       <ComponentRef Id="CHwdataUSB"/>
     </Feature>
 

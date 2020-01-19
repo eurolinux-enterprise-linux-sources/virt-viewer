@@ -2,11 +2,12 @@ NULL =
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = icons src man po data
+SUBDIRS = icons src man po data tests
 
 AM_DISTCHECK_CONFIGURE_FLAGS = --disable-update-mimedb
 EXTRA_DIST =					\
-	$(PACKAGE).spec				\
+	$(PACKAGE).spec	$(PACKAGE).spec.in	\
+	mingw-$(PACKAGE).spec.in		\
 	intltool-extract.in			\
 	intltool-merge.in			\
 	intltool-update.in			\
@@ -21,29 +22,18 @@ EXTRA_DIST =					\
 
 DISTCLEAN_FILES =				\
 	$(PACKAGE).spec				\
+	mingw-$(PACKAGE).spec			\
 	intltool-extract			\
 	intltool-merge				\
 	intltool-update				\
 	$(NULL)
 
 MAINTAINERCLEANFILES =				\
+	$(srcdir)/AUTHORS			\
 	$(srcdir)/INSTALL			\
-	$(srcdir)/aclocal.m4			\
-	$(srcdir)/autoscan.log			\
-	$(srcdir)/config.h.in			\
-	$(srcdir)/build-aux/compile		\
-	$(srcdir)/build-aux/config.guess	\
-	$(srcdir)/build-aux/config.sub		\
-	$(srcdir)/build-aux/depcomp		\
-	$(srcdir)/build-aux/install-sh		\
-	$(srcdir)/build-aux/ltmain.sh		\
-	$(srcdir)/build-aux/missing		\
+	$(GITIGNORE_MAINTAINERCLEANFILES_TOPLEVEL)	\
+	$(GITIGNORE_MAINTAINERCLEANFILES_M4_LIBTOOL)	\
 	$(srcdir)/m4/intltool.m4		\
-	$(srcdir)/m4/libtool.m4			\
-	$(srcdir)/m4/ltoptions.m4		\
-	$(srcdir)/m4/ltsugar.m4			\
-	$(srcdir)/m4/ltversion.m4		\
-	$(srcdir)/m4/lt~obsolete.m4		\
 	$(NULL)
 
 dist-hook: gen-ChangeLog gen-AUTHORS
@@ -51,7 +41,7 @@ dist-hook: gen-ChangeLog gen-AUTHORS
 # Generate the ChangeLog file (with all entries since the switch to git)
 # and insert it into the directory we're about to use to create a tarball.
 if OS_WIN32
-.PHONY: gen-ChangeLog gen-AUTHORS nsis
+.PHONY: gen-ChangeLog gen-AUTHORS msi
 else
 .PHONY: gen-ChangeLog gen-AUTHORS
 endif
@@ -73,9 +63,9 @@ gen-AUTHORS:
 	fi
 
 if OS_WIN32
-.PHONY: nsis
-nsis:
-	make -C $(builddir)/data virt-viewer-$(VERSION).exe
+.PHONY: msi
+msi:
+	make -C $(builddir)/data msi
 endif
 
 

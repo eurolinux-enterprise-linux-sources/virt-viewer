@@ -1,0 +1,31 @@
+From 5d953fc30522de029597a247fdab59452dceabbf Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Thu, 2 Mar 2017 16:00:37 +0100
+Subject: [PATCH 21/26] file-transfer: Fix label of the dialog
+
+Display correct text and make it translatable
+
+Resolves:
+https://bugs.freedesktop.org/show_bug.cgi?id=99980
+
+Acked-by: Jonathon Jongsma <jjongsma@redhat.com>
+---
+ src/resources/ui/virt-viewer-file-transfer-dialog.ui | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/resources/ui/virt-viewer-file-transfer-dialog.ui b/src/resources/ui/virt-viewer-file-transfer-dialog.ui
+index 5e761c8..f71e174 100644
+--- a/src/resources/ui/virt-viewer-file-transfer-dialog.ui
++++ b/src/resources/ui/virt-viewer-file-transfer-dialog.ui
+@@ -25,7 +25,7 @@
+             </child>
+             <child>
+               <object class="GtkButton" id="button1">
+-                <property name="label">gtk-cancel</property>
++                <property name="label" translatable="yes">_Cancel</property>
+                 <property name="visible">True</property>
+                 <property name="can_focus">True</property>
+                 <property name="receives_default">True</property>
+-- 
+2.12.0
+

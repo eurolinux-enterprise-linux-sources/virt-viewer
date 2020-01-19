@@ -24,6 +24,9 @@
 
 #include <config.h>
 
+/* gtk-vnc uses deprecated API, so disable warnings for this file */
+#define GLIB_DISABLE_DEPRECATION_WARNINGS
+
 #include "virt-viewer-auth.h"
 #include "virt-viewer-session-vnc.h"
 #include "virt-viewer-display-vnc.h"
@@ -99,6 +102,11 @@ virt_viewer_session_vnc_connected(VncDisplay *vnc G_GNUC_UNUSED,
                                   VirtViewerSessionVnc *session)
 {
     GtkWidget *display = virt_viewer_display_vnc_new(session, session->priv->vnc);
+    VirtViewerApp *app = virt_viewer_session_get_app(VIRT_VIEWER_SESSION(session));
+
+    virt_viewer_window_set_display(virt_viewer_app_get_main_window(app),
+                                   VIRT_VIEWER_DISPLAY(display));
+
     g_signal_emit_by_name(session, "session-connected");
     virt_viewer_session_add_display(VIRT_VIEWER_SESSION(session),
                                     VIRT_VIEWER_DISPLAY(display));
@@ -147,7 +155,7 @@ virt_viewer_session_vnc_auth_unsupported(VncDisplay *vnc G_GNUC_UNUSED,
 {
     gchar *msg = g_strdup_printf(_("Unsupported authentication type %d"),
                                  authType);
-    g_signal_emit_by_name(session, "session-auth-failed", msg);
+    g_signal_emit_by_name(session, "session-auth-unsupported", msg);
     g_free(msg);
 }
 
@@ -305,6 +313,7 @@ virt_viewer_session_vnc_auth_credential(GtkWidget *src G_GNUC_UNUSED,
 
         if (!ret) {
             vnc_display_close(self->priv->vnc);
+            g_signal_emit_by_name(self, "session-cancelled");
             goto cleanup;
         }
     }

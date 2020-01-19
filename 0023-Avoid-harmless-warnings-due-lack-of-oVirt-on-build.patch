@@ -1,0 +1,58 @@
+From 13689374c286f9ff719b54ce9e24767044118f66 Mon Sep 17 00:00:00 2001
+From: Victor Toso <me@victortoso.com>
+Date: Fri, 3 Mar 2017 16:01:32 +0100
+Subject: [PATCH 23/26] Avoid harmless warnings due lack of oVirt on build
+
+> remote-viewer.c: In function 'remote_viewer_get_property':
+> remote-viewer.c:227:26: warning: unused variable 'priv' [-Wunused-variable]
+>      RemoteViewerPrivate *priv = self->priv;
+>                           ^~~~
+> remote-viewer.c:224:36: warning: unused parameter 'value' [-Wunused-parameter]
+>      GValue *value, GParamSpec *pspec)
+>              ^~~~~
+> virt-viewer-window.c: In function 'virt_viewer_window_menu_change_cd_activate':
+> virt-viewer-window.c:1077:62: warning: unused parameter 'self' [-Wunused-parameter]
+>      VirtViewerWindow *self)
+>                        ^~~~
+
+Signed-off-by: Victor Toso <victortoso@redhat.com>
+---
+ src/remote-viewer.c      | 5 ++++-
+ src/virt-viewer-window.c | 2 +-
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/src/remote-viewer.c b/src/remote-viewer.c
+index 8c31532..451fb1d 100644
+--- a/src/remote-viewer.c
++++ b/src/remote-viewer.c
+@@ -221,10 +221,13 @@ end:
+ 
+ static void
+ remote_viewer_get_property(GObject *object, guint property_id,
+-                           GValue *value, GParamSpec *pspec)
++                           GValue *value G_GNUC_UNUSED,
++                           GParamSpec *pspec)
+ {
++#ifdef HAVE_OVIRT
+     RemoteViewer *self = REMOTE_VIEWER(object);
+     RemoteViewerPrivate *priv = self->priv;
++#endif
+ 
+     switch (property_id) {
+ #ifdef HAVE_OVIRT
+diff --git a/src/virt-viewer-window.c b/src/virt-viewer-window.c
+index 9a0932a..2e41edc 100644
+--- a/src/virt-viewer-window.c
++++ b/src/virt-viewer-window.c
+@@ -1072,7 +1072,7 @@ iso_dialog_response(GtkDialog *dialog,
+ 
+ void
+ virt_viewer_window_menu_change_cd_activate(GtkWidget *menu G_GNUC_UNUSED,
+-                                           VirtViewerWindow *self)
++                                           VirtViewerWindow *self G_GNUC_UNUSED)
+ {
+ #if HAVE_OVIRT
+     VirtViewerWindowPrivate *priv = self->priv;
+-- 
+2.12.0
+

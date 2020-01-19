@@ -1,0 +1,29 @@
+From c5faae7a80448605d85e958aede3a38e5ba800b6 Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Wed, 15 Mar 2017 18:10:44 +0100
+Subject: [PATCH virt-viewer] virt-viewer: Fix comparison in domain selection
+To: virt-tools-list@redhat.com
+
+Related: rhbz#1399077
+
+Acked-by: Eduardo Lima (Etrunko) <etrunko@redhat.com>
+---
+ src/virt-viewer.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/virt-viewer.c b/src/virt-viewer.c
+index 65c0546..b50db16 100644
+--- a/src/virt-viewer.c
++++ b/src/virt-viewer.c
+@@ -110,7 +110,7 @@ opt_domain_selection_cb(const gchar *option_name,
+         return FALSE;
+     }
+ 
+-    for (i = DOMAIN_SELECTION_ID; i <= G_N_ELEMENTS(domain_selection_to_opt); i++) {
++    for (i = DOMAIN_SELECTION_ID; i < G_N_ELEMENTS(domain_selection_to_opt); i++) {
+         if (g_strcmp0(option_name, domain_selection_to_opt[i]) == 0) {
+             domain_selection_type = i;
+             return TRUE;
+-- 
+2.12.0
+

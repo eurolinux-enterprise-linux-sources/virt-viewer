@@ -24,7 +24,7 @@
 #define VIRT_VIEWER_APP_H
 
 #include <glib-object.h>
-#include "virt-viewer-util.h"
+#include <gtk/gtk.h>
 #include "virt-viewer-window.h"
 
 G_BEGIN_DECLS
@@ -39,36 +39,33 @@ G_BEGIN_DECLS
 typedef struct _VirtViewerAppPrivate VirtViewerAppPrivate;
 
 typedef struct {
-    GObject parent;
+    GtkApplication parent;
     VirtViewerAppPrivate *priv;
 } VirtViewerApp;
 
 typedef struct {
-    GObjectClass parent_class;
-
-    /* signals */
-    void (*window_added) (VirtViewerApp *self, VirtViewerWindow *window);
-    void (*window_removed) (VirtViewerApp *self, VirtViewerWindow *window);
+    GtkApplicationClass parent_class;
 
     /*< private >*/
-    gboolean (*start) (VirtViewerApp *self);
+    gboolean (*start) (VirtViewerApp *self, GError **error);
     gboolean (*initial_connect) (VirtViewerApp *self, GError **error);
     gboolean (*activate) (VirtViewerApp *self, GError **error);
     void (*deactivated) (VirtViewerApp *self, gboolean connect_error);
     gboolean (*open_connection)(VirtViewerApp *self, int *fd);
+    void (*add_option_entries)(VirtViewerApp *self, GOptionContext *context, GOptionGroup *group);
 } VirtViewerAppClass;
 
 GType virt_viewer_app_get_type (void);
 
 void virt_viewer_app_set_debug(gboolean debug);
-gboolean virt_viewer_app_start(VirtViewerApp *app);
+gboolean virt_viewer_app_start(VirtViewerApp *app, GError **error);
 void virt_viewer_app_maybe_quit(VirtViewerApp *self, VirtViewerWindow *window);
 VirtViewerWindow* virt_viewer_app_get_main_window(VirtViewerApp *self);
 void virt_viewer_app_trace(VirtViewerApp *self, const char *fmt, ...);
 void virt_viewer_app_simple_message_dialog(VirtViewerApp *self, const char *fmt, ...);
 gboolean virt_viewer_app_is_active(VirtViewerApp *app);
 void virt_viewer_app_free_connect_info(VirtViewerApp *self);
-int virt_viewer_app_create_session(VirtViewerApp *self, const gchar *type);
+gboolean virt_viewer_app_create_session(VirtViewerApp *self, const gchar *type, GError **error);
 gboolean virt_viewer_app_activate(VirtViewerApp *self, GError **error);
 gboolean virt_viewer_app_initial_connect(VirtViewerApp *self, GError **error);
 void virt_viewer_app_set_zoom_level(VirtViewerApp *self, gint zoom_level);
@@ -95,11 +92,13 @@ GList* virt_viewer_app_get_windows(VirtViewerApp *self);
 gboolean virt_viewer_app_get_enable_accel(VirtViewerApp *self);
 VirtViewerSession* virt_viewer_app_get_session(VirtViewerApp *self);
 gboolean virt_viewer_app_get_fullscreen(VirtViewerApp *app);
-GOptionGroup* virt_viewer_app_get_option_group(void);
 void virt_viewer_app_clear_hotkeys(VirtViewerApp *app);
-gint virt_viewer_app_get_n_initial_displays(VirtViewerApp* self);
+GList* virt_viewer_app_get_initial_displays(VirtViewerApp* self);
 gint virt_viewer_app_get_initial_monitor_for_display(VirtViewerApp* self, gint display);
 void virt_viewer_app_set_enable_accel(VirtViewerApp *app, gboolean enable);
+void virt_viewer_app_show_preferences(VirtViewerApp *app, GtkWidget *parent);
+void virt_viewer_app_set_menus_sensitive(VirtViewerApp *self, gboolean sensitive);
+gboolean virt_viewer_app_get_session_cancelled(VirtViewerApp *self);
 
 G_END_DECLS
 

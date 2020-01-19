@@ -1,0 +1,41 @@
+From 7a808362a1cad3cf82613038d891415a638b3b04 Mon Sep 17 00:00:00 2001
+From: "Eduardo Lima (Etrunko)" <etrunko@redhat.com>
+Date: Fri, 13 Jan 2017 11:59:27 -0200
+Subject: [PATCH 05/26] remote-viewer: Extend #ifdef HAVE_OVIRT block
+
+The #endif is closing a #ifdef HAVE_OVIRT block, while another one is
+opened right next, so there is no need to have those lines. Also, due to
+the large amount of source code in between, add a small comment on the
+last #endif to identify what it refers to.
+
+Signed-off-by: Eduardo Lima (Etrunko) <etrunko@redhat.com>
+---
+ src/remote-viewer.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/src/remote-viewer.c b/src/remote-viewer.c
+index 6d29bf2..13c6e7c 100644
+--- a/src/remote-viewer.c
++++ b/src/remote-viewer.c
+@@ -1005,9 +1005,6 @@ error:
+     return success;
+ }
+ 
+-#endif
+-
+-#ifdef HAVE_OVIRT
+ static OvirtVm *
+ choose_vm(GtkWindow *main_window,
+           char **vm_name,
+@@ -1047,7 +1044,7 @@ choose_vm(GtkWindow *main_window,
+ 
+     return vm;
+ }
+-#endif
++#endif /* HAVE_OVIRT */
+ 
+ static void
+ remote_viewer_recent_add(gchar *uri, const gchar *mime_type)
+-- 
+2.12.0
+

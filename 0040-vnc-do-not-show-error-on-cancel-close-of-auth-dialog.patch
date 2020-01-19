@@ -1,0 +1,68 @@
+From 98de755b5be6e76570782755ff026061310bec19 Mon Sep 17 00:00:00 2001
+From: Victor Toso <me@victortoso.com>
+Date: Tue, 6 Jun 2017 14:05:32 +0200
+Subject: [PATCH] vnc: do not show error on cancel/close of auth dialog
+
+Mainly a kiosk mode issue, similar to the spice fix in 6480e52f62b.
+
+This patch saves the cancel/close state of auth dialog from
+virt_viewer_auth_collect_credentials() in order to avoid an error
+dialog to pop up to user in kiosk mode.
+
+This happens due the fact that we call virt_viewer_app_disconnected()
+twice:
+- One with "session-cancelled" which is correct and well handled;
+- The other with "session-disconnected" which is misleading as there
+  was no connection at this time. This will trigger the error dialog
+  with "Unable to connect to the graphic server %s".
+
+Related: https://bugzilla.redhat.com/show_bug.cgi?id=1446161
+
+Signed-off-by: Victor Toso <victortoso@redhat.com>
+Acked-by: Eduardo Lima (Etrunko) <etrunko@redhat.com>
+(cherry picked from commit fb14a8b300ed89a40938302a37679f902b3dab40)
+---
+ src/virt-viewer-session-vnc.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/virt-viewer-session-vnc.c b/src/virt-viewer-session-vnc.c
+index 26fb405..c79b63c 100644
+--- a/src/virt-viewer-session-vnc.c
++++ b/src/virt-viewer-session-vnc.c
+@@ -40,6 +40,7 @@ struct _VirtViewerSessionVncPrivate {
+     GtkWindow *main_window;
+     /* XXX we should really just have a VncConnection */
+     VncDisplay *vnc;
++    gboolean auth_dialog_cancelled;
+ };
+ 
+ #define VIRT_VIEWER_SESSION_VNC_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE((o), VIRT_VIEWER_TYPE_SESSION_VNC, VirtViewerSessionVncPrivate))
+@@ -104,6 +105,8 @@ virt_viewer_session_vnc_connected(VncDisplay *vnc G_GNUC_UNUSED,
+     GtkWidget *display = virt_viewer_display_vnc_new(session, session->priv->vnc);
+     VirtViewerApp *app = virt_viewer_session_get_app(VIRT_VIEWER_SESSION(session));
+ 
++    session->priv->auth_dialog_cancelled = FALSE;
++
+     virt_viewer_window_set_display(virt_viewer_app_get_main_window(app),
+                                    VIRT_VIEWER_DISPLAY(display));
+ 
+@@ -117,6 +120,8 @@ virt_viewer_session_vnc_disconnected(VncDisplay *vnc G_GNUC_UNUSED,
+                                      VirtViewerSessionVnc *session)
+ {
+     GtkWidget *display;
++    if (session->priv->auth_dialog_cancelled)
++        return;
+ 
+     virt_viewer_session_clear_displays(VIRT_VIEWER_SESSION(session));
+     display = virt_viewer_display_vnc_new(session, session->priv->vnc);
+@@ -314,6 +319,7 @@ virt_viewer_session_vnc_auth_credential(GtkWidget *src G_GNUC_UNUSED,
+ 
+         if (!ret) {
+             vnc_display_close(self->priv->vnc);
++            self->priv->auth_dialog_cancelled = TRUE;
+             g_signal_emit_by_name(self, "session-cancelled");
+             goto cleanup;
+         }
+-- 
+2.13.0
+

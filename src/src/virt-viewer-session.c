@@ -41,6 +41,9 @@ struct _VirtViewerSessionPrivate
     gboolean has_usbredir;
     gchar *uri;
     VirtViewerFile *file;
+    gboolean share_folder;
+    gchar *shared_folder;
+    gboolean share_folder_ro;
 };
 
 G_DEFINE_ABSTRACT_TYPE(VirtViewerSession, virt_viewer_session, G_TYPE_OBJECT)
@@ -53,6 +56,9 @@ enum {
     PROP_HAS_USBREDIR,
     PROP_FILE,
     PROP_SW_SMARTCARD_READER,
+    PROP_SHARE_FOLDER,
+    PROP_SHARED_FOLDER,
+    PROP_SHARE_FOLDER_RO,
 };
 
 static void
@@ -69,6 +75,7 @@ virt_viewer_session_finalize(GObject *obj)
 
     g_free(session->priv->uri);
     g_clear_object(&session->priv->file);
+    g_free(session->priv->shared_folder);
 
     G_OBJECT_CLASS(virt_viewer_session_parent_class)->finalize(obj);
 }
@@ -96,6 +103,19 @@ virt_viewer_session_set_property(GObject *object,
 
     case PROP_FILE:
         virt_viewer_session_set_file(self, g_value_get_object(value));
+        break;
+
+    case PROP_SHARE_FOLDER:
+        self->priv->share_folder = g_value_get_boolean(value);
+        break;
+
+    case PROP_SHARED_FOLDER:
+        g_free(self->priv->shared_folder);
+        self->priv->shared_folder = g_value_dup_string(value);
+        break;
+
+    case PROP_SHARE_FOLDER_RO:
+        self->priv->share_folder_ro = g_value_get_boolean(value);
         break;
 
     default:
@@ -131,6 +151,18 @@ virt_viewer_session_get_property(GObject *object,
 
     case PROP_SW_SMARTCARD_READER:
         g_value_set_boolean(value, FALSE);
+        break;
+
+    case PROP_SHARE_FOLDER:
+        g_value_set_boolean(value, self->priv->share_folder);
+        break;
+
+    case PROP_SHARED_FOLDER:
+        g_value_set_string(value, self->priv->shared_folder);
+        break;
+
+    case PROP_SHARE_FOLDER_RO:
+        g_value_set_boolean(value, self->priv->share_folder_ro);
         break;
 
     default:
@@ -197,6 +229,33 @@ virt_viewer_session_class_init(VirtViewerSessionClass *class)
                                                          G_PARAM_READABLE |
                                                          G_PARAM_STATIC_STRINGS));
 
+    g_object_class_install_property(object_class,
+                                    PROP_SHARE_FOLDER,
+                                    g_param_spec_boolean("share-folder",
+                                                         "Share folder",
+                                                         "Indicates whether to share folder",
+                                                         FALSE,
+                                                         G_PARAM_READWRITE |
+                                                         G_PARAM_STATIC_STRINGS));
+
+    g_object_class_install_property(object_class,
+                                    PROP_SHARED_FOLDER,
+                                    g_param_spec_string("shared-folder",
+                                                        "Shared folder",
+                                                        "Indicates the shared folder",
+                                                        g_get_user_special_dir(G_USER_DIRECTORY_PUBLIC_SHARE),
+                                                        G_PARAM_READWRITE |
+                                                        G_PARAM_STATIC_STRINGS));
+
+    g_object_class_install_property(object_class,
+                                    PROP_SHARE_FOLDER_RO,
+                                    g_param_spec_boolean("share-folder-ro",
+                                                         "Share folder read-only",
+                                                         "Indicates whether to share folder in read-only",
+                                                         FALSE,
+                                                         G_PARAM_READWRITE |
+                                                         G_PARAM_STATIC_STRINGS));
+
     g_signal_new("session-connected",
                  G_OBJECT_CLASS_TYPE(object_class),
                  G_SIGNAL_RUN_FIRST,
@@ -246,10 +305,10 @@ virt_viewer_session_class_init(VirtViewerSessionClass *class)
                  1,
                  G_TYPE_STRING);
 
-    g_signal_new("session-auth-failed",
+    g_signal_new("session-auth-unsupported",
                  G_OBJECT_CLASS_TYPE(object_class),
                  G_SIGNAL_RUN_LAST | G_SIGNAL_NO_HOOKS,
-                 G_STRUCT_OFFSET(VirtViewerSessionClass, session_auth_failed),
+                 G_STRUCT_OFFSET(VirtViewerSessionClass, session_auth_unsupported),
                  NULL,
                  NULL,
                  g_cclosure_marshal_VOID__STRING,
@@ -345,49 +404,37 @@ virt_viewer_session_on_monitor_geometry_changed(VirtViewerSession* self,
 {
     VirtViewerSessionClass *klass;
     gboolean all_fullscreen = TRUE;
-    guint nmonitors = 0;
-    GdkRectangle *monitors = NULL;
+    /* GHashTable<gint, GdkRectangle*> */
+    GHashTable *monitors;
     GList *l;
 
     klass = VIRT_VIEWER_SESSION_GET_CLASS(self);
     if (!klass->apply_monitor_geometry)
         return;
 
-    /* find highest monitor ID so we can create the sparse array */
+    monitors = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
+
     for (l = self->priv->displays; l; l = l->next) {
         VirtViewerDisplay *d = VIRT_VIEWER_DISPLAY(l->data);
         guint nth = 0;
-        g_object_get(d, "nth-display", &nth, NULL);
-
-        nmonitors = MAX(nth + 1, nmonitors);
-    }
-
-    if (nmonitors == 0)
-        return;
-
-    monitors = g_new0(GdkRectangle, nmonitors);
-    for (l = self->priv->displays; l; l = l->next) {
-        VirtViewerDisplay *d = VIRT_VIEWER_DISPLAY(l->data);
-        guint nth = 0;
-        GdkRectangle *rect = NULL;
+        GdkRectangle *rect = g_new0(GdkRectangle, 1);
 
         g_object_get(d, "nth-display", &nth, NULL);
-        g_return_if_fail(nth < nmonitors);
-        rect = &monitors[nth];
         virt_viewer_display_get_preferred_monitor_geometry(d, rect);
 
         if (virt_viewer_display_get_enabled(d) &&
             !virt_viewer_display_get_fullscreen(d))
             all_fullscreen = FALSE;
+        g_hash_table_insert(monitors, GINT_TO_POINTER(nth), rect);
     }
 
     if (!all_fullscreen)
-        virt_viewer_align_monitors_linear(monitors, nmonitors);
+        virt_viewer_align_monitors_linear(monitors);
 
-    virt_viewer_shift_monitors_to_origin(monitors, nmonitors);
+    virt_viewer_shift_monitors_to_origin(monitors);
 
-    klass->apply_monitor_geometry(self, monitors, nmonitors);
-    g_free(monitors);
+    klass->apply_monitor_geometry(self, monitors);
+    g_hash_table_unref(monitors);
 }
 
 void virt_viewer_session_add_display(VirtViewerSession *session,
@@ -606,6 +653,28 @@ VirtViewerFile* virt_viewer_session_get_file(VirtViewerSession *self)
     g_return_val_if_fail(VIRT_VIEWER_IS_SESSION(self), NULL);
 
     return self->priv->file;
+}
+
+gboolean virt_viewer_session_can_share_folder(VirtViewerSession *self)
+{
+    VirtViewerSessionClass *klass;
+
+    g_return_val_if_fail(VIRT_VIEWER_IS_SESSION(self), FALSE);
+
+    klass = VIRT_VIEWER_SESSION_GET_CLASS(self);
+
+    return klass->can_share_folder ? klass->can_share_folder(self) : FALSE;
+}
+
+gboolean virt_viewer_session_can_retry_auth(VirtViewerSession *self)
+{
+    VirtViewerSessionClass *klass;
+
+    g_return_val_if_fail(VIRT_VIEWER_IS_SESSION(self), FALSE);
+
+    klass = VIRT_VIEWER_SESSION_GET_CLASS(self);
+
+    return klass->can_retry_auth ? klass->can_retry_auth(self) : FALSE;
 }
 
 /*

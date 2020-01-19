@@ -1,0 +1,36 @@
+From afcb97dcf18286a1685fd9761377e5bb98cdea9f Mon Sep 17 00:00:00 2001
+From: "Eduardo Lima (Etrunko)" <etrunko@redhat.com>
+Date: Fri, 19 May 2017 16:49:20 -0300
+Subject: [PATCH virt-viewer 37/38] window: Do not show fullscreen toolbar if
+ in kiosk mode
+
+Regression since commit cc455b7f916110d7cfae6b7af753349e070c9494.
+
+Related: https://bugzilla.redhat.com/show_bug.cgi?id=1446161
+
+Signed-off-by: Eduardo Lima (Etrunko) <etrunko@redhat.com>
+---
+ src/virt-viewer-window.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/src/virt-viewer-window.c b/src/virt-viewer-window.c
+index 415f729..8d05e52 100644
+--- a/src/virt-viewer-window.c
++++ b/src/virt-viewer-window.c
+@@ -516,8 +516,11 @@ virt_viewer_window_enter_fullscreen(VirtViewerWindow *self, gint monitor)
+ 
+     virt_viewer_window_menu_fullscreen_set_active(self, TRUE);
+     gtk_widget_hide(menu);
+-    gtk_widget_show(priv->toolbar);
+-    virt_viewer_timed_revealer_force_reveal(priv->revealer, TRUE);
++
++    if (!priv->kiosk) {
++        gtk_widget_show(priv->toolbar);
++        virt_viewer_timed_revealer_force_reveal(priv->revealer, TRUE);
++    }
+ 
+     if (priv->display) {
+         virt_viewer_display_set_monitor(priv->display, monitor);
+-- 
+2.9.4
+

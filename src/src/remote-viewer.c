@@ -23,6 +23,7 @@
  */
 
 #include <config.h>
+#include <gio/gio.h>
 #include <gtk/gtk.h>
 #include <glib/gprintf.h>
 #include <glib/gi18n.h>
@@ -36,16 +37,16 @@
 
 #ifdef HAVE_SPICE_GTK
 #include <spice-controller.h>
-#endif
-
-#ifdef HAVE_SPICE_GTK
 #include "virt-viewer-session-spice.h"
 #endif
+
 #include "virt-viewer-app.h"
 #include "virt-viewer-auth.h"
 #include "virt-viewer-file.h"
 #include "virt-viewer-session.h"
+#include "virt-viewer-util.h"
 #include "remote-viewer.h"
+#include "remote-viewer-connect.h"
 
 #ifndef G_VALUE_INIT /* see bug https://bugzilla.gnome.org/show_bug.cgi?id=654793 */
 #define G_VALUE_INIT  { 0, { { 0 } } }
@@ -66,15 +67,6 @@ G_DEFINE_TYPE (RemoteViewer, remote_viewer, VIRT_VIEWER_TYPE_APP)
 #define GET_PRIVATE(o)                                                        \
     (G_TYPE_INSTANCE_GET_PRIVATE ((o), REMOTE_VIEWER_TYPE, RemoteViewerPrivate))
 
-enum {
-    PROP_0,
-#ifdef HAVE_SPICE_GTK
-    PROP_CONTROLLER,
-    PROP_CTRL_FOREIGN_MENU,
-#endif
-    PROP_OPEN_RECENT_DIALOG
-};
-
 #ifdef HAVE_OVIRT
 static OvirtVm * choose_vm(GtkWindow *main_window,
                            char **vm_name,
@@ -82,12 +74,12 @@ static OvirtVm * choose_vm(GtkWindow *main_window,
                            GError **error);
 #endif
 
-static gboolean remote_viewer_start(VirtViewerApp *self);
+static gboolean remote_viewer_start(VirtViewerApp *self, GError **error);
 #ifdef HAVE_SPICE_GTK
 static gboolean remote_viewer_activate(VirtViewerApp *self, GError **error);
-static void remote_viewer_window_added(VirtViewerApp *self, VirtViewerWindow *win);
+static void remote_viewer_window_added(GtkApplication *app, GtkWindow *w);
 static void spice_foreign_menu_updated(RemoteViewer *self);
-static gint connect_dialog(GtkWindow *main_window, gchar **uri);
+static void foreign_menu_title_changed(SpiceCtrlForeignMenu *menu, GParamSpec *pspec, RemoteViewer *self);
 #endif
 
 static void
@@ -121,63 +113,13 @@ remote_viewer_dispose (GObject *object)
 }
 
 static void
-remote_viewer_get_property (GObject *object, guint property_id,
-                            GValue *value, GParamSpec *pspec)
-{
-    RemoteViewer *self = REMOTE_VIEWER(object);
-    RemoteViewerPrivate *priv = self->priv;
-
-    switch (property_id) {
-#ifdef HAVE_SPICE_GTK
-    case PROP_CONTROLLER:
-        g_value_set_object(value, priv->controller);
-        break;
-    case PROP_CTRL_FOREIGN_MENU:
-        g_value_set_object(value, priv->ctrl_foreign_menu);
-        break;
-#endif
-    case PROP_OPEN_RECENT_DIALOG:
-        g_value_set_boolean(value, priv->open_recent_dialog);
-        break;
-    default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    }
-}
-
-static void
-remote_viewer_set_property (GObject *object, guint property_id,
-                            const GValue *value, GParamSpec *pspec)
-{
-    RemoteViewer *self = REMOTE_VIEWER(object);
-    RemoteViewerPrivate *priv = self->priv;
-
-    switch (property_id) {
-#ifdef HAVE_SPICE_GTK
-    case PROP_CONTROLLER:
-        g_return_if_fail(priv->controller == NULL);
-        priv->controller = g_value_dup_object(value);
-        break;
-    case PROP_CTRL_FOREIGN_MENU:
-        g_return_if_fail(priv->ctrl_foreign_menu == NULL);
-        priv->ctrl_foreign_menu = g_value_dup_object(value);
-        break;
-#endif
-    case PROP_OPEN_RECENT_DIALOG:
-        priv->open_recent_dialog = g_value_get_boolean(value);
-        break;
-    default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    }
-}
-
-static void
 remote_viewer_deactivated(VirtViewerApp *app, gboolean connect_error)
 {
     RemoteViewer *self = REMOTE_VIEWER(app);
     RemoteViewerPrivate *priv = self->priv;
 
     if (connect_error && priv->open_recent_dialog) {
-        if (virt_viewer_app_start(app)) {
+        if (virt_viewer_app_start(app, NULL)) {
             return;
         }
     }
@@ -185,52 +127,114 @@ remote_viewer_deactivated(VirtViewerApp *app, gboolean connect_error)
     VIRT_VIEWER_APP_CLASS(remote_viewer_parent_class)->deactivated(app, connect_error);
 }
 
+static gchar **opt_args = NULL;
+static char *opt_title = NULL;
+static gboolean opt_controller = FALSE;
+
+static void
+remote_viewer_add_option_entries(VirtViewerApp *self, GOptionContext *context, GOptionGroup *group)
+{
+    static const GOptionEntry options[] = {
+        { "title", 't', 0, G_OPTION_ARG_STRING, &opt_title,
+          N_("Set window title"), NULL },
+#ifdef HAVE_SPICE_GTK
+        { "spice-controller", '\0', 0, G_OPTION_ARG_NONE, &opt_controller,
+          N_("Open connection using Spice controller communication"), NULL },
+#endif
+        { G_OPTION_REMAINING, '\0', 0, G_OPTION_ARG_STRING_ARRAY, &opt_args,
+          NULL, "URI|VV-FILE" },
+        { NULL, 0, 0, G_OPTION_ARG_NONE, NULL, NULL, NULL }
+    };
+
+    VIRT_VIEWER_APP_CLASS(remote_viewer_parent_class)->add_option_entries(self, context, group);
+    g_option_context_set_summary(context, _("Remote viewer client"));
+    g_option_group_add_entries(group, options);
+
+#ifdef HAVE_OVIRT
+    g_option_context_add_group (context, ovirt_get_option_group ());
+#endif
+}
+
+static gboolean
+remote_viewer_local_command_line (GApplication   *gapp,
+                                  gchar        ***args,
+                                  int            *status)
+{
+    gboolean ret = FALSE;
+    VirtViewerApp *app = VIRT_VIEWER_APP(gapp);
+    RemoteViewer *self = REMOTE_VIEWER(app);
+
+    ret = G_APPLICATION_CLASS(remote_viewer_parent_class)->local_command_line(gapp, args, status);
+    if (ret)
+        goto end;
+
+    if (!opt_args) {
+        self->priv->open_recent_dialog = TRUE;
+    } else {
+        if (g_strv_length(opt_args) > 1) {
+            g_printerr(_("\nError: can't handle multiple URIs\n\n"));
+            ret = TRUE;
+            *status = 1;
+            goto end;
+        }
+
+        g_object_set(app, "guri", opt_args[0], NULL);
+    }
+
+#ifdef HAVE_SPICE_GTK
+    if (opt_controller) {
+        if (opt_args) {
+            g_printerr(_("\nError: extra arguments given while using Spice controller\n\n"));
+            ret = TRUE;
+            *status = 1;
+            goto end;
+        }
+
+        self->priv->controller = spice_ctrl_controller_new();
+        self->priv->ctrl_foreign_menu = spice_ctrl_foreign_menu_new();
+
+        g_object_set(self, "guest-name", "defined by Spice controller", NULL);
+
+        g_signal_connect(self->priv->ctrl_foreign_menu, "notify::title",
+                         G_CALLBACK(foreign_menu_title_changed),
+                         self);
+    }
+#endif
+
+    if (opt_title && !opt_controller)
+        g_object_set(app, "title", opt_title, NULL);
+
+end:
+    if (ret && *status)
+        g_printerr(_("Run '%s --help' to see a full list of available command line options\n"), g_get_prgname());
+
+    g_strfreev(opt_args);
+    return ret;
+}
+
 static void
 remote_viewer_class_init (RemoteViewerClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
+    GtkApplicationClass *gtk_app_class = GTK_APPLICATION_CLASS(klass);
     VirtViewerAppClass *app_class = VIRT_VIEWER_APP_CLASS (klass);
+    GApplicationClass *g_app_class = G_APPLICATION_CLASS(klass);
 
     g_type_class_add_private (klass, sizeof (RemoteViewerPrivate));
 
-    object_class->get_property = remote_viewer_get_property;
-    object_class->set_property = remote_viewer_set_property;
+    object_class->dispose = remote_viewer_dispose;
+
+    g_app_class->local_command_line = remote_viewer_local_command_line;
 
     app_class->start = remote_viewer_start;
     app_class->deactivated = remote_viewer_deactivated;
-    object_class->dispose = remote_viewer_dispose;
+    app_class->add_option_entries = remote_viewer_add_option_entries;
 #ifdef HAVE_SPICE_GTK
     app_class->activate = remote_viewer_activate;
-    app_class->window_added = remote_viewer_window_added;
-
-    g_object_class_install_property(object_class,
-                                    PROP_CONTROLLER,
-                                    g_param_spec_object("controller",
-                                                        "Controller",
-                                                        "Spice controller",
-                                                        SPICE_CTRL_TYPE_CONTROLLER,
-                                                        G_PARAM_READWRITE |
-                                                        G_PARAM_CONSTRUCT_ONLY |
-                                                        G_PARAM_STATIC_STRINGS));
-    g_object_class_install_property(object_class,
-                                    PROP_CTRL_FOREIGN_MENU,
-                                    g_param_spec_object("foreign-menu",
-                                                        "Foreign Menu",
-                                                        "Spice foreign menu",
-                                                        SPICE_CTRL_TYPE_FOREIGN_MENU,
-                                                        G_PARAM_READWRITE |
-                                                        G_PARAM_CONSTRUCT_ONLY |
-                                                        G_PARAM_STATIC_STRINGS));
+    gtk_app_class->window_added = remote_viewer_window_added;
+#else
+    (void) gtk_app_class;
 #endif
-    g_object_class_install_property(object_class,
-                                    PROP_OPEN_RECENT_DIALOG,
-                                    g_param_spec_boolean("open-recent-dialog",
-                                                         "Open recent dialog",
-                                                         "Open recent dialog",
-                                                         FALSE,
-                                                         G_PARAM_READWRITE |
-                                                         G_PARAM_CONSTRUCT_ONLY |
-                                                         G_PARAM_STATIC_STRINGS));
 }
 
 static void
@@ -240,11 +244,11 @@ remote_viewer_init(RemoteViewer *self)
 }
 
 RemoteViewer *
-remote_viewer_new(const gchar *uri)
+remote_viewer_new(void)
 {
     return g_object_new(REMOTE_VIEWER_TYPE,
-                        "guri", uri,
-                        "open-recent-dialog", uri == NULL,
+                        "application-id", "org.virt-manager.remote-viewer",
+                        "flags", G_APPLICATION_NON_UNIQUE,
                         NULL);
 }
 
@@ -265,26 +269,6 @@ foreign_menu_title_changed(SpiceCtrlForeignMenu *menu G_GNUC_UNUSED,
 
     /* update menu title */
     spice_foreign_menu_updated(self);
-}
-
-RemoteViewer *
-remote_viewer_new_with_controller(void)
-{
-    RemoteViewer *self;
-    SpiceCtrlController *ctrl = spice_ctrl_controller_new();
-    SpiceCtrlForeignMenu *menu = spice_ctrl_foreign_menu_new();
-
-    self =  g_object_new(REMOTE_VIEWER_TYPE,
-                         "controller", ctrl,
-                         "foreign-menu", menu,
-                         NULL);
-    g_signal_connect(menu, "notify::title",
-                     G_CALLBACK(foreign_menu_title_changed),
-                     self);
-    g_object_unref(ctrl);
-    g_object_unref(menu);
-
-    return self;
 }
 
 static void
@@ -617,9 +601,12 @@ spice_ctrl_listen_async_cb(GObject *object,
 static gboolean
 remote_viewer_activate(VirtViewerApp *app, GError **error)
 {
-    g_return_val_if_fail(REMOTE_VIEWER_IS(app), FALSE);
-    RemoteViewer *self = REMOTE_VIEWER(app);
+    RemoteViewer *self;
     gboolean ret = FALSE;
+
+    g_return_val_if_fail(REMOTE_VIEWER_IS(app), FALSE);
+
+    self = REMOTE_VIEWER(app);
 
     if (self->priv->controller) {
         SpiceSession *session = remote_viewer_get_spice_session(self);
@@ -633,11 +620,15 @@ remote_viewer_activate(VirtViewerApp *app, GError **error)
 }
 
 static void
-remote_viewer_window_added(VirtViewerApp *app,
-                           VirtViewerWindow *win)
+remote_viewer_window_added(GtkApplication *app,
+                           GtkWindow *w)
 {
+    VirtViewerWindow *win = VIRT_VIEWER_WINDOW(
+                                g_object_get_data(G_OBJECT(w), "virt-viewer-window"));
     spice_menu_update(REMOTE_VIEWER(app), win);
     spice_foreign_menu_update(REMOTE_VIEWER(app), win);
+
+    GTK_APPLICATION_CLASS(remote_viewer_parent_class)->window_added(app, w);
 }
 #endif
 
@@ -668,7 +659,7 @@ parse_ovirt_uri(const gchar *uri_str, char **rest_uri, char **name, char **usern
 
     if (uri->path == NULL) {
         *name = NULL;
-        *rest_uri = g_strdup_printf("https://%s/api/", uri->server);
+        *rest_uri = g_strdup(uri->server);
         xmlFreeURI(uri);
         return TRUE;
     }
@@ -691,8 +682,7 @@ parse_ovirt_uri(const gchar *uri_str, char **rest_uri, char **name, char **usern
 
     /* build final URI */
     rel_path = g_strjoinv("/", path_elements);
-    /* FIXME: how to decide between http and https? */
-    *rest_uri = g_strdup_printf("https://%s%s/api/", uri->server, rel_path);
+    *rest_uri = g_strdup_printf("%s%s", uri->server, rel_path);
     *name = vm_name;
     g_free(rel_path);
     g_strfreev(path_elements);
@@ -730,6 +720,10 @@ authenticate_cb(RestProxy *proxy, G_GNUC_UNUSED RestProxyAuth *auth,
                      "username", username,
                      "password", password,
                      NULL);
+#ifdef HAVE_OVIRT_CANCEL
+    } else {
+        rest_proxy_auth_cancel(auth);
+#endif
     }
 
     g_free(username);
@@ -738,28 +732,34 @@ authenticate_cb(RestProxy *proxy, G_GNUC_UNUSED RestProxyAuth *auth,
 }
 
 static void
-ovirt_foreign_menu_update(RemoteViewer *app, VirtViewerWindow *win)
+ovirt_foreign_menu_update(GtkApplication *gtkapp, GtkWindow *gtkwin, G_GNUC_UNUSED gpointer data)
 {
+    RemoteViewer *app = REMOTE_VIEWER(gtkapp);
+    VirtViewerWindow *win = g_object_get_data(G_OBJECT(gtkwin), "virt-viewer-window");
     GtkWidget *menu = g_object_get_data(G_OBJECT(win), "foreign-menu");
     GtkWidget *submenu;
-    GtkMenuShell *shell = GTK_MENU_SHELL(gtk_builder_get_object(virt_viewer_window_get_builder(win), "top-menu"));
 
     if (app->priv->ovirt_foreign_menu == NULL) {
         /* nothing to do */
         return;
     }
-    if (menu == NULL) {
-        menu = gtk_menu_item_new_with_label(_("_Change CD"));
-        gtk_menu_item_set_use_underline(GTK_MENU_ITEM(menu), TRUE);
-        gtk_menu_shell_append(shell, menu);
-        g_object_set_data_full(G_OBJECT(win), "foreign-menu",
-                               g_object_ref(menu),
-                               (GDestroyNotify)gtk_widget_destroy);
-    }
 
     submenu = ovirt_foreign_menu_get_gtk_menu(app->priv->ovirt_foreign_menu);
-    gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu), submenu);
+    if (submenu == NULL) {
+        /* No items to show, no point in showing the menu */
+        if (menu != NULL)
+           gtk_widget_set_visible(menu, FALSE);
+        g_object_set_data(G_OBJECT(win), "foreign-menu", NULL);
+        return;
+    }
 
+    if (menu == NULL) {
+        menu = GTK_WIDGET(gtk_builder_get_object(virt_viewer_window_get_builder(win), "menu-change-cd"));
+        g_object_set_data(G_OBJECT(win), "foreign-menu", menu);
+        gtk_widget_set_visible(menu, TRUE);
+    }
+
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu), submenu);
     gtk_widget_show_all(menu);
 }
 
@@ -767,8 +767,9 @@ static void
 ovirt_foreign_menu_update_each(gpointer value,
                                gpointer user_data)
 {
-    ovirt_foreign_menu_update(REMOTE_VIEWER(user_data),
-                              VIRT_VIEWER_WINDOW(value));
+    ovirt_foreign_menu_update(GTK_APPLICATION(user_data),
+                              virt_viewer_window_get_window(VIRT_VIEWER_WINDOW(value)),
+                              NULL);
 }
 
 static void
@@ -829,6 +830,7 @@ create_ovirt_session(VirtViewerApp *app, const char *uri, GError **err)
     gboolean success = FALSE;
     guint port;
     guint secure_port;
+    char *proxy_url = NULL;
     OvirtVmDisplayType type;
     const char *session_type;
 
@@ -858,12 +860,20 @@ create_ovirt_session(VirtViewerApp *app, const char *uri, GError **err)
     api = ovirt_proxy_fetch_api(proxy, &error);
     if (error != NULL) {
         g_debug("failed to get oVirt 'api' collection: %s", error->message);
+#ifdef HAVE_OVIRT_CANCEL
+        if (g_error_matches(error, OVIRT_REST_CALL_ERROR, OVIRT_REST_CALL_ERROR_CANCELLED)) {
+            g_clear_error(&error);
+            g_set_error_literal(&error,
+                                VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_CANCELLED,
+                                _("Authentication was cancelled"));
+        }
+#endif
         goto error;
     }
     vms = ovirt_api_get_vms(api);
     ovirt_collection_fetch(vms, proxy, &error);
     if (error != NULL) {
-        g_debug("failed to lookup %s: %s", vm_name, error->message);
+        g_debug("failed to fetch oVirt 'vms' collection: %s", error->message);
         goto error;
     }
     if (vm_name == NULL ||
@@ -909,9 +919,21 @@ create_ovirt_session(VirtViewerApp *app, const char *uri, GError **err)
                  "secure-port", &secure_port,
                  "ticket", &ticket,
                  "host-subject", &host_subject,
+                 "proxy-url", &proxy_url,
                  NULL);
-    gport = g_strdup_printf("%d", port);
-    gtlsport = g_strdup_printf("%d", secure_port);
+    if (port != 0) {
+        gport = g_strdup_printf("%d", port);
+    }
+    if (secure_port != 0) {
+        gtlsport = g_strdup_printf("%d", secure_port);
+    }
+
+    if (ghost == NULL) {
+        g_set_error(&error, VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
+                    _("oVirt VM %s has no host information"), vm_name);
+        g_debug("%s", error->message);
+        goto error;
+    }
 
     if (type == OVIRT_VM_DISPLAY_SPICE) {
         session_type = "spice";
@@ -933,11 +955,9 @@ create_ovirt_session(VirtViewerApp *app, const char *uri, GError **err)
     virt_viewer_app_set_connect_info(app, NULL, ghost, gport, gtlsport,
                                      session_type, NULL, NULL, 0, NULL);
 
-    if (virt_viewer_app_create_session(app, session_type) < 0) {
-        g_set_error(&error, VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
-                    _("Failed to create a session type %s"), session_type);
+    if (!virt_viewer_app_create_session(app, session_type, &error))
         goto error;
-    }
+
 #ifdef HAVE_SPICE_GTK
     if (type == OVIRT_VM_DISPLAY_SPICE) {
         SpiceSession *session;
@@ -947,6 +967,7 @@ create_ovirt_session(VirtViewerApp *app, const char *uri, GError **err)
         g_object_set(G_OBJECT(session),
                      "password", ticket,
                      "cert-subject", host_subject,
+                     "proxy", proxy_url,
                      NULL);
         g_object_get(G_OBJECT(proxy), "ca-cert", &ca_cert, NULL);
         if (ca_cert != NULL) {
@@ -970,6 +991,7 @@ error:
     g_free(ghost);
     g_free(host_subject);
     g_free(guid);
+    g_free(proxy_url);
 
     if (error != NULL)
         g_propagate_error(err, error);
@@ -977,8 +999,6 @@ error:
         g_object_unref(display);
     if (vm != NULL)
         g_object_unref(vm);
-    if (api != NULL)
-        g_object_unref(api);
     if (proxy != NULL)
         g_object_unref(proxy);
 
@@ -986,162 +1006,6 @@ error:
 }
 
 #endif
-
-static void entry_icon_release_cb(GtkEntry* entry, gpointer data G_GNUC_UNUSED)
-{
-    gtk_entry_set_text(entry, "");
-    gtk_widget_grab_focus(GTK_WIDGET(entry));
-}
-
-static void entry_changed_cb(GtkEditable* entry, gpointer data G_GNUC_UNUSED)
-{
-    gboolean rtl = (gtk_widget_get_direction(GTK_WIDGET(entry)) == GTK_TEXT_DIR_RTL);
-    gboolean active = gtk_entry_get_text_length(GTK_ENTRY(entry)) > 0;
-
-    g_object_set(entry,
-                 "secondary-icon-name", active ? (rtl ? "edit-clear-rtl-symbolic" : "edit-clear-symbolic") : NULL,
-                 "secondary-icon-activatable", active,
-                 "secondary-icon-sensitive", active,
-                 NULL);
-}
-
-static void
-recent_selection_changed_dialog_cb(GtkRecentChooser *chooser, gpointer data)
-{
-    GtkRecentInfo *info;
-    GtkWidget *entry = data;
-    const gchar *uri;
-
-    info = gtk_recent_chooser_get_current_item(chooser);
-    if (info == NULL)
-        return;
-
-    uri = gtk_recent_info_get_uri(info);
-    g_return_if_fail(uri != NULL);
-
-    gtk_entry_set_text(GTK_ENTRY(entry), uri);
-
-    gtk_recent_info_unref(info);
-}
-
-static void
-recent_item_activated_dialog_cb(GtkRecentChooser *chooser G_GNUC_UNUSED, gpointer data)
-{
-   gtk_dialog_response(GTK_DIALOG (data), GTK_RESPONSE_ACCEPT);
-}
-
-static void make_label_light(GtkLabel* label)
-{
-    PangoAttrList* attributes = pango_attr_list_new();
-#if GTK_CHECK_VERSION(3, 0, 0)
-    gtk_style_context_add_class(gtk_widget_get_style_context(GTK_WIDGET(label)), "dim-label");
-#else
-    GtkStyle* style = gtk_widget_get_style(GTK_WIDGET(label));
-    GdkColor* c = &style->text[GTK_STATE_INSENSITIVE];
-    pango_attr_list_insert(attributes, pango_attr_foreground_new(c->red, c->green, c->blue));
-#endif
-    pango_attr_list_insert(attributes, pango_attr_scale_new(0.9));
-    gtk_label_set_attributes(label, attributes);
-    pango_attr_list_unref(attributes);
-}
-
-static void make_label_bold(GtkLabel* label)
-{
-    PangoAttrList* attributes = pango_attr_list_new();
-    pango_attr_list_insert(attributes, pango_attr_weight_new(PANGO_WEIGHT_BOLD));
-    gtk_label_set_attributes(label, attributes);
-    pango_attr_list_unref(attributes);
-
-}
-
-static gint
-connect_dialog(GtkWindow *main_window, gchar **uri)
-{
-    GtkWidget *dialog, *area, *box, *label, *entry, *recent;
-#if !GTK_CHECK_VERSION(3, 0, 0)
-    GtkWidget *alignment;
-#endif
-    GtkRecentFilter *rfilter;
-    gint retval;
-
-    /* Create the widgets */
-    dialog = gtk_dialog_new_with_buttons(_("Connection details"),
-                                         main_window,
-                                         GTK_DIALOG_DESTROY_WITH_PARENT,
-                                         GTK_STOCK_CANCEL,
-                                         GTK_RESPONSE_REJECT,
-                                         GTK_STOCK_CONNECT,
-                                         GTK_RESPONSE_ACCEPT,
-                                         NULL);
-    gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_ACCEPT);
-    gtk_container_set_border_width(GTK_CONTAINER(dialog), 5);
-    area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-    box = gtk_vbox_new(FALSE, 6);
-    gtk_container_set_border_width(GTK_CONTAINER(box), 5);
-    gtk_box_pack_start(GTK_BOX(area), box, TRUE, TRUE, 0);
-
-    label = gtk_label_new_with_mnemonic(_("_Connection Address"));
-    gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-    gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 0);
-    entry = GTK_WIDGET(gtk_entry_new());
-    gtk_entry_set_activates_default(GTK_ENTRY(entry), TRUE);
-    g_object_set(entry, "width-request", 200, NULL);
-    g_signal_connect(entry, "changed", G_CALLBACK(entry_changed_cb), entry);
-    g_signal_connect(entry, "icon-release", G_CALLBACK(entry_icon_release_cb), entry);
-    gtk_box_pack_start(GTK_BOX(box), entry, TRUE, TRUE, 0);
-    gtk_label_set_mnemonic_widget(GTK_LABEL(label), entry);
-    make_label_bold(GTK_LABEL(label));
-
-    label = gtk_label_new(_("For example, spice://foo.example.org:5900"));
-    gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-    make_label_light(GTK_LABEL(label));
-#if GTK_CHECK_VERSION(3, 0, 0)
-    gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 0);
-    gtk_widget_set_margin_bottom(label, 12);
-#else
-    alignment = gtk_alignment_new(0, 0, 1, 1);
-    gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 0, 12, 0, 0);
-    gtk_container_add(GTK_CONTAINER(alignment), label);
-    gtk_box_pack_start(GTK_BOX(box), alignment, TRUE, TRUE, 0);
-#endif
-
-    label = gtk_label_new_with_mnemonic(_("_Recent Connections"));
-    make_label_bold(GTK_LABEL(label));
-    gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 0);
-    gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-
-    recent = GTK_WIDGET(gtk_recent_chooser_widget_new());
-    gtk_recent_chooser_set_show_icons(GTK_RECENT_CHOOSER(recent), FALSE);
-    gtk_recent_chooser_set_sort_type(GTK_RECENT_CHOOSER(recent), GTK_RECENT_SORT_MRU);
-    gtk_box_pack_start(GTK_BOX(box), recent, TRUE, TRUE, 0);
-    gtk_label_set_mnemonic_widget(GTK_LABEL(label), recent);
-
-    rfilter = gtk_recent_filter_new();
-    gtk_recent_filter_add_mime_type(rfilter, "application/x-spice");
-    gtk_recent_filter_add_mime_type(rfilter, "application/x-vnc");
-    gtk_recent_filter_add_mime_type(rfilter, "application/x-virt-viewer");
-    gtk_recent_chooser_set_filter(GTK_RECENT_CHOOSER(recent), rfilter);
-    gtk_recent_chooser_set_local_only(GTK_RECENT_CHOOSER(recent), FALSE);
-    g_signal_connect(recent, "selection-changed",
-                     G_CALLBACK(recent_selection_changed_dialog_cb), entry);
-    g_signal_connect(recent, "item-activated",
-                     G_CALLBACK(recent_item_activated_dialog_cb), dialog);
-
-    /* show and wait for response */
-    gtk_widget_show_all(dialog);
-    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-        *uri = g_strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
-        g_strstrip(*uri);
-        retval = 0;
-    } else {
-        *uri = NULL;
-        retval = -1;
-    }
-    gtk_widget_destroy(dialog);
-
-    return retval;
-}
-
 
 #ifdef HAVE_OVIRT
 static OvirtVm *
@@ -1185,14 +1049,43 @@ choose_vm(GtkWindow *main_window,
 }
 #endif
 
+static void
+remote_viewer_recent_add(gchar *uri, const gchar *mime_type)
+{
+    GtkRecentManager *recent;
+    GtkRecentData meta = {
+        .app_name     = (char*)"remote-viewer",
+        .app_exec     = (char*)"remote-viewer %u",
+        .mime_type    = (char*)mime_type,
+    };
+
+    if (uri == NULL)
+        return;
+
+    recent = gtk_recent_manager_get_default();
+    meta.display_name = uri;
+    if (!gtk_recent_manager_add_full(recent, uri, &meta))
+        g_warning("Recent item couldn't be added");
+}
+
+static void
+remote_viewer_session_connected(VirtViewerSession *session,
+                                VirtViewerApp *self G_GNUC_UNUSED)
+{
+    gchar *uri = virt_viewer_session_get_uri(session);
+    const gchar *mime = virt_viewer_session_mime_type(session);
+
+    remote_viewer_recent_add(uri, mime);
+    g_free(uri);
+}
+
 static gboolean
-remote_viewer_start(VirtViewerApp *app)
+remote_viewer_start(VirtViewerApp *app, GError **err)
 {
     g_return_val_if_fail(REMOTE_VIEWER_IS(app), FALSE);
 
     RemoteViewer *self = REMOTE_VIEWER(app);
     RemoteViewerPrivate *priv = self->priv;
-    VirtViewerWindow *main_window;
     GFile *file = NULL;
     VirtViewerFile *vvfile = NULL;
     gboolean ret = FALSE;
@@ -1204,8 +1097,8 @@ remote_viewer_start(VirtViewerApp *app)
     g_signal_connect(app, "notify", G_CALLBACK(app_notified), self);
 
     if (priv->controller) {
-        if (virt_viewer_app_create_session(app, "spice") < 0) {
-            virt_viewer_app_simple_message_dialog(app, _("Couldn't create a Spice session"));
+        if (!virt_viewer_app_create_session(app, "spice", &error)) {
+            g_debug("Couldn't create a Spice session");
             goto cleanup;
         }
 
@@ -1223,10 +1116,14 @@ remote_viewer_start(VirtViewerApp *app)
     } else {
 #endif
 retry_dialog:
-        main_window = virt_viewer_app_get_main_window(app);
         if (priv->open_recent_dialog) {
-            if (connect_dialog(virt_viewer_window_get_window(main_window), &guri) != 0)
+            if (!remote_viewer_connect_dialog(&guri)) {
+                g_set_error_literal(&error,
+                            VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_CANCELLED,
+                            _("No connection was chosen"));
+                g_propagate_error(err, error);
                 return FALSE;
+            }
             g_object_set(app, "guri", guri, NULL);
         } else
             g_object_get(app, "guri", &guri, NULL);
@@ -1241,35 +1138,32 @@ retry_dialog:
             vvfile = virt_viewer_file_new(path, &error);
             g_free(path);
             if (error) {
-                virt_viewer_app_simple_message_dialog(app, _("Invalid file %s"), guri);
+                g_prefix_error(&error, _("Invalid file %s: "), guri);
                 g_warning("%s", error->message);
-                g_clear_error(&error);
                 goto cleanup;
             }
             g_object_get(G_OBJECT(vvfile), "type", &type, NULL);
         } else if (virt_viewer_util_extract_host(guri, &type, NULL, NULL, NULL, NULL) < 0 || type == NULL) {
-            virt_viewer_app_simple_message_dialog(app, _("Cannot determine the connection type from URI"));
+            g_set_error_literal(&error,
+                                VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
+                                _("Cannot determine the connection type from URI"));
             goto cleanup;
         }
 #ifdef HAVE_OVIRT
         if (g_strcmp0(type, "ovirt") == 0) {
             if (!create_ovirt_session(app, guri, &error)) {
-                if (error) {
-                    virt_viewer_app_simple_message_dialog(app,
-                                                          _("Couldn't open oVirt session: %s"),
-                                                          error->message);
-                }
-                g_clear_error(&error);
+                g_prefix_error(&error, _("Couldn't open oVirt session: "));
                 goto cleanup;
             }
         } else
 #endif
         {
-            if (virt_viewer_app_create_session(app, type) < 0) {
-                virt_viewer_app_simple_message_dialog(app, _("Couldn't create a session for this type: %s"), type);
+            if (!virt_viewer_app_create_session(app, type, &error))
                 goto cleanup;
-            }
         }
+
+        g_signal_connect(virt_viewer_app_get_session(app), "session-connected",
+                         G_CALLBACK(remote_viewer_session_connected), app);
 
         virt_viewer_session_set_file(virt_viewer_app_get_session(app), vvfile);
 #ifdef HAVE_OVIRT
@@ -1283,18 +1177,18 @@ retry_dialog:
 #endif
 
         if (!virt_viewer_app_initial_connect(app, &error)) {
-            const gchar *msg = error ? error->message :
-                _("Failed to initiate connection");
-
-            virt_viewer_app_simple_message_dialog(app, msg);
-            g_clear_error(&error);
+            if (error == NULL) {
+                g_set_error_literal(&error,
+                                    VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
+                                    _("Failed to initiate connection"));
+            }
             goto cleanup;
         }
 #ifdef HAVE_SPICE_GTK
     }
 #endif
 
-    ret = VIRT_VIEWER_APP_CLASS(remote_viewer_parent_class)->start(app);
+    ret = VIRT_VIEWER_APP_CLASS(remote_viewer_parent_class)->start(app, &error);
 
 cleanup:
     g_clear_object(&file);
@@ -1305,8 +1199,11 @@ cleanup:
     type = NULL;
 
     if (!ret && priv->open_recent_dialog) {
+        g_clear_error(&error);
         goto retry_dialog;
     }
+    if (error != NULL)
+        g_propagate_error(err, error);
 
     return ret;
 }

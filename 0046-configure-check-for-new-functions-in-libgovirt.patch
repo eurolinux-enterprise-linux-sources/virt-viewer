@@ -1,0 +1,35 @@
+From 909174b37f433a8c68039bd6c853cca6e09a8dd1 Mon Sep 17 00:00:00 2001
+From: "Eduardo Lima (Etrunko)" <etrunko@redhat.com>
+Date: Fri, 29 Sep 2017 17:54:39 -0300
+Subject: [PATCH] configure: check for new functions in libgovirt
+
+These functions will be used in ovirt-foreign-menu code and guarded
+by #ifdef blocks so that we can keep compatibility with older libgovirt
+versions.
+
+Related: https://bugzilla.redhat.com/show_bug.cgi?id=1427467
+         https://bugzilla.redhat.com/show_bug.cgi?id=1428401
+
+Signed-off-by: Eduardo Lima (Etrunko) <etrunko@redhat.com>
+---
+ configure.ac | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/configure.ac b/configure.ac
+index 395659b..6ed5f8a 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -190,6 +190,10 @@ AS_IF([test "x$with_ovirt" = "xyes"],
+          void *fun = rest_proxy_auth_cancel;])],
+         [AC_DEFINE([HAVE_OVIRT_CANCEL], 1, [Have rest_proxy_auth_cancel and OVIRT_REST_CALL_ERROR_CANCELLED?])],
+         [])
++       AC_CHECK_FUNCS([ovirt_api_search_vms ovirt_vm_get_host ovirt_host_get_cluster ovirt_cluster_get_data_center],
++                      [AC_DEFINE([HAVE_OVIRT_DATA_CENTER], 1, [Have support for data center])],
++                      []
++                      )
+        CFLAGS="$SAVED_CFLAGS"
+        LIBS="$SAVED_LIBS"]
+ )
+-- 
+2.13.6
+

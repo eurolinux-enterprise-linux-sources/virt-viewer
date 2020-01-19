@@ -1,0 +1,49 @@
+From 260b1283dc3b6473b19941d466779244f32ddcf1 Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Thu, 19 Jan 2017 17:36:47 +0100
+Subject: [PATCH 12/26] README: switch to Markdown syntax
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+To render nicely on the project git page:
+ https://pagure.io/virt-viewer
+
+Acked-by: Fabiano Fidêncio <fabiano@fidencio.org>
+---
+ README => README.md | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+ rename README => README.md (92%)
+
+diff --git a/README b/README.md
+similarity index 92%
+rename from README
+rename to README.md
+index ea1c633..ceb01a9 100644
+--- a/README
++++ b/README.md
+@@ -1,5 +1,4 @@
+-  Virt Viewer
+-  ===========
++# Virt Viewer
+ 
+ Virt Viewer provides a graphical viewer for the guest OS
+ display. At this time is supports guest OS using the VNC
+@@ -22,7 +21,7 @@ display of the SPICE protocol, which is available from:
+   https://www.spice-space.org/download.html
+ 
+ Use of either SPICE-GTK or GTK-VNC can be disabled at time
+-of configure, with --without-gtk-vnc or --without-spice-gtk
++of configure, with `--without-gtk-vnc` or `--without-spice-gtk`
+ respectively.
+ 
+ Virt Viewer uses libvirt to lookup information about the
+@@ -38,5 +37,3 @@ found on the Virt Manager website:
+ Feedback should be directed to the mailing list at
+ 
+   http://www.redhat.com/mailman/listinfo/virt-tools-list
+-
+--- End
+-- 
+2.12.0
+

@@ -30,9 +30,11 @@ extern gboolean doDebug;
 
 enum {
     VIRT_VIEWER_ERROR_FAILED,
+    VIRT_VIEWER_ERROR_CANCELLED
 };
 
 #define VIRT_VIEWER_ERROR virt_viewer_error_quark ()
+#define VIRT_VIEWER_RESOURCE_PREFIX "/org/virt-manager/virt-viewer"
 
 GQuark virt_viewer_error_quark(void);
 
@@ -53,12 +55,16 @@ gulong virt_viewer_signal_connect_object(gpointer instance,
                                          GConnectFlags connect_flags);
 
 gchar* spice_hotkey_to_gtk_accelerator(const gchar *key);
-gint virt_viewer_compare_version(const gchar *s1, const gchar *s2);
+gint virt_viewer_compare_buildid(const gchar *s1, const gchar *s2);
 
 /* monitor alignment */
-void virt_viewer_align_monitors_linear(GdkRectangle *displays, guint ndisplays);
-void virt_viewer_shift_monitors_to_origin(GdkRectangle *displays, guint ndisplays);
+void virt_viewer_align_monitors_linear(GHashTable *displays);
+void virt_viewer_shift_monitors_to_origin(GHashTable *displays);
 
+/* monitor mapping */
+GHashTable* virt_viewer_parse_monitor_mappings(gchar **mappings,
+                                               const gsize nmappings,
+                                               const gint nmonitors);
 #endif
 
 /*

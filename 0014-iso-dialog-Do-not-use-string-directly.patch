@@ -1,0 +1,28 @@
+From 4e3186bcf1c872f4b2c2bbb4867a4f3847883408 Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Mon, 6 Feb 2017 13:02:30 +0100
+Subject: [PATCH 14/26] iso-dialog: Do not use string directly
+
+Fixes -Werror=format-security used when creating the rpm
+
+Acked-by: Eduardo Lima (Etrunko) <etrunko@redhat.com>
+---
+ src/remote-viewer-iso-list-dialog.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/remote-viewer-iso-list-dialog.c b/src/remote-viewer-iso-list-dialog.c
+index f23ddb2..2ab5435 100644
+--- a/src/remote-viewer-iso-list-dialog.c
++++ b/src/remote-viewer-iso-list-dialog.c
+@@ -286,7 +286,7 @@ remote_viewer_iso_list_dialog_show_error(RemoteViewerISOListDialog *self,
+                                     GTK_DIALOG_DESTROY_WITH_PARENT,
+                                     GTK_MESSAGE_ERROR,
+                                     GTK_BUTTONS_CLOSE,
+-                                    message ? message : _("Unspecified error"));
++                                    "%s", message ? message : _("Unspecified error"));
+     gtk_dialog_run(GTK_DIALOG(dialog));
+     gtk_widget_destroy(dialog);
+ }
+-- 
+2.12.0
+

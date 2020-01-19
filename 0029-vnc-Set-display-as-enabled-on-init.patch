@@ -1,0 +1,47 @@
+From eb99fca90471cdedf2799be1cd98960e75c51ac0 Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Wed, 29 Mar 2017 12:36:58 +0200
+Subject: [PATCH virt-viewer 29/32] vnc: Set display as enabled on init
+To: virt-tools-list@redhat.com
+
+Since 9c77a78af2ef85f3fcdce21b42d89566a9f7ee17 the vnc display has
+stopped setting the show hint and started to ignore the initial zoom
+setting. Let's handle it in a similar way as the spice display and set
+the hint when the display is initialized and unset it on disconnect.
+
+Resolves: rhbz#1436991
+
+Acked-by: Eduardo Lima (Etrunko) <etrunko@redhat.com>
+(cherry picked from commit 47c7f4c064d6fe782717b4cb692447f52434c879)
+---
+ src/virt-viewer-display-vnc.c | 1 +
+ src/virt-viewer-session-vnc.c | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/src/virt-viewer-display-vnc.c b/src/virt-viewer-display-vnc.c
+index cb45c23..c200ac2 100644
+--- a/src/virt-viewer-display-vnc.c
++++ b/src/virt-viewer-display-vnc.c
+@@ -134,6 +134,7 @@ virt_viewer_display_vnc_initialized(VncDisplay *vnc G_GNUC_UNUSED,
+         g_object_set(app, "uuid", _("VNC does not provide GUID"), NULL);
+     }
+ 
++    virt_viewer_display_set_enabled(display, TRUE);
+     virt_viewer_display_set_show_hint(display,
+                                       VIRT_VIEWER_DISPLAY_SHOW_HINT_READY, TRUE);
+ 
+diff --git a/src/virt-viewer-session-vnc.c b/src/virt-viewer-session-vnc.c
+index 231f22f..26fb405 100644
+--- a/src/virt-viewer-session-vnc.c
++++ b/src/virt-viewer-session-vnc.c
+@@ -122,6 +122,7 @@ virt_viewer_session_vnc_disconnected(VncDisplay *vnc G_GNUC_UNUSED,
+     display = virt_viewer_display_vnc_new(session, session->priv->vnc);
+     g_debug("Disconnected");
+     g_signal_emit_by_name(session, "session-disconnected", NULL);
++    virt_viewer_display_set_enabled(VIRT_VIEWER_DISPLAY(display), FALSE);
+     virt_viewer_display_set_show_hint(VIRT_VIEWER_DISPLAY(display),
+                                       VIRT_VIEWER_DISPLAY_SHOW_HINT_READY, FALSE);
+ }
+-- 
+2.12.2
+

@@ -1,0 +1,38 @@
+From 48b0a9949e88782388ce73f0c1292c1367aa7e6c Mon Sep 17 00:00:00 2001
+From: Victor Toso <me@victortoso.com>
+Date: Fri, 3 Mar 2017 15:37:02 +0100
+Subject: [PATCH 24/26] Don't define function without oVirt integration
+
+Function is not used without oVirt.
+
+> virt-viewer-window.c:1063:1: warning: 'iso_dialog_response' defined
+> but not used [-Wunused-function]
+
+Signed-off-by: Victor Toso <victortoso@redhat.com>
+---
+ src/virt-viewer-window.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/virt-viewer-window.c b/src/virt-viewer-window.c
+index 2e41edc..867a7b0 100644
+--- a/src/virt-viewer-window.c
++++ b/src/virt-viewer-window.c
+@@ -1059,6 +1059,7 @@ virt_viewer_window_menu_help_about(GtkWidget *menu G_GNUC_UNUSED,
+     g_object_unref(G_OBJECT(about));
+ }
+ 
++#if HAVE_OVIRT
+ static void
+ iso_dialog_response(GtkDialog *dialog,
+                     gint response_id,
+@@ -1069,6 +1070,7 @@ iso_dialog_response(GtkDialog *dialog,
+ 
+     gtk_widget_destroy(GTK_WIDGET(dialog));
+ }
++#endif
+ 
+ void
+ virt_viewer_window_menu_change_cd_activate(GtkWidget *menu G_GNUC_UNUSED,
+-- 
+2.12.0
+

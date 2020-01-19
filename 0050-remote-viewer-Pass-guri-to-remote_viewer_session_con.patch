@@ -1,0 +1,69 @@
+From 8f1b485ddf106aae94ccdf14c26ad11a19c471b4 Mon Sep 17 00:00:00 2001
+From: "Eduardo Lima (Etrunko)" <etrunko@redhat.com>
+Date: Fri, 20 Oct 2017 15:00:46 -0200
+Subject: [PATCH] remote-viewer: Pass guri to remote_viewer_session_connected
+
+When connecting to a VM via oVirt instance, the original uri can not be
+retrieved using virt_viewer_session_get_uri(). Consequently, it was
+never saved, even though the connection succeeds and the actual callback
+for "session-connected" signal, which saves the URI, is invoked.
+
+To solve this problem, we always pass a copy of the guri as user-data
+parameter for the callback, and if the call to
+virt_viewer_session_get_uri() returns NULL, the parameter is used
+instead.
+
+Resolves: https://bugzilla.redhat.com/1459792
+
+Backport from upstream 6608c0dd60fbf3a762a21a4d039fefc75c040406
+
+Signed-off-by: Eduardo Lima (Etrunko) <etrunko@redhat.com>
+---
+ src/remote-viewer.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/src/remote-viewer.c b/src/remote-viewer.c
+index 7834dac..429f38c 100644
+--- a/src/remote-viewer.c
++++ b/src/remote-viewer.c
+@@ -1064,8 +1064,7 @@ remote_viewer_recent_add(gchar *uri, const gchar *mime_type)
+         .mime_type    = (char*)mime_type,
+     };
+ 
+-    if (uri == NULL)
+-        return;
++    g_return_if_fail(uri != NULL);
+ 
+     recent = gtk_recent_manager_get_default();
+     meta.display_name = uri;
+@@ -1075,13 +1074,17 @@ remote_viewer_recent_add(gchar *uri, const gchar *mime_type)
+ 
+ static void
+ remote_viewer_session_connected(VirtViewerSession *session,
+-                                VirtViewerApp *self G_GNUC_UNUSED)
++                                gchar *guri)
+ {
+     gchar *uri = virt_viewer_session_get_uri(session);
+     const gchar *mime = virt_viewer_session_mime_type(session);
+ 
++    if (uri == NULL)
++        uri = g_strdup(guri);
++
+     remote_viewer_recent_add(uri, mime);
+     g_free(uri);
++    g_free(guri);
+ }
+ 
+ static gboolean
+@@ -1169,7 +1172,7 @@ retry_dialog:
+         }
+ 
+         g_signal_connect(virt_viewer_app_get_session(app), "session-connected",
+-                         G_CALLBACK(remote_viewer_session_connected), app);
++                         G_CALLBACK(remote_viewer_session_connected), g_strdup(guri));
+ 
+         virt_viewer_session_set_file(virt_viewer_app_get_session(app), vvfile);
+ #ifdef HAVE_OVIRT
+-- 
+2.13.6
+

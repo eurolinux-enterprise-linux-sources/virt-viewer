@@ -1,0 +1,38 @@
+From 3b8f6932fd4b9f4019eb305943f6d1b6dd01e119 Mon Sep 17 00:00:00 2001
+From: Victor Toso <me@victortoso.com>
+Date: Fri, 2 Jun 2017 14:05:51 +0200
+Subject: [PATCH virt-viewer 39/39] spice: do not show error on cancel/close of
+ auth dialog
+
+Mainly an issue for kiosk mode due the fact that it'll not quit the
+application on cancel. That means that authentication dialog can't
+really be canceled and showing an input error such as "wrong password"
+is misleading (no password should be taken in consideration on Cancel).
+
+Related: https://bugzilla.redhat.com/show_bug.cgi?id=1446161
+
+Signed-off-by: Victor Toso <victortoso@redhat.com>
+Acked-by: Pavel Grunt <pgrunt@redhat.com>
+Acked-by: Eduardo Lima (Etrunko) <etrunko@redhat.com>
+---
+ src/virt-viewer-session-spice.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/virt-viewer-session-spice.c b/src/virt-viewer-session-spice.c
+index 5f326aa..f43ed65 100644
+--- a/src/virt-viewer-session-spice.c
++++ b/src/virt-viewer-session-spice.c
+@@ -724,6 +724,10 @@ virt_viewer_session_spice_main_channel_event(SpiceChannel *channel,
+                                                    &password);
+         g_free(host);
+         if (!ret) {
++            /* ret is false when dialog did not return GTK_RESPONSE_OK. We
++             * should ignore auth error dialog if user has cancelled or closed
++             * the dialog */
++            self->priv->pass_try = 0;
+             g_signal_emit_by_name(session, "session-cancelled");
+         } else {
+             gboolean openfd;
+-- 
+2.9.4
+

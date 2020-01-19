@@ -1,0 +1,44 @@
+From 2d7f5af36b423053f10d91e03245ca42804e27c7 Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Thu, 19 Jan 2017 17:36:46 +0100
+Subject: [PATCH 11/26] README: Update links
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Acked-by: Fabiano Fidêncio <fabiano@fidencio.org>
+---
+ README | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/README b/README
+index e9fe5b9..ea1c633 100644
+--- a/README
++++ b/README
+@@ -14,12 +14,12 @@ the last release that supported GTK2.
+ Virt Viewer uses the GTK-VNC (>= 0.4.0) widget to provide a
+ display of the VNC protocol, which is available from
+ 
+-  http://gtk-vnc.sourceforge.net/
++  https://wiki.gnome.org/Projects/gtk-vnc
+ 
+-Virt Viewer uses the SPICE-GTK (>= 0.30) widget to provide a
++Virt Viewer uses the SPICE-GTK (>= 0.33) widget to provide a
+ display of the SPICE protocol, which is available from:
+ 
+-  http://www.spice-space.org/download.html
++  https://www.spice-space.org/download.html
+ 
+ Use of either SPICE-GTK or GTK-VNC can be disabled at time
+ of configure, with --without-gtk-vnc or --without-spice-gtk
+@@ -37,6 +37,6 @@ found on the Virt Manager website:
+ 
+ Feedback should be directed to the mailing list at
+ 
+-  http://virt-manager.org/mailinglist.html
++  http://www.redhat.com/mailman/listinfo/virt-tools-list
+ 
+ -- End
+-- 
+2.12.0
+

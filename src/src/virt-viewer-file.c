@@ -2,7 +2,7 @@
 /*
  * Virt Viewer: A virtual machine console viewer
  *
- * Copyright (C) 2012 Red Hat, Inc.
+ * Copyright (C) 2012-2015 Red Hat, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,9 @@
  *
  *  The current list of [virt-viewer] keys is:
  * - version: string
+ * - versions: list of id:versions strings
+ * - newer-version-url: string specifying an URL to display when the minimum
+ *   version check fails
  * - type: string, mandatory, values: "spice" (later "vnc" etc..)
  * - host: string
  * - port: int
@@ -74,8 +77,14 @@
  * - host: string containing the URL of the oVirt engine
  * - vm-guid: string containing the guid of the oVirt VM we are connecting to
  * - jsessionid: string containing an authentication cookie to be used to
- *   connect to the oVirt engine without being asked for credentials
+ *   connect to the oVirt engine without being asked for credentials with oVirt
+ *   3.6
+ * - sso-token: string containing an authentication cookie to be used to
+ *   connect to the oVirt engine without being asked for credentials with oVirt
+ *   4.0 and newer
  * - ca: string PEM data (use \n to separate the lines)
+ * - admin: boolean (0 or 1) indicating whether the VM is visible in the user or
+ *   admin portal
  *
  * (the file can be extended with extra groups or keys, which should
  * be prefixed with x- to avoid later conflicts)
@@ -116,12 +125,16 @@ enum  {
     PROP_USB_FILTER,
     PROP_PROXY,
     PROP_VERSION,
+    PROP_VERSIONS,
+    PROP_VERSION_URL,
     PROP_SECURE_CHANNELS,
     PROP_DELETE_THIS_FILE,
     PROP_SECURE_ATTENTION,
+    PROP_OVIRT_ADMIN,
     PROP_OVIRT_HOST,
     PROP_OVIRT_VM_GUID,
     PROP_OVIRT_JSESSIONID,
+    PROP_OVIRT_SSO_TOKEN,
     PROP_OVIRT_CA,
 };
 
@@ -612,6 +625,79 @@ virt_viewer_file_set_version(VirtViewerFile* self, const gchar* value)
     g_object_notify(G_OBJECT(self), "version");
 }
 
+GHashTable*
+virt_viewer_file_get_versions(VirtViewerFile* self)
+{
+    GHashTable *versions;
+    gchar **versions_str;
+    gsize length;
+    unsigned int i;
+
+    versions = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+    versions_str = virt_viewer_file_get_string_list(self, MAIN_GROUP,
+                                                     "versions", &length);
+    for (i = 0; i < length; i++) {
+        GStrv tokens;
+
+        if (versions_str[i] == NULL) {
+            g_warn_if_reached();
+            break;
+        }
+        tokens = g_strsplit(versions_str[i], ":", 2);
+        if (g_strv_length(tokens) != 2) {
+            g_warn_if_reached();
+            continue;
+        }
+        g_debug("Minimum version '%s' for OS id '%s'", tokens[1], tokens[0]);
+        g_hash_table_insert(versions, tokens[0], tokens[1]);
+        g_free(tokens);
+    }
+    g_strfreev(versions_str);
+
+    return versions;
+}
+
+void
+virt_viewer_file_set_versions(VirtViewerFile* self, GHashTable *version_table)
+{
+    GHashTableIter iter;
+    gpointer key, value;
+    GPtrArray *versions;
+
+    versions = g_ptr_array_new_with_free_func(g_free);
+
+    g_hash_table_iter_init(&iter, version_table);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        char *str;
+
+        /* Check that id only contains letters/numbers/- */
+        /* Check that version only contains numbers, ., :, -, (letters ?) */
+        /* FIXME: ':' separator overlaps with ':' epoch indicator */
+
+        str = g_strdup_printf("%s:%s", (char *)key, (char *)value);
+        g_ptr_array_add(versions, str);
+    }
+    virt_viewer_file_set_string_list(self, MAIN_GROUP, "versions",
+                                     (const char * const *)versions->pdata,
+                                     versions->len);
+    g_ptr_array_unref(versions);
+    g_object_notify(G_OBJECT(self), "versions");
+}
+
+gchar*
+virt_viewer_file_get_version_url(VirtViewerFile* self)
+{
+    return virt_viewer_file_get_string(self, MAIN_GROUP, "newer-version-url");
+}
+
+void
+virt_viewer_file_set_version_url(VirtViewerFile* self, const gchar* value)
+{
+    virt_viewer_file_set_string(self, MAIN_GROUP, "newer-version-url", value);
+    g_object_notify(G_OBJECT(self), "version-url");
+}
+
+
 gchar**
 virt_viewer_file_get_secure_channels(VirtViewerFile* self, gsize* length)
 {
@@ -665,6 +751,19 @@ virt_viewer_file_set_ovirt_jsessionid(VirtViewerFile* self, const gchar* value)
 }
 
 gchar*
+virt_viewer_file_get_ovirt_sso_token(VirtViewerFile* self)
+{
+    return virt_viewer_file_get_string(self, OVIRT_GROUP, "sso-token");
+}
+
+void
+virt_viewer_file_set_ovirt_sso_token(VirtViewerFile* self, const gchar* value)
+{
+    virt_viewer_file_set_string(self, OVIRT_GROUP, "sso-token", value);
+    g_object_notify(G_OBJECT(self), "ovirt-sso-token");
+}
+
+gchar*
 virt_viewer_file_get_ovirt_ca(VirtViewerFile* self)
 {
     return virt_viewer_file_get_string(self, OVIRT_GROUP, "ca");
@@ -675,6 +774,19 @@ virt_viewer_file_set_ovirt_ca(VirtViewerFile* self, const gchar* value)
 {
     virt_viewer_file_set_string(self, OVIRT_GROUP, "ca", value);
     g_object_notify(G_OBJECT(self), "ovirt-ca");
+}
+
+gint
+virt_viewer_file_get_ovirt_admin(VirtViewerFile* self)
+{
+    return virt_viewer_file_get_int(self, OVIRT_GROUP, "admin");
+}
+
+void
+virt_viewer_file_set_ovirt_admin(VirtViewerFile* self, gint value)
+{
+    virt_viewer_file_set_int(self, OVIRT_GROUP, "admin", value);
+    g_object_notify(G_OBJECT(self), "ovirt-admin");
 }
 
 static void
@@ -691,27 +803,70 @@ spice_hotkey_set_accel(const gchar *accel_path, const gchar *key)
     gtk_accel_map_change_entry(accel_path, accel_key, accel_mods, TRUE);
 }
 
+static gboolean
+virt_viewer_file_check_min_version(VirtViewerFile *self, GError **error)
+{
+    gchar *min_version = NULL;
+    gint version_cmp;
+
+#ifdef REMOTE_VIEWER_OS_ID
+    if (virt_viewer_file_is_set(self, "versions")) {
+        GHashTable *versions;
+
+        versions = virt_viewer_file_get_versions(self);
+
+        min_version = g_strdup(g_hash_table_lookup(versions, REMOTE_VIEWER_OS_ID));
+
+        g_hash_table_unref(versions);
+    }
+#endif
+
+
+    if (min_version == NULL) {
+        if (virt_viewer_file_is_set(self, "version")) {
+            min_version = virt_viewer_file_get_version(self);
+        }
+    }
+
+    if (min_version == NULL) {
+        return TRUE;
+    }
+    version_cmp = virt_viewer_compare_buildid(min_version, PACKAGE_VERSION BUILDID);
+
+    if (version_cmp > 0) {
+        gchar *url;
+        url = virt_viewer_file_get_version_url(self);
+        if (url != NULL) {
+            g_set_error(error,
+                        VIRT_VIEWER_ERROR,
+                        VIRT_VIEWER_ERROR_FAILED,
+                        _("At least %s version %s is required to setup this"
+                          " connection, see %s for details"),
+                        g_get_application_name(), min_version, url);
+            g_free(url);
+        } else {
+            g_set_error(error,
+                        VIRT_VIEWER_ERROR,
+                        VIRT_VIEWER_ERROR_FAILED,
+                        _("At least %s version %s is required to setup this connection"),
+                        g_get_application_name(), min_version);
+        }
+        g_free(min_version);
+        return FALSE;
+    }
+    g_free(min_version);
+
+    return TRUE;
+}
+
 gboolean
 virt_viewer_file_fill_app(VirtViewerFile* self, VirtViewerApp *app, GError **error)
 {
     g_return_val_if_fail(VIRT_VIEWER_IS_FILE(self), FALSE);
     g_return_val_if_fail(VIRT_VIEWER_IS_APP(app), FALSE);
 
-    if (virt_viewer_file_is_set(self, "version")) {
-        gchar *val = virt_viewer_file_get_version(self);
-
-        if (virt_viewer_compare_version(val, PACKAGE_VERSION) > 0) {
-            g_set_error(error,
-                VIRT_VIEWER_ERROR,
-                VIRT_VIEWER_ERROR_FAILED,
-                _("At least %s version %s is required to setup this connection"),
-                g_get_application_name(), val);
-
-            g_free(val);
-            return FALSE;
-        }
-
-        g_free(val);
+    if (!virt_viewer_file_check_min_version(self, error)) {
+        return FALSE;
     }
 
     if (virt_viewer_file_is_set(self, "title")) {
@@ -833,12 +988,21 @@ virt_viewer_file_set_property(GObject* object, guint property_id,
     case PROP_VERSION:
         virt_viewer_file_set_version(self, g_value_get_string(value));
         break;
+    case PROP_VERSIONS:
+        virt_viewer_file_set_versions(self, g_value_get_boxed(value));
+        break;
+    case PROP_VERSION_URL:
+        virt_viewer_file_set_version_url(self, g_value_get_string(value));
+        break;
     case PROP_SECURE_CHANNELS:
         strv = g_value_get_boxed(value);
         virt_viewer_file_set_secure_channels(self, (const gchar* const*)strv, g_strv_length(strv));
         break;
     case PROP_DELETE_THIS_FILE:
         virt_viewer_file_set_delete_this_file(self, g_value_get_int(value));
+        break;
+    case PROP_OVIRT_ADMIN:
+        virt_viewer_file_set_ovirt_admin(self, g_value_get_int(value));
         break;
     case PROP_OVIRT_HOST:
         virt_viewer_file_set_ovirt_host(self, g_value_get_string(value));
@@ -848,6 +1012,9 @@ virt_viewer_file_set_property(GObject* object, guint property_id,
         break;
     case PROP_OVIRT_JSESSIONID:
         virt_viewer_file_set_ovirt_jsessionid(self, g_value_get_string(value));
+        break;
+    case PROP_OVIRT_SSO_TOKEN:
+        virt_viewer_file_set_ovirt_sso_token(self, g_value_get_string(value));
         break;
     case PROP_OVIRT_CA:
         virt_viewer_file_set_ovirt_ca(self, g_value_get_string(value));
@@ -934,11 +1101,20 @@ virt_viewer_file_get_property(GObject* object, guint property_id,
     case PROP_VERSION:
         g_value_take_string(value, virt_viewer_file_get_version(self));
         break;
+    case PROP_VERSIONS:
+        g_value_take_boxed(value, virt_viewer_file_get_versions(self));
+        break;
+    case PROP_VERSION_URL:
+        g_value_take_string(value, virt_viewer_file_get_version_url(self));
+        break;
     case PROP_SECURE_CHANNELS:
         g_value_take_boxed(value, virt_viewer_file_get_secure_channels(self, NULL));
         break;
     case PROP_DELETE_THIS_FILE:
         g_value_set_int(value, virt_viewer_file_get_delete_this_file(self));
+        break;
+    case PROP_OVIRT_ADMIN:
+        g_value_set_int(value, virt_viewer_file_get_ovirt_admin(self));
         break;
     case PROP_OVIRT_HOST:
         g_value_take_string(value, virt_viewer_file_get_ovirt_host(self));
@@ -948,6 +1124,9 @@ virt_viewer_file_get_property(GObject* object, guint property_id,
         break;
     case PROP_OVIRT_JSESSIONID:
         g_value_take_string(value, virt_viewer_file_get_ovirt_jsessionid(self));
+        break;
+    case PROP_OVIRT_SSO_TOKEN:
+        g_value_take_string(value, virt_viewer_file_get_ovirt_sso_token(self));
         break;
     case PROP_OVIRT_CA:
         g_value_take_string(value, virt_viewer_file_get_ovirt_ca(self));
@@ -1079,12 +1258,24 @@ virt_viewer_file_class_init(VirtViewerFileClass* klass)
         g_param_spec_string("version", "version", "version", NULL,
                             G_PARAM_STATIC_STRINGS | G_PARAM_READWRITE));
 
+    g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_VERSIONS,
+        g_param_spec_boxed("versions", "versions", "versions", G_TYPE_HASH_TABLE,
+                           G_PARAM_STATIC_STRINGS | G_PARAM_READWRITE));
+
+    g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_VERSION_URL,
+        g_param_spec_string("version-url", "version-url", "version-url", NULL,
+                            G_PARAM_STATIC_STRINGS | G_PARAM_READWRITE));
+
     g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_SECURE_CHANNELS,
         g_param_spec_boxed("secure-channels", "secure-channels", "secure-channels", G_TYPE_STRV,
                            G_PARAM_STATIC_STRINGS | G_PARAM_READWRITE));
 
     g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_DELETE_THIS_FILE,
         g_param_spec_int("delete-this-file", "delete-this-file", "delete-this-file", 0, 1, 0,
+                         G_PARAM_STATIC_STRINGS | G_PARAM_READWRITE));
+
+    g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_OVIRT_ADMIN,
+        g_param_spec_int("ovirt-admin", "ovirt-admin", "ovirt-admin", 0, 1, 0,
                          G_PARAM_STATIC_STRINGS | G_PARAM_READWRITE));
 
     g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_OVIRT_HOST,
@@ -1097,6 +1288,10 @@ virt_viewer_file_class_init(VirtViewerFileClass* klass)
 
     g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_OVIRT_JSESSIONID,
         g_param_spec_string("ovirt-jsessionid", "ovirt-jsessionid", "ovirt-jsessionid", NULL,
+                            G_PARAM_STATIC_STRINGS | G_PARAM_READWRITE));
+
+    g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_OVIRT_SSO_TOKEN,
+        g_param_spec_string("ovirt-sso-token", "ovirt-sso-token", "ovirt-sso-token", NULL,
                             G_PARAM_STATIC_STRINGS | G_PARAM_READWRITE));
 
     g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_OVIRT_CA,

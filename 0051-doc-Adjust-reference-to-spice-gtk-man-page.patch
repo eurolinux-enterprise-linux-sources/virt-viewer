@@ -1,0 +1,30 @@
+From 784c4d11f12ed21bba8c5360019fd484f23a4438 Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Thu, 21 Sep 2017 10:16:56 +0200
+Subject: [PATCH] doc: Adjust reference to spice-gtk man page
+
+The man page spice-gtk ships is named "spice-client", not "spice-gtk"
+
+Signed-off-by: Christophe Fergeau <cfergeau@redhat.com>
+Reviewed-by: Daniel P. Berrange <berrange@redhat.com>
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1477966
+---
+ man/virt-viewer.pod | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/man/virt-viewer.pod b/man/virt-viewer.pod
+index bae3a70..2a1c739 100644
+--- a/man/virt-viewer.pod
++++ b/man/virt-viewer.pod
+@@ -232,6 +232,6 @@ to the extent permitted by law.
+ 
+ =head1 SEE ALSO
+ 
+-C<virsh(1)>, C<virt-manager(1)>, C<spice-gtk(1)>, the project website C<http://virt-manager.org>
++C<virsh(1)>, C<virt-manager(1)>, C<spice-client(1)>, the project website C<http://virt-manager.org>
+ 
+ =cut
+-- 
+2.13.6
+

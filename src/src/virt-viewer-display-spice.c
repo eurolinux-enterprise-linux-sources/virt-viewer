@@ -25,7 +25,7 @@
 #include <config.h>
 
 #include <math.h>
-#include <spice-audio.h>
+#include <spice-client-gtk.h>
 
 #include <glib/gi18n.h>
 
@@ -45,6 +45,8 @@ struct _VirtViewerDisplaySpicePrivate {
     SpiceChannel *channel; /* weak reference */
     SpiceDisplay *display;
     AutoResizeState auto_resize;
+    guint x;
+    guint y;
 };
 
 #define VIRT_VIEWER_DISPLAY_SPICE_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE((o), VIRT_VIEWER_TYPE_DISPLAY_SPICE, VirtViewerDisplaySpicePrivate))
@@ -56,6 +58,8 @@ static GdkPixbuf *virt_viewer_display_spice_get_pixbuf(VirtViewerDisplay *displa
 static void virt_viewer_display_spice_release_cursor(VirtViewerDisplay *display);
 static void virt_viewer_display_spice_close(VirtViewerDisplay *display G_GNUC_UNUSED);
 static gboolean virt_viewer_display_spice_selectable(VirtViewerDisplay *display);
+static void virt_viewer_display_spice_enable(VirtViewerDisplay *display);
+static void virt_viewer_display_spice_disable(VirtViewerDisplay *display);
 
 static void
 virt_viewer_display_spice_class_init(VirtViewerDisplaySpiceClass *klass)
@@ -67,6 +71,8 @@ virt_viewer_display_spice_class_init(VirtViewerDisplaySpiceClass *klass)
     dclass->release_cursor = virt_viewer_display_spice_release_cursor;
     dclass->close = virt_viewer_display_spice_close;
     dclass->selectable = virt_viewer_display_spice_selectable;
+    dclass->enable = virt_viewer_display_spice_enable;
+    dclass->disable = virt_viewer_display_spice_disable;
 
     g_type_class_add_private(klass, sizeof(VirtViewerDisplaySpicePrivate));
 }
@@ -87,11 +93,9 @@ virt_viewer_display_spice_monitor_geometry_changed(VirtViewerDisplaySpice *self)
     g_signal_emit_by_name(self, "monitor-geometry-changed", NULL);
 }
 
-static void
-show_hint_changed(VirtViewerDisplay *self)
+static void update_enabled(VirtViewerDisplay *self, gboolean enabled, gboolean send)
 {
     SpiceMainChannel *main_channel = get_main(self);
-    guint enabled = virt_viewer_display_get_enabled(self);
     guint nth;
 
     /* this may happen when finalizing */
@@ -99,7 +103,26 @@ show_hint_changed(VirtViewerDisplay *self)
         return;
 
     g_object_get(self, "nth-display", &nth, NULL);
-    spice_main_set_display_enabled(main_channel, nth, enabled);
+    spice_main_update_display_enabled(main_channel, nth, enabled, send);
+}
+
+static void
+show_hint_changed(VirtViewerDisplay *self)
+{
+    /* just keep spice-gtk state up-to-date, but don't send change anything */
+    update_enabled(self, virt_viewer_display_get_enabled(self), FALSE);
+}
+
+static void virt_viewer_display_spice_enable(VirtViewerDisplay *self)
+{
+    virt_viewer_display_set_enabled(self, TRUE);
+    update_enabled(self, TRUE, TRUE);
+}
+
+static void virt_viewer_display_spice_disable(VirtViewerDisplay *self)
+{
+    virt_viewer_display_set_enabled(self, FALSE);
+    update_enabled(self, FALSE, TRUE);
 }
 
 static void
@@ -176,26 +199,25 @@ virt_viewer_display_spice_size_allocate(VirtViewerDisplaySpice *self,
                                         gpointer data G_GNUC_UNUSED)
 {
     GtkRequisition preferred;
-    guint hint = virt_viewer_display_get_show_hint(VIRT_VIEWER_DISPLAY(self));
 
-    if (hint & VIRT_VIEWER_DISPLAY_SHOW_HINT_READY)
-    {
-        /* ignore all allocations before the widget gets mapped to screen since we
-         * only want to trigger guest resizing due to user actions
-         */
-        if (!gtk_widget_get_mapped(GTK_WIDGET(self)))
-            return;
+    if (!virt_viewer_display_get_enabled(VIRT_VIEWER_DISPLAY(self)))
+        return;
 
-        /* when the window gets resized due to a change in zoom level, we don't want
-         * to re-size the guest display.  So if we get an allocation event that
-         * resizes the window to the size it already wants to be (based on desktop
-         * size and zoom level), just return early
-         */
-        virt_viewer_display_get_preferred_size(VIRT_VIEWER_DISPLAY(self), &preferred);
-        if (preferred.width == allocation->width
-            && preferred.height == allocation->height) {
-            return;
-        }
+    /* ignore all allocations before the widget gets mapped to screen since we
+     * only want to trigger guest resizing due to user actions
+     */
+    if (!gtk_widget_get_mapped(GTK_WIDGET(self)))
+        return;
+
+    /* when the window gets resized due to a change in zoom level, we don't want
+     * to re-size the guest display.  So if we get an allocation event that
+     * resizes the window to the size it already wants to be (based on desktop
+     * size and zoom level), just return early
+     */
+    gtk_widget_get_preferred_size(GTK_WIDGET(self), NULL, &preferred);
+    if (preferred.width == allocation->width
+        && preferred.height == allocation->height) {
+        return;
     }
 
     if (self->priv->auto_resize != AUTO_RESIZE_NEVER)
@@ -221,7 +243,7 @@ enable_accel_changed(VirtViewerApp *app,
                      GParamSpec *pspec G_GNUC_UNUSED,
                      VirtViewerDisplaySpice *self)
 {
-    GtkAccelKey key = { 0 };
+    GtkAccelKey key = {0, 0, 0};
     if (virt_viewer_app_get_enable_accel(app))
         gtk_accel_map_lookup_entry("<virt-viewer>/view/release-cursor", &key);
 
@@ -264,8 +286,11 @@ virt_viewer_display_spice_new(VirtViewerSessionSpice *session,
     g_return_val_if_fail(SPICE_IS_DISPLAY_CHANNEL(channel), NULL);
 
     g_object_get(channel, "channel-id", &channelid, NULL);
-    // We don't allow monitorid != 0 && channelid != 0
-    g_return_val_if_fail(channelid == 0 || monitorid == 0, NULL);
+    if (channelid != 0 && monitorid != 0) {
+        g_warning("Unsupported graphics configuration:\n"
+                  "spice-gtk only supports multiple graphics channels if they are single-head");
+        return NULL;
+    }
 
     self = g_object_new(VIRT_VIEWER_TYPE_DISPLAY_SPICE,
                         "session", session,
@@ -343,6 +368,31 @@ virt_viewer_display_spice_selectable(VirtViewerDisplay *self)
     return agent_connected;
 }
 
+void
+virt_viewer_display_spice_set_desktop(VirtViewerDisplay *display,
+                                      guint x, guint y,
+                                      guint width, guint height)
+{
+    VirtViewerDisplaySpicePrivate *priv;
+    guint desktopWidth, desktopHeight;
+
+    g_return_if_fail(VIRT_VIEWER_IS_DISPLAY_SPICE(display));
+
+    virt_viewer_display_get_desktop_size(display, &desktopWidth, &desktopHeight);
+
+    priv = VIRT_VIEWER_DISPLAY_SPICE(display)->priv;
+
+    if (desktopWidth == width && desktopHeight == height && priv->x == x && priv->y == y)
+        return;
+
+    g_object_set(G_OBJECT(display), "desktop-width", width, "desktop-height", height, NULL);
+    priv->x = x;
+    priv->y = y;
+
+    virt_viewer_display_queue_resize(display);
+
+    g_signal_emit_by_name(display, "display-desktop-resize");
+}
 
 /*
  * Local variables:

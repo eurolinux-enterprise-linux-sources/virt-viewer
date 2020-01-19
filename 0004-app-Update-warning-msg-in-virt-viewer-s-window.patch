@@ -1,0 +1,29 @@
+From 2dd0d5bffb0f24936d1f646cf94cf22fc8d7b571 Mon Sep 17 00:00:00 2001
+From: Snir Sheriber <ssheribe@redhat.com>
+Date: Thu, 5 Jan 2017 18:47:59 +0200
+Subject: [PATCH 04/26] app: Update warning msg in virt-viewer's window
+
+Information about connection issues during display
+activation will appear in virt-viewer's window
+
+Related: rhbz#1386630
+---
+ src/virt-viewer-app.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index bf32315..2e7e193 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -1239,6 +1239,8 @@ virt_viewer_app_activate(VirtViewerApp *self, GError **error)
+     ret = VIRT_VIEWER_APP_GET_CLASS(self)->activate(self, error);
+ 
+     if (ret == FALSE) {
++        if(error != NULL && *error != NULL)
++            virt_viewer_app_show_status(self, (*error)->message);
+         priv->connected = FALSE;
+     } else {
+         virt_viewer_app_show_status(self, _("Connecting to graphic server"));
+-- 
+2.12.0
+

@@ -1,0 +1,74 @@
+From b22ebc15e9b2d08663e3105ca12c8cc5de3971ab Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Fri, 7 Apr 2017 12:05:18 +0200
+Subject: [PATCH virt-viewer 32/32] app: Allow to connect to channel using unix
+ socket
+To: virt-tools-list@redhat.com
+
+Only method for connecting to channel opened later was ssh, however
+this method failes when unix socket is used:
+
+    <graphics type='spice'>
+      <listen type='socket' socket='/tmp/spice.sock'/>
+    </graphics>
+
+Related: rhbz#1335832, rhbz#1411765
+
+Acked-by: Jonathon Jongsma <jjongsma@redhat.com>
+(cherry picked from commit fe538a9296925c919d4b80698147e4a1b56ba7fd)
+---
+ src/virt-viewer-app.c | 29 +++++++++++++++++++++++------
+ 1 file changed, 23 insertions(+), 6 deletions(-)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index 2e7e193..2b74a9f 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -1129,6 +1129,7 @@ virt_viewer_app_channel_open(VirtViewerSession *session,
+ {
+     VirtViewerAppPrivate *priv;
+     int fd = -1;
++    gchar *error_message = NULL;
+ 
+     g_return_if_fail(self != NULL);
+ 
+@@ -1141,14 +1142,30 @@ virt_viewer_app_channel_open(VirtViewerSession *session,
+     if (priv->transport && g_ascii_strcasecmp(priv->transport, "ssh") == 0 &&
+         !priv->direct && fd == -1) {
+         if ((fd = virt_viewer_app_open_tunnel_ssh(priv->host, priv->port, priv->user,
+-                                                  priv->ghost, priv->gport, NULL)) < 0)
+-            virt_viewer_app_simple_message_dialog(self, _("Connect to ssh failed."));
+-    } else if (fd == -1) {
+-        virt_viewer_app_simple_message_dialog(self, _("Can't connect to channel, SSH only supported."));
++                                                  priv->ghost, priv->gport, priv->unixsock)) < 0) {
++            error_message = g_strdup(_("Connect to ssh failed."));
++            g_debug("channel open ssh tunnel: %s", error_message);
++        }
++    }
++    if (fd < 0 && priv->unixsock) {
++        GError *error = NULL;
++        if ((fd = virt_viewer_app_open_unix_sock(priv->unixsock, &error)) < 0) {
++            g_free(error_message);
++            error_message = g_strdup(error->message);
++            g_debug("channel open unix socket: %s", error_message);
++        }
++        g_clear_error(&error);
++    }
++
++    if (fd < 0) {
++        virt_viewer_app_simple_message_dialog(self, _("Can't connect to channel: %s"),
++                                              (error_message != NULL) ? error_message :
++                                              _("only SSH or unix socket connection supported."));
++        g_free(error_message);
++        return;
+     }
+ 
+-    if (fd >= 0)
+-        virt_viewer_session_channel_open_fd(session, channel, fd);
++    virt_viewer_session_channel_open_fd(session, channel, fd);
+ }
+ #else
+ static void
+-- 
+2.12.2
+

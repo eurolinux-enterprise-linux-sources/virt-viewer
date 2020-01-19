@@ -3,21 +3,24 @@ LDADD =
 MAINTAINERCLEANFILES =
 bin_PROGRAMS =
 
-builderxmldir = $(pkgdatadir)/ui
-builderxml_DATA =				\
-	virt-viewer.xml				\
-	virt-viewer-about.xml			\
-	virt-viewer-auth.xml			\
-	virt-viewer-guest-details.xml	\
-	virt-viewer-vm-connection.xml	\
+noinst_LTLIBRARIES = libvirt-viewer-util.la libvirt-viewer.la
+
+noinst_DATA = \
+	resources/ui/virt-viewer.ui \
+	resources/ui/virt-viewer-about.ui \
+	resources/ui/virt-viewer-auth.ui \
+	resources/ui/virt-viewer-guest-details.ui \
+	resources/ui/virt-viewer-vm-connection.ui \
+	resources/ui/virt-viewer-preferences.ui \
+	resources/ui/remote-viewer-connect.ui \
+	resources/ui/virt-viewer-file-transfer-dialog.ui \
 	$(NULL)
 
 EXTRA_DIST =					\
-	$(builderxml_DATA)			\
+	$(noinst_DATA)					\
 	virt-viewer-enums.c.etemplate		\
 	virt-viewer-enums.h.etemplate		\
-	gbinding.c				\
-	gbinding.h				\
+	resources/virt-viewer.gresource.xml	\
 	$(NULL)
 
 ENUMS_FILES =					\
@@ -25,124 +28,167 @@ ENUMS_FILES =					\
 	$(NULL)
 
 BUILT_SOURCES =					\
+	virt-viewer-resources.h			\
+	virt-viewer-resources.c			\
 	virt-viewer-enums.h			\
 	virt-viewer-enums.c			\
 	$(NULL)
 
-$(BUILT_SOURCES): %: %.etemplate $(ENUMS_FILES)
+virt-viewer-resources.c virt-viewer-resources.h: resources/virt-viewer.gresource.xml Makefile $(shell $(GLIB_COMPILE_RESOURCES) --generate-dependencies --sourcedir=$(srcdir)/resources $(srcdir)/resources/virt-viewer.gresource.xml)
+	$(AM_V_GEN) $(GLIB_COMPILE_RESOURCES) --target=$@ --sourcedir=$(srcdir)/resources --generate --c-name virt_viewer $<
+
+virt-viewer-enums.c virt-viewer-enums.h: %: %.etemplate $(ENUMS_FILES)
 	$(AM_V_GEN)$(GLIB_MKENUMS) --template $^ | \
             sed -e 's/VIRT_TYPE_VIEWER/VIRT_VIEWER_TYPE/' \
                 -e 's,#include "$(srcdir)/,#include ",' > $@
 
-COMMON_SOURCES =					\
+CLEANFILES = \
 	$(BUILT_SOURCES)				\
-	virt-glib-compat.h				\
-	virt-glib-compat.c				\
-	virt-gtk-compat.h				\
-	virt-viewer-util.h virt-viewer-util.c		\
-	virt-viewer-auth.h virt-viewer-auth.c		\
-	virt-viewer-app.h virt-viewer-app.c		\
-	virt-viewer-file.h virt-viewer-file.c		\
-	virt-viewer-session.h virt-viewer-session.c	\
-	virt-viewer-display.h virt-viewer-display.c	\
-	virt-viewer-notebook.h virt-viewer-notebook.c	\
-	virt-viewer-window.h virt-viewer-window.c	\
-	virt-viewer-vm-connection.h virt-viewer-vm-connection.c	\
-	view/autoDrawer.c				\
-	view/autoDrawer.h				\
-	view/drawer.c					\
-	view/drawer.h					\
-	view/ovBox.c					\
-	view/ovBox.h					\
+	$(NULL)
+
+libvirt_viewer_util_la_SOURCES = \
+	virt-viewer-util.h \
+	virt-viewer-util.c \
+	$(NULL)
+
+libvirt_viewer_la_SOURCES =					\
+	$(BUILT_SOURCES)				\
+	virt-viewer-auth.h				\
+	virt-viewer-auth.c				\
+	virt-viewer-app.h				\
+	virt-viewer-app.c				\
+	virt-viewer-file.h				\
+	virt-viewer-file.c				\
+	virt-viewer-session.h				\
+	virt-viewer-session.c				\
+	virt-viewer-display.h				\
+	virt-viewer-display.c				\
+	virt-viewer-notebook.h				\
+	virt-viewer-notebook.c				\
+	virt-viewer-window.h				\
+	virt-viewer-window.c				\
+	virt-viewer-vm-connection.h			\
+	virt-viewer-vm-connection.c			\
+	virt-viewer-timed-revealer.c \
+	virt-viewer-timed-revealer.h \
 	$(NULL)
 
 if HAVE_GTK_VNC
-COMMON_SOURCES +=						\
-	virt-viewer-session-vnc.h virt-viewer-session-vnc.c	\
-	virt-viewer-display-vnc.h virt-viewer-display-vnc.c	\
+libvirt_viewer_la_SOURCES += \
+	virt-viewer-session-vnc.h \
+	virt-viewer-session-vnc.c \
+	virt-viewer-display-vnc.h \
+	virt-viewer-display-vnc.c \
 	$(NULL)
 endif
 
 if HAVE_SPICE_GTK
-COMMON_SOURCES +=						\
-	virt-viewer-session-spice.h virt-viewer-session-spice.c	\
-	virt-viewer-display-spice.h virt-viewer-display-spice.c	\
+libvirt_viewer_la_SOURCES += \
+	virt-viewer-session-spice.h \
+	virt-viewer-session-spice.c \
+	virt-viewer-display-spice.h \
+	virt-viewer-display-spice.c \
+	virt-viewer-file-transfer-dialog.h \
+	virt-viewer-file-transfer-dialog.c \
 	$(NULL)
 endif
 
 if HAVE_OVIRT
-COMMON_SOURCES +=					\
-	ovirt-foreign-menu.h ovirt-foreign-menu.c
+libvirt_viewer_la_SOURCES += \
+	ovirt-foreign-menu.h \
+	ovirt-foreign-menu.c \
+	$(NULL)
 endif
 
-if HAVE_LIBVIRT
-bin_PROGRAMS += virt-viewer
-virt_viewer_SOURCES =					\
-	$(COMMON_SOURCES)				\
-	virt-viewer-events.h virt-viewer-events.c	\
-	virt-viewer.h virt-viewer.c			\
-	virt-viewer-main.c				\
-	$(NULL)
-virt_viewer_LDFLAGS =				\
+COMMON_LIBS = \
 	-lm					\
 	$(GLIB2_LIBS)				\
 	$(GTK_LIBS)				\
 	$(GTK_VNC_LIBS)				\
-	$(LIBXML2_LIBS)				\
-	$(LIBVIRT_LIBS)				\
-	$(OVIRT_LIBS)				\
 	$(SPICE_GTK_LIBS)			\
+	$(LIBXML2_LIBS)				\
+	$(OVIRT_LIBS) \
+	$(NULL)
+
+COMMON_CFLAGS = \
+	-DLOCALE_DIR=\""$(datadir)/locale"\" \
+	-DG_LOG_DOMAIN=\"virt-viewer\" \
+	$(GLIB2_CFLAGS) \
+	$(GTK_CFLAGS) \
+	$(GTK_VNC_CFLAGS) \
+	$(SPICE_GTK_CFLAGS) \
+	$(LIBXML2_CFLAGS) \
+	$(OVIRT_CFLAGS) \
+	$(WARN_CFLAGS) \
+	$(NULL)
+
+libvirt_viewer_util_la_LIBADD = \
+	$(GLIB2_LIBS) \
+	$(GTK_LIBS) \
+	$(LIBXML2_LIBS) \
+	$(NULL)
+
+libvirt_viewer_util_la_CFLAGS = \
+	-DLOCALE_DIR=\""$(datadir)/locale"\" \
+	$(GLIB2_CFLAGS) \
+	$(GTK_CFLAGS) \
+	$(LIBXML2_CFLAGS) \
+	$(NULL)
+
+libvirt_viewer_la_LIBADD = \
+	$(COMMON_LIBS) \
+	$(NULL)
+
+libvirt_viewer_la_CFLAGS = \
+	$(COMMON_CFLAGS) \
+	$(NULL)
+
+if HAVE_LIBVIRT
+bin_PROGRAMS += virt-viewer
+virt_viewer_SOURCES =					\
+	virt-viewer.h					\
+	virt-viewer.c					\
+	virt-viewer-main.c				\
+	$(NULL)
+virt_viewer_LDFLAGS =				\
+	$(COMMON_LIBS)				\
+	$(LIBVIRT_LIBS)				\
 	$(NULL)
 virt_viewer_CFLAGS = 				\
-	-DLOCALE_DIR=\""$(datadir)/locale"\"	\
-	-DG_LOG_DOMAIN=\"virt-viewer\"          \
-	$(GLIB2_CFLAGS) 			\
-	$(GTK_CFLAGS)				\
-	$(GTK_VNC_CFLAGS)			\
-	$(LIBXML2_CFLAGS)			\
+	$(COMMON_CFLAGS) 			\
 	$(LIBVIRT_CFLAGS)			\
-	$(OVIRT_CFLAGS)				\
-	$(SPICE_GTK_CFLAGS)			\
-	$(SPICE_CONTROLLER_CFLAGS)		\
-	$(WARN_CFLAGS)				\
+	$(NULL)
+virt_viewer_LDADD = \
+	libvirt-viewer-util.la \
+	libvirt-viewer.la \
 	$(NULL)
 endif
 
 
 bin_PROGRAMS += remote-viewer
 remote_viewer_SOURCES =				\
-	$(COMMON_SOURCES)			\
-	remote-viewer.h remote-viewer.c		\
+	remote-viewer.h				\
+	remote-viewer.c				\
+	remote-viewer-connect.c 		\
+	remote-viewer-connect.h 		\
 	remote-viewer-main.c			\
 	$(NULL)
 remote_viewer_LDFLAGS =				\
-	-lm					\
-	$(GLIB2_LIBS)				\
-	$(GTK_LIBS)				\
-	$(GTK_VNC_LIBS)				\
-	$(LIBXML2_LIBS)				\
-	$(OVIRT_LIBS)				\
-	$(SPICE_GTK_LIBS)			\
+	$(COMMON_LIBS)				\
 	$(SPICE_CONTROLLER_LIBS)		\
 	$(NULL)
 remote_viewer_CFLAGS =				\
-	-DLOCALE_DIR=\""$(datadir)/locale"\"	\
-	-DG_LOG_DOMAIN=\"remote-viewer\"        \
-	$(GLIB2_CFLAGS) 			\
-	$(GTK_CFLAGS)				\
-	$(GTK_VNC_CFLAGS)			\
-	$(LIBXML2_CFLAGS)			\
-	$(OVIRT_CFLAGS)				\
-	$(SPICE_GTK_CFLAGS)			\
+	$(COMMON_CFLAGS) 			\
 	$(SPICE_CONTROLLER_CFLAGS)		\
-	$(WARN_CFLAGS)				\
+	$(NULL)
+remote_viewer_LDADD = \
+	libvirt-viewer-util.la \
+	libvirt-viewer.la \
 	$(NULL)
 
 if OS_WIN32
 remote_viewer_LDFLAGS += -Wl,--subsystem,windows
 endif
-
-AM_CPPFLAGS = -DPACKAGE_DATADIR=\""$(pkgdatadir)"\"
 
 VIRT_VIEWER_RES = virt-viewer.rc virt-viewer.manifest
 ICONDIR = $(top_builddir)/icons

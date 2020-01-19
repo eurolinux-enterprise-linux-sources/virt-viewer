@@ -1,0 +1,61 @@
+From 77d66094d945e38608f98347bd3c117a90a01913 Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Fri, 3 Mar 2017 14:08:46 +0100
+Subject: [PATCH 26/26] virt-viewer: Adjust name-id-uuid comment
+
+virt-viewer by default chooses the VM by its id, then uuid
+and then by name. Adjust the comment to match the implementation.
+
+Related: rhbz#1399077
+---
+ man/virt-viewer.pod | 2 +-
+ src/virt-viewer.c   | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/man/virt-viewer.pod b/man/virt-viewer.pod
+index 30af8db..8463eb4 100644
+--- a/man/virt-viewer.pod
++++ b/man/virt-viewer.pod
+@@ -5,7 +5,7 @@ virt-viewer - display the graphical console for a virtual machine
+ 
+ =head1 SYNOPSIS
+ 
+-B<virt-viewer> [OPTIONS] [DOMAIN-NAME|ID|UUID]
++B<virt-viewer> [OPTIONS] [ID|UUID|DOMAIN-NAME]
+ 
+ =head1 DESCRIPTION
+ 
+diff --git a/src/virt-viewer.c b/src/virt-viewer.c
+index 22a952a..65c0546 100644
+--- a/src/virt-viewer.c
++++ b/src/virt-viewer.c
+@@ -142,7 +142,7 @@ virt_viewer_add_option_entries(VirtViewerApp *self, GOptionContext *context, GOp
+         { "uuid", '\0', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, opt_domain_selection_cb,
+           N_("Select the virtual machine only by its uuid"), NULL },
+         { G_OPTION_REMAINING, '\0', 0, G_OPTION_ARG_STRING_ARRAY, &opt_args,
+-          NULL, "-- DOMAIN-NAME|ID|UUID" },
++          NULL, "-- ID|UUID|DOMAIN-NAME" },
+         { NULL, 0, 0, G_OPTION_ARG_NONE, NULL, NULL, NULL }
+     };
+ 
+@@ -166,7 +166,7 @@ virt_viewer_local_command_line (GApplication   *gapp,
+ 
+     if (opt_args) {
+         if (g_strv_length(opt_args) != 1) {
+-            g_printerr(_("\nUsage: %s [OPTIONS] [DOMAIN-NAME|ID|UUID]\n\n"), PACKAGE);
++            g_printerr(_("\nUsage: %s [OPTIONS] [ID|UUID|DOMAIN-NAME]\n\n"), PACKAGE);
+             ret = TRUE;
+             *status = 1;
+             goto end;
+@@ -178,7 +178,7 @@ virt_viewer_local_command_line (GApplication   *gapp,
+ 
+     if (opt_waitvm || domain_selection_type != DOMAIN_SELECTION_DEFAULT) {
+         if (!self->priv->domkey) {
+-            g_printerr(_("\nNo DOMAIN-NAME|ID|UUID was specified for '%s'\n\n"),
++            g_printerr(_("\nNo ID|UUID|DOMAIN-NAME was specified for '%s'\n\n"),
+                        opt_waitvm ? "--wait" : domain_selection_to_opt[domain_selection_type]);
+             ret = TRUE;
+             *status = 1;
+-- 
+2.12.0
+

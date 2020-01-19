@@ -1,0 +1,54 @@
+From 8e29fa411c7ea10d95bb290fe94d9be965153142 Mon Sep 17 00:00:00 2001
+From: "Eduardo Lima (Etrunko)" <etrunko@redhat.com>
+Date: Thu, 8 Jun 2017 17:59:54 -0300
+Subject: [PATCH virt-viewer 41/41] remote-viewer: Show authentication dialog
+ again if in kiosk mode and connecting to ovirt
+
+Similar to previous commit 5d9e6d2338cbb680fe761b86e6ca433b1234e6e0, now
+dealing with the case of connecting directly to ovirt:// URIs, which was
+left behind.
+
+Resolves: https://bugzilla.redhat.com/show_bug.cgi?id=1459808
+
+Signed-off-by: Eduardo Lima (Etrunko) <etrunko@redhat.com>
+---
+ src/remote-viewer.c | 14 ++++++++++----
+ 1 file changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/src/remote-viewer.c b/src/remote-viewer.c
+index 451fb1d..d927f8a 100644
+--- a/src/remote-viewer.c
++++ b/src/remote-viewer.c
+@@ -742,19 +742,25 @@ authenticate_cb(RestProxy *proxy, G_GNUC_UNUSED RestProxyAuth *auth,
+     gchar *password = NULL;
+     VirtViewerWindow *window;
+     gboolean success = FALSE;
++    gboolean kiosk = FALSE;
+ 
+     g_object_get(proxy,
+                  "username", &username,
+                  NULL);
+ 
++    g_object_get(G_OBJECT(user_data), "kiosk", &kiosk, NULL);
++
+     if (username == NULL || *username == '\0')
+         username = g_strdup(g_get_user_name());
+ 
+     window = virt_viewer_app_get_main_window(VIRT_VIEWER_APP(user_data));
+-    success = virt_viewer_auth_collect_credentials(virt_viewer_window_get_window(window),
+-                                                   "oVirt",
+-                                                   NULL,
+-                                                   &username, &password);
++    do {
++        success = virt_viewer_auth_collect_credentials(virt_viewer_window_get_window(window),
++                                                       "oVirt",
++                                                       NULL,
++                                                       &username, &password);
++    } while (kiosk && !success);
++
+     if (success) {
+         g_object_set(G_OBJECT(proxy),
+                      "username", username,
+-- 
+2.9.4
+

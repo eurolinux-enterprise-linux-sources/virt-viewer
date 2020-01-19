@@ -25,8 +25,7 @@
 #define _VIRT_VIEWER_DISPLAY_SPICE_H
 
 #include <glib-object.h>
-#include <spice-widget.h>
-#include <spice-audio.h>
+#include <spice-client.h>
 
 #include "virt-viewer-display.h"
 #include "virt-viewer-session-spice.h"
@@ -68,6 +67,8 @@ GType virt_viewer_display_spice_get_type(void);
 
 GtkWidget* virt_viewer_display_spice_new(VirtViewerSessionSpice *session, SpiceChannel *channel, gint monitorid);
 
+void virt_viewer_display_spice_set_desktop(VirtViewerDisplay *display, guint x, guint y,
+                                           guint width, guint height);
 G_END_DECLS
 
 #endif /* _VIRT_VIEWER_DISPLAY_SPICE_H */

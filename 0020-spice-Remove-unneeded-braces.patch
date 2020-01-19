@@ -1,0 +1,37 @@
+From 63940b3981b270e324249267118aa06ed3da1b65 Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Fri, 17 Feb 2017 13:35:38 +0100
+Subject: [PATCH 20/26] spice: Remove unneeded braces
+
+Two statements in virt_viewer_session_spice_main_channel_event() are
+wrapped in a { } block, but this is unneeded.
+
+Signed-off-by: Christophe Fergeau <cfergeau@redhat.com>
+---
+ src/virt-viewer-session-spice.c | 10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
+
+diff --git a/src/virt-viewer-session-spice.c b/src/virt-viewer-session-spice.c
+index 9b52ec0..5f326aa 100644
+--- a/src/virt-viewer-session-spice.c
++++ b/src/virt-viewer-session-spice.c
+@@ -694,12 +694,10 @@ virt_viewer_session_spice_main_channel_event(SpiceChannel *channel,
+         gchar *host = NULL;
+         g_debug("main channel: auth failure (wrong username/password?)");
+ 
+-        {
+-            error = spice_channel_get_error(channel);
+-            username_required = g_error_matches(error,
+-                                                SPICE_CLIENT_ERROR,
+-                                                SPICE_CLIENT_ERROR_AUTH_NEEDS_PASSWORD_AND_USERNAME);
+-        }
++        error = spice_channel_get_error(channel);
++        username_required = g_error_matches(error,
++                                            SPICE_CLIENT_ERROR,
++                                            SPICE_CLIENT_ERROR_AUTH_NEEDS_PASSWORD_AND_USERNAME);
+ 
+         if (self->priv->pass_try > 0)
+             g_signal_emit_by_name(session, "session-auth-refused",
+-- 
+2.12.0
+

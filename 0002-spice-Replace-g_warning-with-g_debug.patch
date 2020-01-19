@@ -1,0 +1,37 @@
+From e588d6f011b9fb327e5f8d6ae9a19b710039417a Mon Sep 17 00:00:00 2001
+From: Snir Sheriber <ssheribe@redhat.com>
+Date: Sun, 1 Jan 2017 14:23:25 +0200
+Subject: [PATCH 02/26] spice: Replace g_warning with g_debug
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Instead of having a warning message telling the user that they can't
+have more displays enabled in fullscreen than the number of physical
+displays, let's just have it as a debug message.
+
+Related: rhbz#1368390
+
+Acked-by: Fabiano Fidêncio <fabiano@fidencio.org>
+---
+ src/virt-viewer-session-spice.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/virt-viewer-session-spice.c b/src/virt-viewer-session-spice.c
+index c24f94d..c3fce48 100644
+--- a/src/virt-viewer-session-spice.c
++++ b/src/virt-viewer-session-spice.c
+@@ -914,8 +914,8 @@ virt_viewer_session_spice_display_monitors(SpiceChannel *channel,
+ 
+         if (!disabled && fullscreen_mode && self->priv->did_auto_conf &&
+             !display_is_in_fullscreen_mode(self, VIRT_VIEWER_DISPLAY(display))) {
+-            g_warning("display %d should not be enabled, disabling",
+-                      virt_viewer_display_get_nth(VIRT_VIEWER_DISPLAY(display)) + 1);
++            g_debug("display %d should not be enabled, disabling",
++                    virt_viewer_display_get_nth(VIRT_VIEWER_DISPLAY(display)) + 1);
+             spice_main_set_display_enabled(virt_viewer_session_spice_get_main_channel(self),
+                                            virt_viewer_display_get_nth(VIRT_VIEWER_DISPLAY(display)),
+                                            FALSE);
+-- 
+2.12.0
+

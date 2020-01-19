@@ -1,0 +1,53 @@
+From 8ebff59a59bc89c4533240348d7c231d9a07f886 Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Thu, 18 May 2017 11:59:18 +0200
+Subject: [PATCH virt-viewer 33/35] virt-viewer: Ensure to not close during
+ migration
+To: virt-tools-list@redhat.com
+
+Take a look at the shutdown event detail before killing
+the connection. Otherwise it breaks the SPICE seamless migration
+feature.
+
+Regression since commit a62827d28c6b69e90102e4c1c8043cbddad8929a
+
+Resolves: https://bugzilla.redhat.com/show_bug.cgi?id=1442929
+Signed-off-by: Pavel Grunt <pgrunt@redhat.com>
+Acked-by: Daniel P. Berrange <berrange@redhat.com>
+(cherry picked from commit 209c80375b152dc02f903a3ac72272872b4e5270)
+---
+ src/virt-viewer.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/src/virt-viewer.c b/src/virt-viewer.c
+index fe10229..875f86e 100644
+--- a/src/virt-viewer.c
++++ b/src/virt-viewer.c
+@@ -52,6 +52,10 @@
+ #include "virt-viewer-auth.h"
+ #include "virt-viewer-util.h"
+ 
++#ifdef HAVE_SPICE_GTK
++#include "virt-viewer-session-spice.h"
++#endif
++
+ struct _VirtViewerPrivate {
+     char *uri;
+     virConnectPtr conn;
+@@ -737,6 +741,13 @@ virt_viewer_domain_event(virConnectPtr conn G_GNUC_UNUSED,
+     switch (event) {
+     case VIR_DOMAIN_EVENT_STOPPED:
+         session = virt_viewer_app_get_session(app);
++#ifdef HAVE_SPICE_GTK
++        /* do not disconnect due to migration */
++        if (detail == VIR_DOMAIN_EVENT_STOPPED_MIGRATED &&
++            VIRT_VIEWER_IS_SESSION_SPICE(session)) {
++            break;
++        }
++#endif
+         if (session != NULL)
+             virt_viewer_session_close(session);
+         break;
+-- 
+2.13.0
+

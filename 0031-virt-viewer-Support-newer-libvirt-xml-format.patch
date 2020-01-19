@@ -1,0 +1,52 @@
+From 2b271402aaeee7d7948493362bc6d152a7422856 Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Fri, 7 Apr 2017 12:05:17 +0200
+Subject: [PATCH virt-viewer 31/32] virt-viewer: Support newer libvirt xml
+ format
+To: virt-tools-list@redhat.com
+
+Since libvirt 0.9.4 there is a new listen element which can be used
+to specify address instead of using the attributes of graphics element.
+
+Also add support for listen type socket - available for Qemu since
+libvirt 2.0.0
+
+Resolves: rhbz#1411765
+
+Acked-by: Jonathon Jongsma <jjongsma@redhat.com>
+(cherry picked from commit effa832ca5bd51b1f450f630e1fe3cd7deacb887)
+---
+ src/virt-viewer.c | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/src/virt-viewer.c b/src/virt-viewer.c
+index 65c0546..fe10229 100644
+--- a/src/virt-viewer.c
++++ b/src/virt-viewer.c
+@@ -565,11 +565,21 @@ virt_viewer_extract_connect_info(VirtViewer *self,
+     }
+ 
+     if (gport || gtlsport) {
+-        xpath = g_strdup_printf("string(/domain/devices/graphics[@type='%s']/@listen)", type);
++        xpath = g_strdup_printf("string(/domain/devices/graphics[@type='%s']/listen/@address)", type);
+         ghost = virt_viewer_extract_xpath_string(xmldesc, xpath);
++        if (ghost == NULL) { /* try old xml format - listen attribute in the graphics node */
++            g_free(xpath);
++            xpath = g_strdup_printf("string(/domain/devices/graphics[@type='%s']/@listen)", type);
++            ghost = virt_viewer_extract_xpath_string(xmldesc, xpath);
++        }
+     } else {
+-        xpath = g_strdup_printf("string(/domain/devices/graphics[@type='%s']/@socket)", type);
++        xpath = g_strdup_printf("string(/domain/devices/graphics[@type='%s']/listen/@socket)", type);
+         unixsock = virt_viewer_extract_xpath_string(xmldesc, xpath);
++        if (unixsock == NULL) { /* try old xml format - socket attribute in the graphics node */
++            g_free(xpath);
++            xpath = g_strdup_printf("string(/domain/devices/graphics[@type='%s']/@socket)", type);
++            unixsock = virt_viewer_extract_xpath_string(xmldesc, xpath);
++        }
+     }
+ 
+     if (ghost && gport) {
+-- 
+2.12.2
+

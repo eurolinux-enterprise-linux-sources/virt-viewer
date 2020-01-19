@@ -1,14 +1,11 @@
 # -*- rpm-spec -*-
 
+%global _hardened_build 1
+
 # Default to skipping autoreconf.  Distros can change just this one line
 # (or provide a command-line override) if they backport any patches that
 # touch configure.ac or Makefile.am.
-%{!?enable_autotools:%define enable_autotools 1}
-
-%define with_gtk3 0
-%if 0%{?fedora} >= 15 || 0%{?rhel} >= 7
-%define with_gtk3 1
-%endif
+%{!?enable_autotools:%global enable_autotools 1}
 
 %define with_spice 0
 %if 0%{?fedora} >= 17 || 0%{?rhel} >= 6
@@ -26,117 +23,67 @@
 %endif
 
 Name: virt-viewer
-Version: 2.0
-Release: 12%{?dist}%{?extra_release}
+Version: 5.0
+Release: 10%{?dist}%{?extra_release}
 Summary: Virtual Machine Viewer
 Group: Applications/System
 License: GPLv2+
-URL: http://virt-manager.org/
-Source0: http://virt-manager.org/download/sources/%{name}/%{name}-%{version}.tar.gz
-Patch1: 0001-Take-direct-into-consideration-when-checking-if-a-gu.patch
-Patch2: 0002-Update-geometry-when-enabling-disabling-displays.patch
-Patch3: 0003-VirtViewerApp-create-main-window-after-constructor.patch
-Patch4: 0004-Use-constructed-vfunc-instead-of-constructor.patch
-Patch5: 0005-Monitor-config-at-sometimes-leaves-additional-monito.patch
-Patch6: 0006-virt-viewer-Bring-back-debug-log-about-nonexistent-g.patch
-Patch7: 0007-foreign-menu-Don-t-show-empty-foreign-menu-on-second.patch
-Patch8: 0008-Do-not-add-https-and-api-to-oVirt-URI.patch
-Patch9: 0009-virt-viewer-Add-a-GError-arg-to-extract_connect_info.patch
-Patch10: 0010-virt-viewer-Add-a-GError-arg-to-update_display.patch
-Patch11: 0011-virt-viewer-app-Add-a-GError-arg-to-create_session.patch
-Patch12: 0012-virt-viewer-app-create_session-should-return-a-boole.patch
-Patch13: 0013-virt-viewer-Avoid-simple_message_dialog-when-errors-.patch
-Patch14: 0014-remote-viewer-Avoid-simple_message_dialog-when-error.patch
-Patch15: 0015-virt-viewer-Do-not-wait-for-a-guest-that-will-never-.patch
-Patch16: 0016-virt-viewer-app-Do-not-show-error-dialog-twice-for-u.patch
-Patch17: 0017-Use-ZOOM-constants-instead-of-numbers.patch
-Patch18: 0018-virt-viewer-display-Use-MIN_DISPLAY_WIDTH-HEIGHT-ins.patch
-Patch19: 0019-virt-viewer-window-Change-zoom-of-the-display-only-w.patch
-Patch20: 0020-virt-viewer-window-Set-zoom-when-display-is-enabled-.patch
-Patch21: 0021-virt-viewer-window-Return-early-when-zoom-of-window-.patch
-Patch22: 0022-display-spice-Do-not-ignore-change-of-position.patch
-Patch23: 0023-virt-viewer-main-Require-domain-name-as-argument-for.patch
-Patch24: 0024-virt-viewer-app-Set-hotkeys-when-app-is-constructed.patch
-Patch25: 0025-Revert-virt-viewer-main-Require-domain-name-as-argum.patch
-Patch26: 0026-virt-viewer-main-wait-should-not-be-used-without-dom.patch
-Patch27: 0027-virt-viewer-window-Make-sure-that-minimum-zoom-level.patch
-Patch28: 0028-virt-viewer-window-Set-initial-zoom-only-once.patch
-Patch29: 0029-session-spice-Destroy-the-channel-instead-of-emit-a-.patch
-Patch30: 0030-spice-session-use-the-error-message-when-available-o.patch
-Patch31: 0031-ovirt-Add-support-for-an-admin-key-in-vv-file.patch
-Patch32: 0032-Enable-hotkeys-after-setting-them-in-virt_viewer_app.patch
-Patch33: 0033-build-sys-Don-t-substitute-buildid-when-it-was-not-s.patch
-Patch34: 0034-build-sys-Always-prepend-to-BUILDID.patch
-Patch35: 0035-vv-file-Move-version-checking-code-in-its-own-functi.patch
-Patch36: 0036-vv-file-Refactor-virt_viewer_file_check_min_version.patch
-Patch37: 0037-vv-file-Add-VirtViewerFile-versions.patch
-Patch38: 0038-build-sys-Add-with-osid.patch
-Patch39: 0039-Show-osid-in-remote-viewer-version.patch
-Patch40: 0040-vv-file-Use-versions-in-min-version-check.patch
-Patch41: 0041-util-Replace-virt_viewer_compare_version-with-_compa.patch
-Patch42: 0042-test-Add-test-case-for-virt_viewer_compare_buildid.patch
-Patch43: 0043-vv-file-Add-newer-version-url-key-to-.vv-files.patch
-Patch44: 0044-vv-file-Show-newer-version-url-when-version-check-fa.patch
-Patch45: 0045-Avoid-Dereference-of-a-null-pointer.patch
-Patch46: 0046-virt-viewer-set-keepAlive-on-libvirt-connection.patch
-Patch47: 0047-Remove-unnecessary-parameter-from-virt_viewer_window.patch
-Patch48: 0048-virt-viewer-window-Allow-to-resize-window-to-any-siz.patch
-Patch49: 0049-events-ensure-event-callbacks-are-threadsafe.patch
-Patch50: 0050-events-register-event-using-GOnce-to-avoid-multiple-.patch
-Patch51: 0051-events-remove-timeout-and-handle-from-arrays.patch
-Patch52: 0052-glib-compat-Use-g_new0-GMutex-1-if-GLib-2.31.patch
-Patch53: 0053-events-allow-zero-timeouts-for-timer.patch
-Patch54: 0054-events-remove-unused-virt_viewer_events_find_-handle.patch
-Patch55: 0055-events-protect-handles-and-timeouts-against-concurre.patch
-Patch56: 0056-events-don-t-reschedule-deleted-timeouts-watches.patch
-Patch57: 0057-events-don-t-hold-events-lock-when-dispatching-free-.patch
-Patch58: 0058-events-don-t-create-glib-IO-watch-for-disabled-handl.patch
-Patch59: 0059-events-allow-to-remove-disabled-timers-and-handles.patch
-Patch60: 0060-events-don-t-leak-GIOChannel-when-destroying-IO-hand.patch
-Patch61: 0061-Exit-normally-when-canceling-dialog.patch
-Patch62: 0062-Clear-GError-in-cleanup-section.patch
-Patch63: 0063-Report-errors-in-one-place.patch
-Patch64: 0064-virt-viewer-Clean-up-if-no-vm-was-chosen.patch
-Patch65: 0065-Set-enabled-status-of-all-displays-when-we-get-a-mon.patch
-Patch66: 0066-app-Add-helper-for-number-of-client-monitors.patch
-Patch67: 0067-app-Do-not-map-display-to-non-existent-monitor.patch
-Patch68: 0068-session-spice-Disable-extra-displays-in-fullscreen-m.patch
-Patch69: 0069-app-Compute-monitor-mapping-only-in-fullscreen.patch
-Patch70: 0070-ovirt-Take-into-account-SPICE-proxy.patch
-Patch71: 0071-virt-viewer-display-vnc-Set-guest-name-when-using-VN.patch
-Patch72: 0072-virt-viewer-display-vnc-Set-uuid-when-using-VNC.patch
-Patch73: 0073-Stop-polling-after-reconnecting-to-libvirtd.patch
-Patch74: 0074-Fix-crash-when-disabling-last-enabled-display.patch
-Patch75: 0075-Use-the-display-ID-to-configure-fullscreen-monitors.patch
-Patch76: 0076-session-Only-create-a-hashtable-if-apply_monitor_geo.patch
-Patch77: 0077-util-Fix-the-size-of-sorted_displays-allocation.patch
-Patch78: 0078-spice-vv-file-do-not-ignore-usb-filter.patch
-Patch79: 0079-ovirt-Only-use-active-ISO-domains-for-foreign-menu.patch
-Patch80: 0080-display-set-min-value-for-desktop-width-height-props.patch
-Patch81: 0081-display-Set-useful-values-for-MIN_DISPLAY_-WIDTH-HEI.patch
-Patch82: 0082-ovirt-Don-t-try-to-use-ovirt-if-jsessionid-is-not-se.patch
-Patch83: 0083-ovirt-Error-reporting-improvements-on-invalid-VM-nam.patch
-Patch84: 0084-ovirt-Fix-OvirtApi-memory-handling.patch
-Patch85: 0085-vv-file-Add-support-for-sso-token-field-in-ovirt.patch
-Patch86: 0086-ovirt-Use-sso-token-when-set-in-.vv-file.patch
-Patch87: 0087-app-monitor-config-do-it-all-or-nothing.patch
-Patch88: 0088-app-Return-early-on-empty-monitor-mapping.patch
-Patch89: 0089-vnc-display-Disable-default-grab-sequence.patch
-Patch90: 0090-spice-avoid-crashing-when-using-invalid-video-config.patch
-Patch91: 0091-Add-some-missing-mnemonics-to-menu-items.patch
-Patch92: 0092-Add-mnemonics-for-each-display-item.patch
-Patch93: 0093-Add-file-transfer-dialog.patch
-Patch94: 0094-Add-some-timeouts-to-file-transfer-dialog.patch
-Patch95: 0095-app-Use-debug-to-inform-about-smartcard-shortcuts-st.patch
-Patch96: 0096-app-Check-validity-of-hotkey.patch
-Patch97: 0097-Update-timer-to-refresh-ovirt-foreign-menu.patch
-Patch98: 0098-monitor-alignment-Do-not-crash-on-NULL-display.patch
-Patch99: 0099-remote-viewer-GtkRecentChooserWidget-is-not-suitable.patch
-Patch100: 0100-remote-viewer-Use-a-different-mnemonic-for-Connectio.patch
-Patch101: 0101-app-window-Set-display-menu-not-sensitive-when-neede.patch
-Patch102: 0102-virt-viewer-Set-toolbar-buttons-not-sensitive-when-n.patch
-Patch103: 0103-app-Do-not-show-usbredir-button-without-session.patch
-Patch104: 0104-Refresh-translations.patch
+URL: https://virt-manager.org/
+Source0: https://releases.pagure.org/%{name}/%{name}-%{version}.tar.gz
+
+Patch0001: 0001-spice-Fix-display-id-in-the-warning-log.patch
+Patch0002: 0002-spice-Replace-g_warning-with-g_debug.patch
+Patch0003: 0003-Set-guest-name-at-the-same-time-as-uuid.patch
+Patch0004: 0004-app-Update-warning-msg-in-virt-viewer-s-window.patch
+Patch0005: 0005-remote-viewer-Extend-ifdef-HAVE_OVIRT-block.patch
+Patch0006: 0006-ovirt-foreign-menu-Set-new-ISO-name-using-GTask-API.patch
+Patch0007: 0007-ovirt-foreign-menu-Fetch-ISO-names-using-GTask-API.patch
+Patch0008: 0008-ovirt-foreign-menu-Add-accessors-for-current-iso-and.patch
+Patch0009: 0009-Introduce-ISO-List-dialog.patch
+Patch0010: 0010-Run-ISO-dialog-when-Change-CD-menu-is-activated.patch
+Patch0011: 0011-README-Update-links.patch
+Patch0012: 0012-README-switch-to-Markdown-syntax.patch
+Patch0013: 0013-Update-for-README.md.patch
+Patch0014: 0014-iso-dialog-Do-not-use-string-directly.patch
+Patch0015: 0015-Do-not-print-password-in-the-debug-log.patch
+Patch0016: 0016-iso-dialog-Avoid-crash-when-closing-dialog-early.patch
+Patch0017: 0017-session-spice-Pass-hostname-to-authentication-dialog.patch
+Patch0018: 0018-Show-errors-generated-by-connection-dialog.patch
+Patch0019: 0019-man-Mention-that-ssh-agent-can-be-useful.patch
+Patch0020: 0020-spice-Remove-unneeded-braces.patch
+Patch0021: 0021-file-transfer-Fix-label-of-the-dialog.patch
+Patch0022: 0022-Fix-build-when-building-without-oVirt.patch
+Patch0023: 0023-Avoid-harmless-warnings-due-lack-of-oVirt-on-build.patch
+Patch0024: 0024-Don-t-define-function-without-oVirt-integration.patch
+Patch0025: 0025-virt-viewer-Allow-more-precise-VM-selection.patch
+Patch0026: 0026-virt-viewer-Adjust-name-id-uuid-comment.patch
+Patch0027: 0027-Comment-out-folder-sharing-menus.patch
+Patch0028: 0028-virt-viewer-Fix-comparison-in-domain-selection.patch
+Patch0029: 0029-vnc-Set-display-as-enabled-on-init.patch
+Patch0030: 0030-window-Allow-to-control-zoom-using-keypad.patch
+Patch0031: 0031-virt-viewer-Support-newer-libvirt-xml-format.patch
+Patch0032: 0032-app-Allow-to-connect-to-channel-using-unix-socket.patch
+Patch0033: 0033-virt-viewer-Ensure-to-not-close-during-migration.patch
+Patch0034: 0034-Make-the-progress-bar-smooth-during-file-transfer.patch
+Patch0036: 0036-Update-translation-from-internal-zanata.patch
+Patch0037: 0037-window-Do-not-show-fullscreen-toolbar-if-in-kiosk-mo.patch
+Patch0038: 0038-kiosk-Show-authentication-dialog-again-if-cancelled.patch
+Patch0039: 0039-spice-do-not-show-error-on-cancel-close-of-auth-dial.patch
+Patch0040: 0040-vnc-do-not-show-error-on-cancel-close-of-auth-dialog.patch
+Patch0041: 0041-remote-viewer-Show-authentication-dialog-again-if-in.patch
+Patch0042: 0042-remote-viewer-connect-Keep-the-dialog-window-on-top.patch
+Patch0043: 0043-Change-default-screenshot-name-to-Screenshot.png.patch
+Patch0044: 0044-Report-errors-when-saving-screenshot.patch
+Patch0045: 0045-Screenshot-reject-unknown-image-type-filenames.patch
+Patch0046: 0046-configure-check-for-new-functions-in-libgovirt.patch
+Patch0047: 0047-foreign-menu-Use-query-for-fetching-virtual-machines.patch
+Patch0048: 0048-ovirt-foreign-menu-Fetch-host-cluster-and-data-cente.patch
+Patch0049: 0049-foreign-menu-Check-if-storage-domain-is-active-for-d.patch
+Patch0050: 0050-remote-viewer-Pass-guri-to-remote_viewer_session_con.patch
+Patch0051: 0051-doc-Adjust-reference-to-spice-gtk-man-page.patch
+Patch0052: 0052-doc-Adjust-reference-to-spice-gtk-man-page-for-remot.patch
+Patch0053: 0053-Update-translations-from-zanata.patch
+
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: openssh-clients
@@ -152,32 +99,20 @@ BuildRequires: gettext-devel
 BuildRequires: libtool
 %endif
 
-BuildRequires: glib2-devel >= 2.22
-%if %{with_gtk3}
-BuildRequires: gtk3-devel >= 3.0.0
-%else
-BuildRequires: gtk2-devel >= 2.18.0
-Requires: gtk2 >= 2.18.0
-%endif
-BuildRequires: libvirt-devel >= 0.9.7
-BuildRequires: libxml2-devel
-%if %{with_gtk3}
-BuildRequires: gtk-vnc2-devel >= 0.4.0
-%else
-BuildRequires: gtk-vnc-devel >= 0.3.8
-%endif
+BuildRequires: pkgconfig(glib-2.0) >= 2.38
+BuildRequires: pkgconfig(gtk+-3.0) >= 3.12
+BuildRequires: pkgconfig(libvirt) >= 0.10.0
+BuildRequires: pkgconfig(libvirt-glib-1.0) >= 0.1.8
+BuildRequires: pkgconfig(libxml-2.0) >= 2.6.0
+BuildRequires: pkgconfig(gtk-vnc-2.0) >= 0.4.0
 %if %{with_spice}
-%if %{with_gtk3}
-BuildRequires: spice-gtk3-devel >= 0.31
-%else
-BuildRequires: spice-gtk-devel >= 0.31
-%endif
-BuildRequires: spice-protocol >= 0.10.1
+BuildRequires: pkgconfig(spice-client-gtk-3.0) >= 0.33
+BuildRequires: pkgconfig(spice-protocol) >= 0.12.12
 %endif
 BuildRequires: /usr/bin/pod2man
 BuildRequires: intltool
 %if %{with_govirt}
-BuildRequires: libgovirt-devel >= 0.3.2
+BuildRequires: pkgconfig(govirt-1.0) >= 0.3.3
 %endif
 
 %if 0%{?fedora} >= 20
@@ -192,110 +127,59 @@ the display, and libvirt for looking up VNC/SPICE server details.
 
 %prep
 %setup -q
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
-%patch7 -p1
-%patch8 -p1
-%patch9 -p1
-%patch10 -p1
-%patch11 -p1
-%patch12 -p1
-%patch13 -p1
-%patch14 -p1
-%patch15 -p1
-%patch16 -p1
-%patch17 -p1
-%patch18 -p1
-%patch19 -p1
-%patch20 -p1
-%patch21 -p1
-%patch22 -p1
-%patch23 -p1
-%patch24 -p1
-%patch25 -p1
-%patch26 -p1
-%patch27 -p1
-%patch28 -p1
-%patch29 -p1
-%patch30 -p1
-%patch31 -p1
-%patch32 -p1
-%patch33 -p1
-%patch34 -p1
-%patch35 -p1
-%patch36 -p1
-%patch37 -p1
-%patch38 -p1
-%patch39 -p1
-%patch40 -p1
-%patch41 -p1
-%patch42 -p1
-%patch43 -p1
-%patch44 -p1
-%patch45 -p1
-%patch46 -p1
-%patch47 -p1
-%patch48 -p1
-%patch49 -p1
-%patch50 -p1
-%patch51 -p1
-%patch52 -p1
-%patch53 -p1
-%patch54 -p1
-%patch55 -p1
-%patch56 -p1
-%patch57 -p1
-%patch58 -p1
-%patch59 -p1
-%patch60 -p1
-%patch61 -p1
-%patch62 -p1
-%patch63 -p1
-%patch64 -p1
-%patch65 -p1
-%patch66 -p1
-%patch67 -p1
-%patch68 -p1
-%patch69 -p1
-%patch70 -p1
-%patch71 -p1
-%patch72 -p1
-%patch73 -p1
-%patch74 -p1
-%patch75 -p1
-%patch76 -p1
-%patch77 -p1
-%patch78 -p1
-%patch79 -p1
-%patch80 -p1
-%patch81 -p1
-%patch82 -p1
-%patch83 -p1
-%patch84 -p1
-%patch85 -p1
-%patch86 -p1
-%patch87 -p1
-%patch88 -p1
-%patch89 -p1
-%patch90 -p1
-%patch91 -p1
-%patch92 -p1
-%patch93 -p1
-%patch94 -p1
-%patch95 -p1
-%patch96 -p1
-%patch97 -p1
-%patch98 -p1
-%patch99 -p1
-%patch100 -p1
-%patch101 -p1
-%patch102 -p1
-%patch103 -p1
-%patch104 -p1
+%patch0001 -p1
+%patch0002 -p1
+%patch0003 -p1
+%patch0004 -p1
+%patch0005 -p1
+%patch0006 -p1
+%patch0007 -p1
+%patch0008 -p1
+%patch0009 -p1
+%patch0010 -p1
+%patch0011 -p1
+%patch0012 -p1
+%patch0013 -p1
+%patch0014 -p1
+%patch0015 -p1
+%patch0016 -p1
+%patch0017 -p1
+%patch0018 -p1
+%patch0019 -p1
+%patch0020 -p1
+%patch0021 -p1
+%patch0022 -p1
+%patch0023 -p1
+%patch0024 -p1
+%patch0025 -p1
+%patch0026 -p1
+%patch0027 -p1
+%patch0028 -p1
+%patch0029 -p1
+%patch0030 -p1
+%patch0031 -p1
+%patch0032 -p1
+%patch0033 -p1
+%patch0034 -p1
+%patch0036 -p1
+%patch0037 -p1
+%patch0038 -p1
+%patch0039 -p1
+%patch0040 -p1
+%patch0041 -p1
+%patch0042 -p1
+%patch0043 -p1
+%patch0044 -p1
+%patch0045 -p1
+%patch0046 -p1
+%patch0047 -p1
+%patch0048 -p1
+%patch0049 -p1
+%patch0050 -p1
+%patch0051 -p1
+%patch0052 -p1
+%patch0053 -p1
+
 %build
 
 %if 0%{?enable_autotools}
@@ -308,18 +192,12 @@ autoreconf -if
 %define spice_arg --without-spice-gtk
 %endif
 
-%if %{with_gtk3}
-%define gtk_arg --with-gtk=3.0
-%else
-%define gtk_arg --with-gtk=2.0
-%endif
-
 %if %{with_govirt}
 %define govirt_arg --with-ovirt
 %endif
 
-%configure %{spice_arg} %{gtk_arg} %{govirt_arg} --with-buildid=%{release} --disable-update-mimedb --with-osid=rhel%{?rhel}
-%__make %{?_smp_mflags}
+%configure %{spice_arg} %{govirt_arg} --with-buildid=%{release} --disable-update-mimedb --with-osid=rhel%{?rhel}
+%__make %{?_smp_mflags} V=1
 
 
 %install
@@ -335,38 +213,33 @@ rm -rf $RPM_BUILD_ROOT
 
 %post
 /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
+/bin/touch --no-create %{_datadir}/mime/packages &> /dev/null || :
 %{_sbindir}/update-alternatives --install %{_libexecdir}/spice-xpi-client \
   spice-xpi-client %{_libexecdir}/spice-xpi-client-remote-viewer 25
-update-desktop-database -q %{_datadir}/applications
-%{_bindir}/update-mime-database %{_datadir}/mime &> /dev/null
+%{_bindir}/update-desktop-database -q %{_datadir}/applications
 
 %postun
 if [ $1 -eq 0 ] ; then
   /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null
-  /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+  %{_bindir}/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+  %{_bindir}/update-mime-database %{_datadir}/mime &> /dev/null || :
   %{_sbindir}/update-alternatives --remove spice-xpi-client %{_libexecdir}/spice-xpi-client-remote-viewer
 fi
-update-desktop-database -q %{_datadir}/applications
-%{_bindir}/update-mime-database %{_datadir}/mime &> /dev/null
+%{_bindir}/update-desktop-database -q %{_datadir}/applications
 
 %posttrans
-/usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+%{_bindir}/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+%{_bindir}/update-mime-database %{?fedora:-n} %{_datadir}/mime &> /dev/null || :
 
 %files -f %{name}.lang
 %defattr(-,root,root,-)
-%doc README COPYING AUTHORS ChangeLog NEWS
+%doc README.md COPYING AUTHORS ChangeLog NEWS
 %{_bindir}/%{name}
 %{_bindir}/remote-viewer
-%dir %{_datadir}/%{name}
-%dir %{_datadir}/%{name}/ui/
-%{_datadir}/%{name}/ui/virt-viewer.xml
-%{_datadir}/%{name}/ui/virt-viewer-auth.xml
-%{_datadir}/%{name}/ui/virt-viewer-about.xml
-%{_datadir}/%{name}/ui/virt-viewer-guest-details.xml
-%{_datadir}/%{name}/ui/virt-viewer-vm-connection.xml
 %{_datadir}/icons/hicolor/*/apps/*
 %{_datadir}/icons/hicolor/*/devices/*
 %{_datadir}/applications/remote-viewer.desktop
+%{_datadir}/appdata/remote-viewer.appdata.xml
 %{_datadir}/mime/packages/virt-viewer-mime.xml
 %ghost %{_libexecdir}/spice-xpi-client
 %{_libexecdir}/spice-xpi-client-remote-viewer
@@ -374,6 +247,98 @@ update-desktop-database -q %{_datadir}/applications
 %{_mandir}/man1/remote-viewer.1*
 
 %changelog
+* Mon Dec 11 2017 Eduardo Lima (Etrunko) <etrunko@redhat.com> - 5.0-10
+- Adjust reference to spice-gtk man page for remote-viewer
+  Resolves: rhbz#1477966
+- Update translations
+  Resolves: rhbz#1481243
+
+* Fri Nov 17 2017 Eduardo Lima (Etrunko) <etrunko@redhat.com> - 5.0-9
+- Drop downstream specific patch reverting string change
+  Related: rhbz#1481243
+- Fix scope declaration of enable_autotools macro
+  Resolves: rhbz#1504132
+- Fix wrong date in previous changelog entry
+  Resolves: rhbz#1504132
+- Save oVirt uri after connecting to guest
+  Resolves: rhbz#1459792
+- Adjust reference to spice-gtk man page
+  Resolves: rhbz#1477966
+
+* Mon Oct 02 2017 Eduardo Lima (Etrunko) <etrunko@redhat.com> - 5.0-8
+- Show authentication dialog if in kiosk mode and connecting to ovirt
+  Resolves: rhbz#1459808
+- Keep the remove-viewer-connect dialog window on top
+  Resolves: rhbz#1459800
+- Show overwrite confirmation when saving screenshot file
+  Resolves: rhbz#1455832
+- Fix REST endpoint used to load the storagedomains
+  Resolves: rhb#1427467
+
+* Tue Jun 06 2017 Victor Toso <victortoso@redhat.com> - 5.0-7
+- Do not show error on cancel/close of auth dialog - vnc fix
+  Resolves: rhbz#1446161
+
+* Thu Jun 01 2017 Eduardo Lima (Etrunko) <etrunko@redhat.com> - 5.0-6
+- Do not show error on cancel/close of auth dialog
+  Resolves: rhbz#1446161
+
+* Thu Jun 01 2017 Eduardo Lima (Etrunko) <etrunko@redhat.com> - 5.0-5
+- Do not allow exit fullscreen in kiosk mode
+  Resolves: rhbz#1446161
+
+* Thu May 18 2017 Pavel Grunt <pgrunt@redhat.com> - 5.0-4
+- Fix seamless migration in virt-viewer
+  Resolves: rhbz#1442929
+- Make file transfer progressbar smooth again
+  Resolves: rhbz#1449572
+- Update translation from internal zanata
+  Resolves: rhzb#1378279
+
+* Mon Apr 10 2017 Pavel Grunt <pgrunt@redhat.com> - 5.0-3
+- Handle initial zoom settings for vnc
+  Resolves: rhbz#1436991
+- Allow to control zoom using numpad
+  Resolves: rhbz#1337575
+- Support new elements in libvirt xml
+  Resolves: rhbz#1411765
+
+* Wed Mar 15 2017 Pavel Grunt <pgrunt@redhat.com> - 5.0-2
+- Really enable the hardened build
+  Resolves: rhzb#1420780
+- Fixup for precise VM selection
+  Resolves: rhbz#1399077
+
+* Wed Mar 15 2017 Pavel Grunt <pgrunt@redhat.com> - 5.0-1
+- Rebase to the latest upstream release
+  Resolves: rhbz#1413982
+- Rebuild with spice-gtk 0.33
+  Resolves: rbhz#1431995
+- Rebuild with correct hardening flags
+  Resolves: rhbz#1420780
+- Fix display id inconsistencies in debug logs
+  Resolves: rhbz#1368390
+- Provide a dialog for selecting ISOs
+  Resolves: rhbz#1414016
+- Always display warning messages
+  Resolves: rhbz#1386630
+- Do not print password in the logs
+  Resolves: rhbz#1410030
+- Update qemu+ssh URL example
+  Resolves: rhbz#1377283
+- Add cli options for precise VM selection in virt-viewer
+  Resolves: rhbz#1399077
+
+* Mon Dec 12 2016 Pavel Grunt <pgrunt@redhat.com> - 2.0-13
+- Fix connection using broken monitor mapping
+  Resolves: rhbz#1351243
+- Provide correct exit code on cancel
+  Resolves: rhbz#1374430
+- Inform user about connection failure
+  Resolves: rhbz#1377100
+- Recommend using ssh-agent
+  Resolves: rhbz#1377283
+
 * Wed Sep 14 2016 Pavel Grunt <pgrunt@redhat.com> - 2.0-12
 - Update translations
   Resolves: rhbz#1182470

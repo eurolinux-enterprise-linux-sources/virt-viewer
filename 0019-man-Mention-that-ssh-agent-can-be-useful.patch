@@ -1,0 +1,37 @@
+From 276012ea375fb760b53f83308774010621dde1f4 Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Thu, 1 Dec 2016 17:29:47 +0100
+Subject: [PATCH virt-viewer] man: Mention that ssh-agent can be useful
+To: virt-tools-list@redhat.com
+
+When using a tunneled SPICE connection, the user will get a dozen
+authentication prompts if they are not using ssh-agent.
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1377283
+---
+ man/virt-viewer.pod | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/man/virt-viewer.pod b/man/virt-viewer.pod
+index bd953ed..ad3e298 100644
+--- a/man/virt-viewer.pod
++++ b/man/virt-viewer.pod
+@@ -179,6 +179,15 @@ To connect to a remote console using TLS
+    virt-viewer --connect xen://example.org/ demo
+ 
+ To connect to a remote host using SSH, lookup the guest config and
++then make a tunnelled connection of the console
++
++   virt-viewer --connect qemu+ssh://root@example.org/system demo
++
++When using a SSH tunnel to connect to a SPICE console, it's recommended to
++have ssh-agent running to avoid getting multiple authentication prompts.
++
++
++To connect to a remote host using SSH, lookup the guest config and
+ then make a direct non-tunnelled connection of the console
+ 
+    virt-viewer --direct --connect xen+ssh://root@example.org/ demo
+-- 
+2.12.0
+
