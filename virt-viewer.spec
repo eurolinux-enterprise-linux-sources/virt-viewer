@@ -5,7 +5,7 @@
 # Default to skipping autoreconf.  Distros can change just this one line
 # (or provide a command-line override) if they backport any patches that
 # touch configure.ac or Makefile.am.
-%{!?enable_autotools:%global enable_autotools 1}
+%{!?enable_autotools:%define enable_autotools 1}
 
 %define with_spice 0
 %if 0%{?fedora} >= 17 || 0%{?rhel} >= 6
@@ -24,7 +24,7 @@
 
 Name: virt-viewer
 Version: 5.0
-Release: 15%{?dist}%{?extra_release}
+Release: 7%{?dist}%{?extra_release}
 Summary: Virtual Machine Viewer
 Group: Applications/System
 License: GPLv2+
@@ -65,39 +65,20 @@ Patch0031: 0031-virt-viewer-Support-newer-libvirt-xml-format.patch
 Patch0032: 0032-app-Allow-to-connect-to-channel-using-unix-socket.patch
 Patch0033: 0033-virt-viewer-Ensure-to-not-close-during-migration.patch
 Patch0034: 0034-Make-the-progress-bar-smooth-during-file-transfer.patch
+Patch0035: 0035-Remove-string-introduced-by-the-previous-commit.patch
 Patch0036: 0036-Update-translation-from-internal-zanata.patch
 Patch0037: 0037-window-Do-not-show-fullscreen-toolbar-if-in-kiosk-mo.patch
 Patch0038: 0038-kiosk-Show-authentication-dialog-again-if-cancelled.patch
 Patch0039: 0039-spice-do-not-show-error-on-cancel-close-of-auth-dial.patch
 Patch0040: 0040-vnc-do-not-show-error-on-cancel-close-of-auth-dialog.patch
-Patch0041: 0041-remote-viewer-Show-authentication-dialog-again-if-in.patch
-Patch0042: 0042-remote-viewer-connect-Keep-the-dialog-window-on-top.patch
-Patch0043: 0043-Change-default-screenshot-name-to-Screenshot.png.patch
-Patch0044: 0044-Report-errors-when-saving-screenshot.patch
-Patch0045: 0045-Screenshot-reject-unknown-image-type-filenames.patch
-Patch0046: 0046-configure-check-for-new-functions-in-libgovirt.patch
-Patch0047: 0047-foreign-menu-Use-query-for-fetching-virtual-machines.patch
-Patch0048: 0048-ovirt-foreign-menu-Fetch-host-cluster-and-data-cente.patch
-Patch0049: 0049-foreign-menu-Check-if-storage-domain-is-active-for-d.patch
-Patch0050: 0050-remote-viewer-Pass-guri-to-remote_viewer_session_con.patch
-Patch0051: 0051-doc-Adjust-reference-to-spice-gtk-man-page.patch
-Patch0052: 0052-doc-Adjust-reference-to-spice-gtk-man-page-for-remot.patch
-Patch0053: 0053-Update-translations-from-zanata.patch
-Patch0054: 0054-remote-viewer-remove-spice-controller.patch
-Patch0055: 0055-remote-viewer-connect-centralize-window.patch
-Patch0056: 0056-app-Always-add-guest-name-comment.patch
-Patch0057: 0057-Mark-PrintScreen-as-translatable.patch
-Patch0058: 0058-ovirt-foreign-menu-Bypass-errors-from-Host-Cluster-D.patch
-Patch0059: 0059-Spice-listen-for-new-SpiceSession-disconnected-signa.patch
-Patch0060: 0060-Fix-a-regression-when-initial-connection-fails.patch
-Patch0061: 0061-configure-Fix-check-for-govirt-functions.patch
+
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: openssh-clients
+Requires(post):   %{_sbindir}/update-alternatives
+Requires(postun): %{_sbindir}/update-alternatives
 Requires(post): desktop-file-utils
 Requires(postun): desktop-file-utils
-Requires(post): %{_sbindir}/update-alternatives
-Requires(postun): %{_sbindir}/update-alternatives
 
 %if 0%{?enable_autotools}
 BuildRequires: autoconf
@@ -113,7 +94,7 @@ BuildRequires: pkgconfig(libvirt-glib-1.0) >= 0.1.8
 BuildRequires: pkgconfig(libxml-2.0) >= 2.6.0
 BuildRequires: pkgconfig(gtk-vnc-2.0) >= 0.4.0
 %if %{with_spice}
-BuildRequires: pkgconfig(spice-client-gtk-3.0) >= 0.35
+BuildRequires: pkgconfig(spice-client-gtk-3.0) >= 0.33
 BuildRequires: pkgconfig(spice-protocol) >= 0.12.12
 %endif
 BuildRequires: /usr/bin/pod2man
@@ -168,33 +149,12 @@ the display, and libvirt for looking up VNC/SPICE server details.
 %patch0032 -p1
 %patch0033 -p1
 %patch0034 -p1
+%patch0035 -p1
 %patch0036 -p1
 %patch0037 -p1
 %patch0038 -p1
 %patch0039 -p1
 %patch0040 -p1
-%patch0041 -p1
-%patch0042 -p1
-%patch0043 -p1
-%patch0044 -p1
-%patch0045 -p1
-%patch0046 -p1
-%patch0047 -p1
-%patch0048 -p1
-%patch0049 -p1
-%patch0050 -p1
-%patch0051 -p1
-%patch0052 -p1
-%patch0053 -p1
-%patch0054 -p1
-%patch0055 -p1
-%patch0056 -p1
-%patch0057 -p1
-%patch0058 -p1
-%patch0059 -p1
-%patch0060 -p1
-%patch0061 -p1
-
 %build
 
 %if 0%{?enable_autotools}
@@ -218,6 +178,9 @@ autoreconf -if
 %install
 rm -rf $RPM_BUILD_ROOT
 %__make install  DESTDIR=$RPM_BUILD_ROOT
+mkdir -p %{buildroot}%{_libexecdir}
+touch %{buildroot}%{_libexecdir}/spice-xpi-client
+install -m 0755 data/spice-xpi-client-remote-viewer %{buildroot}%{_libexecdir}/
 %find_lang %{name}
 
 %clean
@@ -226,18 +189,16 @@ rm -rf $RPM_BUILD_ROOT
 %post
 /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
 /bin/touch --no-create %{_datadir}/mime/packages &> /dev/null || :
+%{_sbindir}/update-alternatives --install %{_libexecdir}/spice-xpi-client \
+  spice-xpi-client %{_libexecdir}/spice-xpi-client-remote-viewer 25
 %{_bindir}/update-desktop-database -q %{_datadir}/applications
-if [ $1 -eq 2 ] ; then
-  # Here due 1658325, postun alone is not enough. Can be removed later on.
-  %{_sbindir}/update-alternatives --remove spice-xpi-client %{_libexecdir}/spice-xpi-client-remote-viewer || :
-fi
 
 %postun
-%{_sbindir}/update-alternatives --remove spice-xpi-client %{_libexecdir}/spice-xpi-client-remote-viewer || :
 if [ $1 -eq 0 ] ; then
   /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null
   %{_bindir}/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
   %{_bindir}/update-mime-database %{_datadir}/mime &> /dev/null || :
+  %{_sbindir}/update-alternatives --remove spice-xpi-client %{_libexecdir}/spice-xpi-client-remote-viewer
 fi
 %{_bindir}/update-desktop-database -q %{_datadir}/applications
 
@@ -255,65 +216,13 @@ fi
 %{_datadir}/applications/remote-viewer.desktop
 %{_datadir}/appdata/remote-viewer.appdata.xml
 %{_datadir}/mime/packages/virt-viewer-mime.xml
+%ghost %{_libexecdir}/spice-xpi-client
+%{_libexecdir}/spice-xpi-client-remote-viewer
 %{_mandir}/man1/virt-viewer.1*
 %{_mandir}/man1/remote-viewer.1*
 
 %changelog
-* Fri May 31 2019 Eduardo Lima (Etrunko) <etrunko@redhat.com> - 5.0.15
-- Fix check for ovirt functions
-  Related: rhbz#1427467
-
-* Wed May 22 2019 Victor Toso <victortoso@redhat.com> - 5.0-14
-- Listen to SpiceSession::disconnected
-  Resolves: rhbz#1505809
-
-* Wed Apr 10 2019 Eduardo Lima (Etrunko) <etrunko@redhat.com> - 5.0.13
-- Bypass errors from oVirt foreign menu queries
-  Related: rhbz#1428401
-
-* Fri Mar 15 2019 Victor Toso <victortoso@redhat.com> - 5.0-12
-- Centralize recent dialog
-  Resolves: rhbz#1508274
-- Always add guest name as comment
-  Resolves: rhbz#1623756
-- Mark PrintScreen as translatable
-  Resolves: rhbz#1510411
-- Remove symlink to spice-xpi-client-remote-viewer on update (it was dropped)
-  Resolves: rhbz#1658325
-
-* Wed Jun 13 2018 Victor Toso <victortoso@redhat.com> - 5.0-11
-- Disable spice-controller in virt-viewer
-  Resolves: rhbz#1590457
-
-* Mon Dec 11 2017 Eduardo Lima (Etrunko) <etrunko@redhat.com> - 5.0-10
-- Adjust reference to spice-gtk man page for remote-viewer
-  Resolves: rhbz#1477966
-- Update translations
-  Resolves: rhbz#1481243
-
-* Fri Nov 17 2017 Eduardo Lima (Etrunko) <etrunko@redhat.com> - 5.0-9
-- Drop downstream specific patch reverting string change
-  Related: rhbz#1481243
-- Fix scope declaration of enable_autotools macro
-  Resolves: rhbz#1504132
-- Fix wrong date in previous changelog entry
-  Resolves: rhbz#1504132
-- Save oVirt uri after connecting to guest
-  Resolves: rhbz#1459792
-- Adjust reference to spice-gtk man page
-  Resolves: rhbz#1477966
-
-* Mon Oct 02 2017 Eduardo Lima (Etrunko) <etrunko@redhat.com> - 5.0-8
-- Show authentication dialog if in kiosk mode and connecting to ovirt
-  Resolves: rhbz#1459808
-- Keep the remove-viewer-connect dialog window on top
-  Resolves: rhbz#1459800
-- Show overwrite confirmation when saving screenshot file
-  Resolves: rhbz#1455832
-- Fix REST endpoint used to load the storagedomains
-  Resolves: rhb#1427467
-
-* Tue Jun 06 2017 Victor Toso <victortoso@redhat.com> - 5.0-7
+* Tue Jun 07 2017 Victor Toso <victortoso@redhat.com> - 5.0-7
 - Do not show error on cancel/close of auth dialog - vnc fix
   Resolves: rhbz#1446161
 

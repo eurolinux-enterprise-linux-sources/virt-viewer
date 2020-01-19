@@ -1,0 +1,41 @@
+From e9a548d222a240670b800e479395d01ce8bd4973 Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Thu, 18 May 2017 15:24:03 +0200
+Subject: [PATCH virt-viewer 35/35] Remove string introduced by the previous
+ commit
+To: virt-tools-list@redhat.com
+
+Due to the string freeze
+
+DOWNSTREAM only commit
+
+Related: rhbz#1449572, rhbz#1378279
+---
+ src/virt-viewer-file-transfer-dialog.c | 11 ++++-------
+ 1 file changed, 4 insertions(+), 7 deletions(-)
+
+diff --git a/src/virt-viewer-file-transfer-dialog.c b/src/virt-viewer-file-transfer-dialog.c
+index dcf99a3..f378811 100644
+--- a/src/virt-viewer-file-transfer-dialog.c
++++ b/src/virt-viewer-file-transfer-dialog.c
+@@ -150,13 +150,10 @@ static void update_global_progress(VirtViewerFileTransferDialog *self)
+         fraction = (gdouble)transferred / self->priv->total_transfer_size;
+     }
+ 
+-    if (self->priv->num_files == 1) {
+-        message = g_strdup(_("Transferring 1 file..."));
+-    } else {
+-        message = g_strdup_printf(ngettext("Transferring %d file of %d...",
+-                                           "Transferring %d files of %d...", n_files),
+-                                  n_files, self->priv->num_files);
+-    }
++    message = g_strdup_printf(ngettext("Transferring %d file...",
++                                       "Transferring %d files...", n_files),
++                              n_files);
++
+     gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(self->priv->progressbar), fraction);
+     gtk_label_set_text(GTK_LABEL(self->priv->transfer_summary), message);
+     g_free(message);
+-- 
+2.13.0
+
