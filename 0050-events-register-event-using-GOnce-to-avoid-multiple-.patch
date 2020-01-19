@@ -1,0 +1,50 @@
+From 8b3f405adcfda8b31e331582579f6efd93cfc7a3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabiano=20Fid=C3=AAncio?= <fidencio@redhat.com>
+Date: Wed, 22 Jul 2015 02:51:49 +0200
+Subject: [PATCH] events: register event using GOnce to avoid multiple
+ initializations
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Based on commit 8f8d9ce5238dbcbce40aa04ba55b8c55f97c79c0 from
+libvirt-glib.
+Original author: Marc-André Lureau <marcandre.lureau@redhat.com>
+
+Related to: rhbz#1243228
+
+(cherry picked from commit 0a464aae9a764c404ea76fe2212d45e5b2d87d2f)
+---
+ src/virt-viewer-events.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/src/virt-viewer-events.c b/src/virt-viewer-events.c
+index f767c2e..daf128e 100644
+--- a/src/virt-viewer-events.c
++++ b/src/virt-viewer-events.c
+@@ -392,8 +392,8 @@ cleanup:
+     return ret;
+ }
+ 
+-
+-void virt_viewer_events_register(void) {
++static gpointer event_register_once(gpointer data G_GNUC_UNUSED)
++{
+     eventlock = g_mutex_new();
+     virEventRegisterImpl(virt_viewer_events_add_handle,
+                          virt_viewer_events_update_handle,
+@@ -401,6 +401,14 @@ void virt_viewer_events_register(void) {
+                          virt_viewer_events_add_timeout,
+                          virt_viewer_events_update_timeout,
+                          virt_viewer_events_remove_timeout);
++
++    return NULL;
++}
++
++void virt_viewer_events_register(void) {
++    static GOnce once = G_ONCE_INIT;
++
++    g_once(&once, event_register_once, NULL);
+ }
+ 
+ /*

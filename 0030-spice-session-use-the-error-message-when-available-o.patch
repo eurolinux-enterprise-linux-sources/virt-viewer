@@ -1,0 +1,40 @@
+From ce7ff4af0ff08c250f94c22d5d325256ab94228c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabiano=20Fid=C3=AAncio?= <fidencio@redhat.com>
+Date: Thu, 9 Apr 2015 13:31:56 +0200
+Subject: [PATCH] spice-session: use the error message, when available, on
+ _channel_destroy()
+
+(cherry picked from commit 64e7b604d3449380fc24c9782013dcf3b62eec3e)
+---
+ src/virt-viewer-session-spice.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/virt-viewer-session-spice.c b/src/virt-viewer-session-spice.c
+index f7a8dc7..d82fd49 100644
+--- a/src/virt-viewer-session-spice.c
++++ b/src/virt-viewer-session-spice.c
+@@ -886,12 +886,15 @@ virt_viewer_session_spice_channel_destroy(G_GNUC_UNUSED SpiceSession *s,
+ {
+     VirtViewerSessionSpice *self = VIRT_VIEWER_SESSION_SPICE(session);
+     int id;
++    const GError *error;
+ 
+     g_return_if_fail(self != NULL);
+ 
+     g_object_get(channel, "channel-id", &id, NULL);
+     g_debug("Destroy SPICE channel %s %d", g_type_name(G_OBJECT_TYPE(channel)), id);
+ 
++    error = spice_channel_get_error(channel);
++
+     if (SPICE_IS_MAIN_CHANNEL(channel)) {
+         g_debug("zap main channel");
+         if (channel == SPICE_CHANNEL(self->priv->main_channel))
+@@ -917,7 +920,7 @@ virt_viewer_session_spice_channel_destroy(G_GNUC_UNUSED SpiceSession *s,
+ 
+     self->priv->channel_count--;
+     if (self->priv->channel_count == 0)
+-        g_signal_emit_by_name(self, "session-disconnected", NULL);
++        g_signal_emit_by_name(self, "session-disconnected", error ? error->message : NULL);
+ }
+ 
+ #define UUID_LEN 16

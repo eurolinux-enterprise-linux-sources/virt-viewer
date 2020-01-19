@@ -1,0 +1,29 @@
+From 6b271d09c171304d54322a783e4e84899c2ed665 Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Tue, 21 Apr 2015 18:37:16 +0200
+Subject: [PATCH] virt-viewer-window: Make sure that minimum zoom level is
+ lower than NORMAL_ZOOM_LEVEL
+
+The minimum size of the desktop is 100x100 if the minimum window size
+is greater than this, the zoom level is greater than NORMAL_ZOOM_LEVEL
+
+related: rhbz#1206460
+(cherry picked from commit 41645a0eb594b3c847968642ee0bc13b5fc4e091)
+---
+ src/virt-viewer-window.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/virt-viewer-window.c b/src/virt-viewer-window.c
+index 6a337da..7734b5d 100644
+--- a/src/virt-viewer-window.c
++++ b/src/virt-viewer-window.c
+@@ -1527,7 +1527,8 @@ virt_viewer_window_get_minimal_zoom_level(VirtViewerWindow *self)
+     height_ratio = (double) min_height / height;
+     zoom = ceil(10 * MAX(width_ratio, height_ratio));
+ 
+-    return MAX(MIN_ZOOM_LEVEL, zoom * ZOOM_STEP);
++    /* make sure that the returned zoom level is in the range from MIN_ZOOM_LEVEL to NORMAL_ZOOM_LEVEL */
++    return CLAMP(zoom * ZOOM_STEP, MIN_ZOOM_LEVEL, NORMAL_ZOOM_LEVEL);
+ }
+ 
+ /*

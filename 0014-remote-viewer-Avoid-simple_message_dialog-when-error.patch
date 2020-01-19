@@ -1,0 +1,28 @@
+From c536197971b3587eefc7001c45a78a3d6a48acfe Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabiano=20Fid=C3=AAncio?= <fidencio@redhat.com>
+Date: Thu, 26 Mar 2015 23:09:21 +0100
+Subject: [PATCH] remote-viewer: Avoid simple_message_dialog() when errors can
+ be propagated
+
+Remove the dialog used to report errors when create_session() fails,
+propagating the error is enough and it is already done.
+
+Related: rhbz#1085216
+(cherry picked from commit f580f1ea54f98092791814e8f49fbcd5296a4a77)
+---
+ src/remote-viewer.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/remote-viewer.c b/src/remote-viewer.c
+index ae763ca..0912f55 100644
+--- a/src/remote-viewer.c
++++ b/src/remote-viewer.c
+@@ -1207,7 +1207,7 @@ remote_viewer_start(VirtViewerApp *app)
+ 
+     if (priv->controller) {
+         if (!virt_viewer_app_create_session(app, "spice", &error)) {
+-            virt_viewer_app_simple_message_dialog(app, _("Couldn't create a Spice session"));
++            g_debug("Couldn't create a Spice session");
+             goto cleanup;
+         }
+ 

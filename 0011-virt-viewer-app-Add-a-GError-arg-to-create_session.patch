@@ -1,0 +1,110 @@
+From 95e1d7f30f0afec5d4fb09cae3a9f9e28313d4ec Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabiano=20Fid=C3=AAncio?= <fidencio@redhat.com>
+Date: Thu, 26 Mar 2015 23:05:31 +0100
+Subject: [PATCH] virt-viewer-app: Add a GError arg to create_session()
+
+This is part of a small re-factoring that will have all connection
+errors, when we won't be able to connect regardless of what changes on
+the remote host, being treated by virt_viewer_app_initial_connect(),
+avoiding weird behaviors as we have nowadays (like more than one error
+dialog being shown or having the virt-viewer waiting forever for a guest
+that will never show up).
+
+Related: rhbz#1085216
+(cherry picked from commit f9c4a03bd76ca23b6eb715244b7019fddca0eb72)
+---
+ src/remote-viewer.c   | 12 ++++--------
+ src/virt-viewer-app.c |  6 +++++-
+ src/virt-viewer-app.h |  2 +-
+ src/virt-viewer.c     |  2 +-
+ 4 files changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/src/remote-viewer.c b/src/remote-viewer.c
+index 2a6ad6d..4ffae7e 100644
+--- a/src/remote-viewer.c
++++ b/src/remote-viewer.c
+@@ -937,11 +937,9 @@ create_ovirt_session(VirtViewerApp *app, const char *uri, GError **err)
+     virt_viewer_app_set_connect_info(app, NULL, ghost, gport, gtlsport,
+                                      session_type, NULL, NULL, 0, NULL);
+ 
+-    if (virt_viewer_app_create_session(app, session_type) < 0) {
+-        g_set_error(&error, VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
+-                    _("Failed to create a session type %s"), session_type);
++    if (virt_viewer_app_create_session(app, session_type, &error) < 0)
+         goto error;
+-    }
++
+ #ifdef HAVE_SPICE_GTK
+     if (type == OVIRT_VM_DISPLAY_SPICE) {
+         SpiceSession *session;
+@@ -1208,7 +1206,7 @@ remote_viewer_start(VirtViewerApp *app)
+     g_signal_connect(app, "notify", G_CALLBACK(app_notified), self);
+ 
+     if (priv->controller) {
+-        if (virt_viewer_app_create_session(app, "spice") < 0) {
++        if (virt_viewer_app_create_session(app, "spice", &error) < 0) {
+             virt_viewer_app_simple_message_dialog(app, _("Couldn't create a Spice session"));
+             goto cleanup;
+         }
+@@ -1269,10 +1267,8 @@ retry_dialog:
+         } else
+ #endif
+         {
+-            if (virt_viewer_app_create_session(app, type) < 0) {
+-                virt_viewer_app_simple_message_dialog(app, _("Couldn't create a session for this type: %s"), type);
++            if (virt_viewer_app_create_session(app, type, &error) < 0)
+                 goto cleanup;
+-            }
+         }
+ 
+         virt_viewer_session_set_file(virt_viewer_app_get_session(app), vvfile);
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index a2328d7..19df7ae 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -1051,7 +1051,7 @@ static void notify_software_reader_cb(GObject    *gobject G_GNUC_UNUSED,
+ }
+ 
+ int
+-virt_viewer_app_create_session(VirtViewerApp *self, const gchar *type)
++virt_viewer_app_create_session(VirtViewerApp *self, const gchar *type, GError **error)
+ {
+     g_return_val_if_fail(VIRT_VIEWER_IS_APP(self), -1);
+     VirtViewerAppPrivate *priv = self->priv;
+@@ -1075,6 +1075,10 @@ virt_viewer_app_create_session(VirtViewerApp *self, const gchar *type)
+     } else
+ #endif
+     {
++        g_set_error(error,
++                    VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
++                    _("Unsupported graphic type '%s'"), type);
++
+         virt_viewer_app_trace(self, "Guest %s has unsupported %s display type",
+                               priv->guest_name, type);
+         virt_viewer_app_simple_message_dialog(self, _("Unknown graphic type for the guest %s"),
+diff --git a/src/virt-viewer-app.h b/src/virt-viewer-app.h
+index c9b347d..6c8842c 100644
+--- a/src/virt-viewer-app.h
++++ b/src/virt-viewer-app.h
+@@ -68,7 +68,7 @@ void virt_viewer_app_trace(VirtViewerApp *self, const char *fmt, ...);
+ void virt_viewer_app_simple_message_dialog(VirtViewerApp *self, const char *fmt, ...);
+ gboolean virt_viewer_app_is_active(VirtViewerApp *app);
+ void virt_viewer_app_free_connect_info(VirtViewerApp *self);
+-int virt_viewer_app_create_session(VirtViewerApp *self, const gchar *type);
++int virt_viewer_app_create_session(VirtViewerApp *self, const gchar *type, GError **error);
+ gboolean virt_viewer_app_activate(VirtViewerApp *self, GError **error);
+ gboolean virt_viewer_app_initial_connect(VirtViewerApp *self, GError **error);
+ void virt_viewer_app_set_zoom_level(VirtViewerApp *self, gint zoom_level);
+diff --git a/src/virt-viewer.c b/src/virt-viewer.c
+index 6f76f92..fc27cb6 100644
+--- a/src/virt-viewer.c
++++ b/src/virt-viewer.c
+@@ -420,7 +420,7 @@ virt_viewer_extract_connect_info(VirtViewer *self,
+         goto cleanup;
+     }
+ 
+-    if (virt_viewer_app_create_session(app, type) < 0)
++    if (virt_viewer_app_create_session(app, type, error) < 0)
+         goto cleanup;
+ 
+     xpath = g_strdup_printf("string(/domain/devices/graphics[@type='%s']/@port)", type);

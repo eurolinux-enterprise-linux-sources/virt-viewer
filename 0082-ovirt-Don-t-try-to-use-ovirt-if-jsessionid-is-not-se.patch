@@ -1,0 +1,33 @@
+From 446ce5c0a4e861f35dc17eb45175d0229e4cb9e6 Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Fri, 3 Apr 2015 17:52:55 +0200
+Subject: [PATCH] ovirt: Don't try to use [ovirt] if jsessionid is not set
+
+If jsessionid is not set in the .vv file and we try to use anyway the
+REST API, an authentication dialog will be shown by remote-viewer, which
+is very unwelcome. If we don't have a jsessionid set, we know we won't
+be able to silently login to the REST API, so don't try to set a foreign
+menu when it's not set.
+
+(cherry picked from commit bc77b4776c6b23f5ecf3ba896173430b2715296d)
+---
+ src/ovirt-foreign-menu.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/ovirt-foreign-menu.c b/src/ovirt-foreign-menu.c
+index 59104a8..855540e 100644
+--- a/src/ovirt-foreign-menu.c
++++ b/src/ovirt-foreign-menu.c
+@@ -844,8 +844,11 @@ OvirtForeignMenu *ovirt_foreign_menu_new_from_file(VirtViewerFile *file)
+     ca_str = virt_viewer_file_get_ovirt_ca(file);
+     admin = virt_viewer_file_get_ovirt_admin(file);
+ 
+-    if ((url == NULL) || (vm_guid == NULL))
++    if ((url == NULL) || (vm_guid == NULL) || (jsessionid == NULL)) {
++        g_debug("ignoring [ovirt] section content as URL, VM GUID or jsessionid"
++                " are missing from the .vv file");
+         goto end;
++    }
+ 
+     proxy = ovirt_proxy_new(url);
+     if (proxy == NULL)

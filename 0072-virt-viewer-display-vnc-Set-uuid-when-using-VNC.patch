@@ -1,0 +1,63 @@
+From 911ce54ba907025fc5b1584f10a8f566bf2ef137 Mon Sep 17 00:00:00 2001
+From: Lukas Venhoda <lvenhoda@redhat.com>
+Date: Wed, 29 Apr 2015 17:39:34 +0200
+Subject: [PATCH] virt-viewer-display-vnc: Set uuid when using VNC
+
+Notify user, that VNC does not provide uuid.
+
+Set uuid to string "VNC does not provide guid".
+This is more informative then just plain "Unknown".
+User will now know WHY the GUID is unknown, when using remote-viewer.
+
+(cherry picked from commit fc2add5827c359ced244c4e0a9cb36d24c24ee83)
+---
+ po/POTFILES.in                | 1 +
+ src/virt-viewer-display-vnc.c | 8 +++++++-
+ 2 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/po/POTFILES.in b/po/POTFILES.in
+index b02bd12..f270898 100644
+--- a/po/POTFILES.in
++++ b/po/POTFILES.in
+@@ -7,6 +7,7 @@ src/remote-viewer.c
+ src/virt-viewer-app.c
+ src/virt-viewer-auth.c
+ [type: gettext/glade] src/virt-viewer-auth.xml
++src/virt-viewer-display-vnc.c
+ src/virt-viewer-main.c
+ src/virt-viewer-session-spice.c
+ src/virt-viewer-session-vnc.c
+diff --git a/src/virt-viewer-display-vnc.c b/src/virt-viewer-display-vnc.c
+index 5b57a32..c567ff4 100644
+--- a/src/virt-viewer-display-vnc.c
++++ b/src/virt-viewer-display-vnc.c
+@@ -117,22 +117,28 @@ virt_viewer_display_vnc_initialized(VncDisplay *vnc G_GNUC_UNUSED,
+                                     VirtViewerDisplay *display)
+ {
+     gchar *name = NULL;
++    gchar *uuid = NULL;
++
+     VirtViewerSession *session = virt_viewer_display_get_session(display);
+     VirtViewerApp *app = virt_viewer_session_get_app(session);
+ 
+-    g_object_get(app, "guest-name", &name, NULL);
++    g_object_get(app, "guest-name", &name, "uuid", &uuid, NULL);
+     if (name == NULL || *name == '\0') {
+         const gchar * vnc_name = vnc_display_get_name(vnc);
+         if (vnc_name != NULL) {
+             g_object_set(app, "guest-name", vnc_name, NULL);
+         }
+     }
++    if (uuid == NULL || *uuid == '\0') {
++        g_object_set(app, "uuid", _("VNC does not provide GUID"), NULL);
++    }
+ 
+     virt_viewer_display_set_show_hint(display,
+                                       VIRT_VIEWER_DISPLAY_SHOW_HINT_READY, TRUE);
+     g_signal_emit_by_name(display, "display-desktop-resize");
+ 
+     g_free(name);
++    g_free(uuid);
+ }
+ 
+ static void

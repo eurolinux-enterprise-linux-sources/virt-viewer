@@ -1,0 +1,131 @@
+From 15d046330e0773891d6c70772eeb857a2fe603f7 Mon Sep 17 00:00:00 2001
+From: Jonathon Jongsma <jjongsma@redhat.com>
+Date: Wed, 13 Jan 2016 10:36:24 -0600
+Subject: [PATCH] display: Set useful values for MIN_DISPLAY_{WIDTH, HEIGHT}
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Nowadays the value for MIN_DISPLAY_{WIDTH,HEIGHT} is 50. This arbitrary
+value doesn't bring any benefit, doesn't provide a useful size for a
+desktop to be usable and can actually trigger some undefined behavior
+when reaching resolutions that are lower than the ones provided by the
+video drivers (as in rhbz#1296878).
+
+In order to avoid these issues and provide a minimum resolution that can
+still be useful for our users, let's use the same values for minimum
+width and height used by the linux QXL drivers (320x200).
+
+This also requires us to adjust the minimum requested widget size when
+zoom is enabled so that we don't accidentally request a size smaller
+than the driver can support.
+
+Related: rhbz#1296878
+Signed-off-by: Fabiano Fidêncio <fidencio@redhat.com>
+(cherry picked from commit c2046a2992b04fde2286c6feffdd7f4410087583)
+---
+ src/virt-viewer-display.c | 33 ++++++++++++++++++---------------
+ src/virt-viewer-display.h |  4 ++--
+ 2 files changed, 20 insertions(+), 17 deletions(-)
+
+diff --git a/src/virt-viewer-display.c b/src/virt-viewer-display.c
+index 2b1f2b0..0939d7a 100644
+--- a/src/virt-viewer-display.c
++++ b/src/virt-viewer-display.c
+@@ -116,7 +116,7 @@ virt_viewer_display_class_init(VirtViewerDisplayClass *class)
+                                                      "Desktop width",
+                                                      MIN_DISPLAY_WIDTH,
+                                                      G_MAXINT32,
+-                                                     100,
++                                                     MIN_DISPLAY_WIDTH,
+                                                      G_PARAM_READWRITE));
+ 
+     g_object_class_install_property(object_class,
+@@ -126,7 +126,7 @@ virt_viewer_display_class_init(VirtViewerDisplayClass *class)
+                                                      "Desktop height",
+                                                      MIN_DISPLAY_HEIGHT,
+                                                      G_MAXINT32,
+-                                                     100,
++                                                     MIN_DISPLAY_HEIGHT,
+                                                      G_PARAM_READWRITE));
+ 
+     g_object_class_install_property(object_class,
+@@ -274,8 +274,8 @@ virt_viewer_display_init(VirtViewerDisplay *display)
+ 
+     display->priv = VIRT_VIEWER_DISPLAY_GET_PRIVATE(display);
+ 
+-    display->priv->desktopWidth = 100;
+-    display->priv->desktopHeight = 100;
++    display->priv->desktopWidth = MIN_DISPLAY_WIDTH;
++    display->priv->desktopHeight = MIN_DISPLAY_HEIGHT;
+     display->priv->zoom_level = NORMAL_ZOOM_LEVEL;
+     display->priv->zoom = TRUE;
+ #if !GTK_CHECK_VERSION(3, 0, 0)
+@@ -425,8 +425,8 @@ virt_viewer_display_size_request(GtkWidget *widget,
+     if (priv->dirty || !priv->size_request_once) {
+         virt_viewer_display_get_preferred_size(display, requisition);
+     } else {
+-        requisition->width = MIN_DISPLAY_WIDTH;
+-        requisition->height = MIN_DISPLAY_HEIGHT;
++        requisition->width = MIN_DISPLAY_WIDTH * priv->zoom_level / (double) NORMAL_ZOOM_LEVEL;
++        requisition->height = MIN_DISPLAY_HEIGHT * priv->zoom_level / (double) NORMAL_ZOOM_LEVEL;
+     }
+ 
+     priv->size_request_once = TRUE;
+@@ -460,14 +460,16 @@ static void virt_viewer_display_get_preferred_width(GtkWidget *widget,
+     VirtViewerDisplayPrivate *priv = display->priv;
+     int border_width = gtk_container_get_border_width(GTK_CONTAINER(widget));
+ 
+-    *minwidth = MIN_DISPLAY_WIDTH + 2 * border_width;
+ 
+     if (priv->zoom) {
+-        *defwidth = round(priv->desktopWidth * priv->zoom_level / (double) NORMAL_ZOOM_LEVEL) +
+-                    2 * border_width;
++        *defwidth = round(priv->desktopWidth * priv->zoom_level / (double) NORMAL_ZOOM_LEVEL);
++        *minwidth = round(MIN_DISPLAY_WIDTH * priv->zoom_level / (double) NORMAL_ZOOM_LEVEL);
+     } else {
+-        *defwidth = priv->desktopWidth + 2 * border_width;
++        *defwidth = priv->desktopWidth;
++        *minwidth = MIN_DISPLAY_WIDTH;
+     }
++    *defwidth += 2 * border_width;
++    *minwidth += 2 * border_width;
+ }
+ 
+ 
+@@ -479,14 +481,15 @@ static void virt_viewer_display_get_preferred_height(GtkWidget *widget,
+     VirtViewerDisplayPrivate *priv = display->priv;
+     int border_height = gtk_container_get_border_width(GTK_CONTAINER(widget));
+ 
+-    *minheight = MIN_DISPLAY_HEIGHT + 2 * border_height;
+-
+     if (priv->zoom) {
+-        *defheight = round(priv->desktopHeight * priv->zoom_level / (double) NORMAL_ZOOM_LEVEL) +
+-                    2 * border_height;
++        *defheight = round(priv->desktopHeight * priv->zoom_level / (double) NORMAL_ZOOM_LEVEL);
++        *minheight = round(MIN_DISPLAY_HEIGHT * priv->zoom_level / (double) NORMAL_ZOOM_LEVEL);
+     } else {
+-        *defheight = priv->desktopHeight + 2 * border_height;
++        *defheight = priv->desktopHeight;
++        *minheight = MIN_DISPLAY_HEIGHT;
+     }
++    *defheight += 2 * border_height;
++    *minheight += 2 * border_height;
+ }
+ #endif
+ 
+diff --git a/src/virt-viewer-display.h b/src/virt-viewer-display.h
+index 9829617..6562ec3 100644
+--- a/src/virt-viewer-display.h
++++ b/src/virt-viewer-display.h
+@@ -29,8 +29,8 @@
+ 
+ G_BEGIN_DECLS
+ 
+-#define MIN_DISPLAY_WIDTH 50
+-#define MIN_DISPLAY_HEIGHT 50
++#define MIN_DISPLAY_WIDTH 320
++#define MIN_DISPLAY_HEIGHT 200
+ 
+ #define VIRT_VIEWER_TYPE_DISPLAY virt_viewer_display_get_type()
+ 

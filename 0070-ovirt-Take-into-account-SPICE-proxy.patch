@@ -1,0 +1,55 @@
+From c467ba8a094ab2fe1c8b4dee309b2b6951f7cc45 Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Thu, 22 Jan 2015 16:45:01 +0100
+Subject: [PATCH] ovirt: Take into account SPICE proxy
+
+VMs managed by oVirt can be hidden behind a proxy. This commit allows
+remote-viewer to make use of this information when it's available
+A recent oVirt instance is needed so that it's available through the
+REST API, as well as libgovirt 0.3.3 or newer.
+With older oVirt/libgovirt versions, the worst that can happen is a
+runtime warning in the console, and an impossibility to connect to VMs
+behind a proxy, so this commit is not raising the minimum libgovirt
+requirement.
+
+(cherry picked from commit f9577b9197b737be722cfd5632b6077ce6b041ff)
+---
+ src/remote-viewer.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/remote-viewer.c b/src/remote-viewer.c
+index 32793e5..418f6e7 100644
+--- a/src/remote-viewer.c
++++ b/src/remote-viewer.c
+@@ -833,6 +833,7 @@ create_ovirt_session(VirtViewerApp *app, const char *uri, GError **err)
+     gboolean success = FALSE;
+     guint port;
+     guint secure_port;
++    char *proxy_url = NULL;
+     OvirtVmDisplayType type;
+     const char *session_type;
+ 
+@@ -913,6 +914,7 @@ create_ovirt_session(VirtViewerApp *app, const char *uri, GError **err)
+                  "secure-port", &secure_port,
+                  "ticket", &ticket,
+                  "host-subject", &host_subject,
++                 "proxy-url", &proxy_url,
+                  NULL);
+     gport = g_strdup_printf("%d", port);
+     gtlsport = g_strdup_printf("%d", secure_port);
+@@ -949,6 +951,7 @@ create_ovirt_session(VirtViewerApp *app, const char *uri, GError **err)
+         g_object_set(G_OBJECT(session),
+                      "password", ticket,
+                      "cert-subject", host_subject,
++                     "proxy", proxy_url,
+                      NULL);
+         g_object_get(G_OBJECT(proxy), "ca-cert", &ca_cert, NULL);
+         if (ca_cert != NULL) {
+@@ -972,6 +975,7 @@ error:
+     g_free(ghost);
+     g_free(host_subject);
+     g_free(guid);
++    g_free(proxy_url);
+ 
+     if (error != NULL)
+         g_propagate_error(err, error);

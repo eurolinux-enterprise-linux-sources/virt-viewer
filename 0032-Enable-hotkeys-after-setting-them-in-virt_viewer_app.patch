@@ -1,0 +1,38 @@
+From 179c6a0cb577f23032b7073e062b2eed21c4908f Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Wed, 10 Jun 2015 18:11:56 +0200
+Subject: [PATCH] Enable hotkeys after setting them in
+ virt_viewer_app_set_hotkeys
+
+Enabling hotkeys will trigger a rebuild of the 'send keys' menu
+containing the new hotkeys. virt_viewer_app_set_hotkeys() was clearing
+and then enabling the hotkeys before parsing the string containing the
+new hotkeys. This was causing these hotkeys to be missing from the 'Send
+keys' menu when they are set through the spice controller because the
+'send keys' menu was rebuilt before the new hotkeys are set.
+
+Resolves: rhbz#1055600
+---
+ src/virt-viewer-app.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index d7a8e56..972e4ec 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -2041,7 +2041,6 @@ virt_viewer_app_set_hotkeys(VirtViewerApp *self, const gchar *hotkeys_str)
+     }
+ 
+     virt_viewer_app_clear_hotkeys(self);
+-    virt_viewer_app_set_enable_accel(self, TRUE);
+ 
+     for (hotkey = hotkeys; *hotkey != NULL; hotkey++) {
+         gchar *key = strstr(*hotkey, "=");
+@@ -2073,6 +2072,7 @@ virt_viewer_app_set_hotkeys(VirtViewerApp *self, const gchar *hotkeys_str)
+     }
+     g_strfreev(hotkeys);
+ 
++    virt_viewer_app_set_enable_accel(self, TRUE);
+     virt_viewer_update_smartcard_accels(self);
+ }
+ 

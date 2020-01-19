@@ -1,0 +1,56 @@
+From df96e6065b1da05720689b5d574732e4820826ce Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Tue, 31 May 2016 11:01:24 +0200
+Subject: [PATCH] app: Check validity of hotkey
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The hotkey is valid if it has a valid value. The value is valid if it is
+not empty and is successfully parsed by gtk_accelerator_parse().
+
+These hotkeys formats are considered invalid:
+ "key" - missing value
+ "key=" - missing value
+ "key=abcd" - value cannot be parsed by gtk_accelerator_parse()
+
+Resolves: rhbz#1339572
+
+Acked-by: Fabiano Fidêncio <fidencio@redhat.com>
+(cherry picked from commit ffa460b8c6a1c900eb155d06245f42693bd13f3b)
+---
+ src/virt-viewer-app.c | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index feffd9c..89c35dd 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -2073,18 +2073,23 @@ virt_viewer_app_set_hotkeys(VirtViewerApp *self, const gchar *hotkeys_str)
+ 
+     for (hotkey = hotkeys; *hotkey != NULL; hotkey++) {
+         gchar *key = strstr(*hotkey, "=");
+-        if (key == NULL) {
+-            g_warn_if_reached();
++        const gchar *value = (key == NULL) ? NULL : (*key = '\0', key + 1);
++        if (value == NULL || *value == '\0') {
++            g_warning("missing value for key '%s'", *hotkey);
+             continue;
+         }
+-        *key = '\0';
+ 
+-        gchar *accel = spice_hotkey_to_gtk_accelerator(key + 1);
++        gchar *accel = spice_hotkey_to_gtk_accelerator(value);
+         guint accel_key;
+         GdkModifierType accel_mods;
+         gtk_accelerator_parse(accel, &accel_key, &accel_mods);
+         g_free(accel);
+ 
++        if (accel_key == 0 && accel_mods == 0) {
++            g_warning("Invalid value '%s' for key '%s'", value, *hotkey);
++            continue;
++        }
++
+         if (g_str_equal(*hotkey, "toggle-fullscreen")) {
+             gtk_accel_map_change_entry("<virt-viewer>/view/toggle-fullscreen", accel_key, accel_mods, TRUE);
+         } else if (g_str_equal(*hotkey, "release-cursor")) {

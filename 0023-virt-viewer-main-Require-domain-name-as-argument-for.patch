@@ -1,0 +1,56 @@
+From 39af2ef261d2a2746d03f9493b56528ca0fd689e Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Tue, 7 Apr 2015 11:06:46 +0200
+Subject: [PATCH] virt-viewer-main: Require domain name as argument for
+ '--wait'
+
+As since 88f634179e56742a21fb4c7efc270e4203322d74 virt-viewer can be
+used without a domain-name, let's require it when using --wait.
+
+Resolves: rhbz#1209398
+(cherry picked from commit a830275344c88aef12166661b68ea2b4429c7212)
+---
+ src/virt-viewer-main.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/src/virt-viewer-main.c b/src/virt-viewer-main.c
+index 3fae955..7f6e851 100644
+--- a/src/virt-viewer-main.c
++++ b/src/virt-viewer-main.c
+@@ -50,7 +50,7 @@ int main(int argc, char **argv)
+     gchar **args = NULL;
+     gboolean direct = FALSE;
+     gboolean attach = FALSE;
+-    gboolean waitvm = FALSE;
++    char *waitvm = NULL;
+     gboolean reconnect = FALSE;
+     VirtViewer *viewer = NULL;
+     char *base_name;
+@@ -64,8 +64,8 @@ int main(int argc, char **argv)
+           N_("Attach to the local display using libvirt"), NULL },
+         { "connect", 'c', 0, G_OPTION_ARG_STRING, &uri,
+           N_("Connect to hypervisor"), "URI"},
+-        { "wait", 'w', 0, G_OPTION_ARG_NONE, &waitvm,
+-          N_("Wait for domain to start"), NULL },
++        { "wait", 'w', 0, G_OPTION_ARG_STRING, &waitvm,
++          N_("Wait for domain to start"), "DOMAIN-NAME|ID|UUID" },
+         { "reconnect", 'r', 0, G_OPTION_ARG_NONE, &reconnect,
+           N_("Reconnect to domain upon restart"), NULL },
+         { G_OPTION_REMAINING, '\0', 0, G_OPTION_ARG_STRING_ARRAY, &args,
+@@ -109,7 +109,7 @@ int main(int argc, char **argv)
+         goto cleanup;
+     }
+ 
+-    viewer = virt_viewer_new(uri, (args) ? args[0] : NULL, direct, attach, waitvm, reconnect);
++    viewer = virt_viewer_new(uri, (args) ? args[0] : waitvm, direct, attach, waitvm != NULL, reconnect);
+     if (viewer == NULL)
+         goto cleanup;
+ 
+@@ -124,6 +124,7 @@ int main(int argc, char **argv)
+     if (viewer)
+         g_object_unref(viewer);
+     g_free(uri);
++    g_free(waitvm);
+     g_strfreev(args);
+     g_free(help_msg);
+ 

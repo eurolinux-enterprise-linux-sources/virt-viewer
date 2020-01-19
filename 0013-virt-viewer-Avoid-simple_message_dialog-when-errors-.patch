@@ -1,0 +1,66 @@
+From 1358e46259fbbd941b72ea21ed11d9736ef3388c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabiano=20Fid=C3=AAncio?= <fidencio@redhat.com>
+Date: Thu, 26 Mar 2015 15:21:03 +0100
+Subject: [PATCH] virt-viewer: Avoid simple_message_dialog() when errors can be
+ propagated
+
+Remove all the dialogs used to report errors on extract_connect_info()
+and just propagate the errors we got from it.
+The only exception is virt_viewer_domain_event(), that is a callback
+that doesn't have GError as argument. In this specific case, we show the
+error dialog instead of propagating it.
+
+Related: rhbz#1085216
+(cherry picked from commit ffe19f6ece25e89968e74bccd12c61c1cd749f61)
+---
+ src/virt-viewer.c | 16 ++++++----------
+ 1 file changed, 6 insertions(+), 10 deletions(-)
+
+diff --git a/src/virt-viewer.c b/src/virt-viewer.c
+index a7b3be4..b22f221 100644
+--- a/src/virt-viewer.c
++++ b/src/virt-viewer.c
+@@ -414,9 +414,6 @@ virt_viewer_extract_connect_info(VirtViewer *self,
+                     VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
+                     _("Cannot determine the graphic type for the guest %s"), priv->domkey);
+ 
+-        virt_viewer_app_simple_message_dialog(app, _("Cannot determine the graphic type for the guest %s"),
+-                                              priv->domkey);
+-
+         goto cleanup;
+     }
+ 
+@@ -456,9 +453,6 @@ virt_viewer_extract_connect_info(VirtViewer *self,
+                     VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
+                     _("Cannot determine the host for the guest %s"), priv->domkey);
+ 
+-        virt_viewer_app_simple_message_dialog(app, _("Cannot determine the host for the guest %s"),
+-                                              priv->domkey);
+-
+         goto cleanup;
+     }
+ 
+@@ -490,9 +484,6 @@ virt_viewer_extract_connect_info(VirtViewer *self,
+         g_debug("graphics listen '%s' is not reachable from this machine",
+                 ghost ? ghost : "");
+ 
+-        virt_viewer_app_simple_message_dialog(app, _("Guest '%s' is not reachable"),
+-                                              priv->domkey);
+-
+         goto cleanup;
+     }
+ 
+@@ -607,7 +598,12 @@ virt_viewer_domain_event(virConnectPtr conn G_GNUC_UNUSED,
+         break;
+ 
+     case VIR_DOMAIN_EVENT_STARTED:
+-        virt_viewer_update_display(self, dom, NULL);
++        virt_viewer_update_display(self, dom, &error);
++        if (error) {
++            virt_viewer_app_simple_message_dialog(app, error->message);
++            g_clear_error(&error);
++        }
++
+         virt_viewer_app_activate(app, &error);
+         if (error) {
+             /* we may want to consolidate error reporting in

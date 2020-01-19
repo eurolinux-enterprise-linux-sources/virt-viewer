@@ -1,0 +1,32 @@
+From ae7b4d9c8d9153d0562495f477d9b658c3473511 Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Tue, 19 May 2015 18:35:52 +0200
+Subject: [PATCH] build-sys: Add --with-osid
+
+This new configure flag allows to specify a string ID (eg fedora22,
+ubuntu10.04, ..) identifying the OS this remote-viewer build will be
+for. This will be used in combination with the new 'versions' field in
+.vv files in order to make it possible for the creator of the .vv file
+to specify which version it expects for the various OSes which may
+connect.
+---
+ configure.ac | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/configure.ac b/configure.ac
+index d893631..4adb58d 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -219,6 +219,12 @@ if test "x$have_gtk_vnc" != "xyes" && test "x$have_spice_gtk" != "xyes"; then
+     AC_MSG_ERROR([At least one of spice or vnc must be used])
+ fi
+ 
++AC_ARG_WITH([osid],
++    AS_HELP_STRING([--with-osid=id], [Set OS ID for use in .vv files]))
++if test -n "$with_osid"; then
++    AC_DEFINE_UNQUOTED([REMOTE_VIEWER_OS_ID], "$with_osid", [OS ID for this build])
++fi
++
+ AC_ARG_WITH([buildid],
+     AS_HELP_STRING([--with-buildid=id], [Set additional build version details]),
+     [buildid="$with_buildid"], [buildid="0"])

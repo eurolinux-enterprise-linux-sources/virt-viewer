@@ -1,0 +1,23 @@
+From 7c7cced636e84e46c8cf3a65de6fca0ea2b39132 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabiano=20Fid=C3=AAncio?= <fidencio@redhat.com>
+Date: Wed, 11 Mar 2015 09:56:12 +0100
+Subject: [PATCH] Avoid 'Dereference of a null pointer'
+
+Caught by Covscan.
+---
+ src/virt-viewer.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/virt-viewer.c b/src/virt-viewer.c
+index c1768b3..6e92b54 100644
+--- a/src/virt-viewer.c
++++ b/src/virt-viewer.c
+@@ -829,7 +829,7 @@ virt_viewer_auth_libvirt_credentials(virConnectCredentialPtr cred,
+         VirtViewerWindow *vwin = virt_viewer_app_get_main_window(VIRT_VIEWER_APP(app));
+         GtkWindow *win = virt_viewer_window_get_window(vwin);
+ 
+-        if (*username == NULL || **username == '\0')
++        if (username && (*username == NULL || **username == '\0'))
+             *username = g_strdup(g_get_user_name());
+ 
+         priv->auth_cancelled = !virt_viewer_auth_collect_credentials(win,

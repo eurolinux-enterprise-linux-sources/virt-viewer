@@ -1,0 +1,52 @@
+From 76fecd7940315a6dfa45f78bf76507755500aa81 Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Thu, 16 Apr 2015 18:02:57 +0200
+Subject: [PATCH] vv-file: Refactor virt_viewer_file_check_min_version
+
+Reorganize the code a bit so that it's easier to extend it.
+---
+ src/virt-viewer-file.c | 27 +++++++++++++++------------
+ 1 file changed, 15 insertions(+), 12 deletions(-)
+
+diff --git a/src/virt-viewer-file.c b/src/virt-viewer-file.c
+index 8b732a3..23eae31 100644
+--- a/src/virt-viewer-file.c
++++ b/src/virt-viewer-file.c
+@@ -710,22 +710,25 @@ spice_hotkey_set_accel(const gchar *accel_path, const gchar *key)
+ static gboolean
+ virt_viewer_file_check_min_version(VirtViewerFile *self, GError **error)
+ {
+-    if (virt_viewer_file_is_set(self, "version")) {
+-        gchar *val = virt_viewer_file_get_version(self);
++    gchar *min_version = NULL;
++    gint version_cmp;
+ 
+-        if (virt_viewer_compare_version(val, PACKAGE_VERSION) > 0) {
+-            g_set_error(error,
+-                VIRT_VIEWER_ERROR,
+-                VIRT_VIEWER_ERROR_FAILED,
+-                _("At least %s version %s is required to setup this connection"),
+-                g_get_application_name(), val);
++    if (virt_viewer_file_is_set(self, "version")) {
++        min_version = virt_viewer_file_get_version(self);
++    }
+ 
+-            g_free(val);
+-            return FALSE;
+-        }
++    version_cmp = virt_viewer_compare_version(min_version, PACKAGE_VERSION);
+ 
+-        g_free(val);
++    if (version_cmp > 0) {
++        g_set_error(error,
++                    VIRT_VIEWER_ERROR,
++                    VIRT_VIEWER_ERROR_FAILED,
++                    _("At least %s version %s is required to setup this connection"),
++                    g_get_application_name(), min_version);
++        g_free(min_version);
++        return FALSE;
+     }
++    g_free(min_version);
+ 
+     return TRUE;
+ }

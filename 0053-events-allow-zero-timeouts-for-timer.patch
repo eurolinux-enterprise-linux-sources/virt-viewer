@@ -1,0 +1,34 @@
+From acc448a9d65783e760d84a5c82ba788b00106137 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabiano=20Fid=C3=AAncio?= <fidencio@redhat.com>
+Date: Wed, 22 Jul 2015 03:27:50 +0200
+Subject: [PATCH] events: allow zero timeouts for timer
+
+In libvirt, it's perfectly possible and widely used to have disabled
+timers (timeout=-1) and fire them up 'randomly' with timeout=0.
+However, with current mapping into glib mainloop it's not possible
+and causing troubles.
+
+Based on commit a40a1732e0d53fcc44b8d348cec97152dafd2b88 from
+libvirt-glib.
+Original author: Michal Privoznik <mprivozn@redhat.com>
+
+Related to: rhbz#1243228
+
+(cherry picked from commit 7805b67b68aba43afb7f421f76cf0c49afa3ea06)
+---
+ src/virt-viewer-events.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/virt-viewer-events.c b/src/virt-viewer-events.c
+index 02b7216..462ce6c 100644
+--- a/src/virt-viewer-events.c
++++ b/src/virt-viewer-events.c
+@@ -349,7 +349,7 @@ virt_viewer_events_update_timeout(int timer,
+ 
+     if (interval >= 0) {
+         if (data->source)
+-            goto cleanup;
++            g_source_remove(data->source);
+ 
+         data->interval = interval;
+         data->source = g_timeout_add(data->interval,

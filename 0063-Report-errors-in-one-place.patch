@@ -1,0 +1,143 @@
+From e28fa61b1548d0bad2833c8025c99da2a0939e71 Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Fri, 20 Mar 2015 10:35:56 +0100
+Subject: [PATCH] Report errors in one place
+
+Since the error is propagated to the main, report the error there.
+To make it work GError VIRT_VIEWER_ERROR_FAILED is set for all
+failing states and it is reported using virt_viewer_app_simple_message_dialog().
+
+(cherry picked from commit 1a619f23835abcc358b84bcead14171361907038)
+
+ Conflicts:
+	src/remote-viewer.c
+---
+ src/remote-viewer-main.c |  3 +++
+ src/remote-viewer.c      | 21 ++++++++++-----------
+ src/virt-viewer-main.c   |  3 +++
+ src/virt-viewer.c        | 21 ++++-----------------
+ 4 files changed, 20 insertions(+), 28 deletions(-)
+
+diff --git a/src/remote-viewer-main.c b/src/remote-viewer-main.c
+index 8298053..81cf736 100644
+--- a/src/remote-viewer-main.c
++++ b/src/remote-viewer-main.c
+@@ -180,6 +180,9 @@ main(int argc, char **argv)
+     if (!virt_viewer_app_start(app, &error)) {
+         if (g_error_matches(error, VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_CANCELLED))
+             ret = 0;
++        else if (error) {
++            virt_viewer_app_simple_message_dialog(app, error->message);
++        }
+         goto cleanup;
+     }
+ 
+diff --git a/src/remote-viewer.c b/src/remote-viewer.c
+index b571c0b..32793e5 100644
+--- a/src/remote-viewer.c
++++ b/src/remote-viewer.c
+@@ -1248,23 +1248,21 @@ retry_dialog:
+             vvfile = virt_viewer_file_new(path, &error);
+             g_free(path);
+             if (error) {
+-                virt_viewer_app_simple_message_dialog(app, _("Invalid file %s"), guri);
++                g_prefix_error(&error, _("Invalid file %s: "), guri);
+                 g_warning("%s", error->message);
+                 goto cleanup;
+             }
+             g_object_get(G_OBJECT(vvfile), "type", &type, NULL);
+         } else if (virt_viewer_util_extract_host(guri, &type, NULL, NULL, NULL, NULL) < 0 || type == NULL) {
+-            virt_viewer_app_simple_message_dialog(app, _("Cannot determine the connection type from URI"));
++            g_set_error_literal(&error,
++                                VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
++                                _("Cannot determine the connection type from URI"));
+             goto cleanup;
+         }
+ #ifdef HAVE_OVIRT
+         if (g_strcmp0(type, "ovirt") == 0) {
+             if (!create_ovirt_session(app, guri, &error)) {
+-                if (error && !g_error_matches(error, VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_CANCELLED)) {
+-                    virt_viewer_app_simple_message_dialog(app,
+-                                                          _("Couldn't open oVirt session: %s"),
+-                                                          error->message);
+-                }
++                g_prefix_error(&error, _("Couldn't open oVirt session: "));
+                 goto cleanup;
+             }
+         } else
+@@ -1286,10 +1284,11 @@ retry_dialog:
+ #endif
+ 
+         if (!virt_viewer_app_initial_connect(app, &error)) {
+-            const gchar *msg = error ? error->message :
+-                _("Failed to initiate connection");
+-
+-            virt_viewer_app_simple_message_dialog(app, msg);
++            if (error == NULL) {
++                g_set_error_literal(&error,
++                                    VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
++                                    _("Failed to initiate connection"));
++            }
+             goto cleanup;
+         }
+ #ifdef HAVE_SPICE_GTK
+diff --git a/src/virt-viewer-main.c b/src/virt-viewer-main.c
+index 713cdec..1f154cd 100644
+--- a/src/virt-viewer-main.c
++++ b/src/virt-viewer-main.c
+@@ -120,6 +120,9 @@ int main(int argc, char **argv)
+     if (!virt_viewer_app_start(VIRT_VIEWER_APP(viewer), &error)) {
+         if (g_error_matches(error, VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_CANCELLED))
+             ret = 0;
++        else if (error) {
++            virt_viewer_app_simple_message_dialog(VIRT_VIEWER_APP(viewer), error->message);
++        }
+         goto cleanup;
+     }
+ 
+diff --git a/src/virt-viewer.c b/src/virt-viewer.c
+index bbdee73..f077ab6 100644
+--- a/src/virt-viewer.c
++++ b/src/virt-viewer.c
+@@ -759,7 +759,9 @@ virt_viewer_initial_connect(VirtViewerApp *app, GError **error)
+ 
+     virt_viewer_app_show_status(app, _("Checking guest domain status"));
+     if (virDomainGetInfo(dom, &info) < 0) {
+-        g_debug("Cannot get guest state");
++        g_set_error_literal(&err, VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
++                            _("Cannot get guest state"));
++        g_debug("%s", err->message);
+         goto cleanup;
+     }
+ 
+@@ -924,7 +926,6 @@ virt_viewer_connect(VirtViewerApp *app, GError **err)
+             g_set_error_literal(&error,
+                                 VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
+                                 error_message);
+-            virt_viewer_app_simple_message_dialog(app, error_message);
+ 
+             g_free(error_message);
+         } else {
+@@ -937,21 +938,7 @@ virt_viewer_connect(VirtViewerApp *app, GError **err)
+     }
+ 
+     if (!virt_viewer_app_initial_connect(app, &error)) {
+-        if (error != NULL) {
+-            if (!g_error_matches(error, VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_CANCELLED)) {
+-                VirtViewerWindow *main_window = virt_viewer_app_get_main_window(app);
+-
+-                GtkWidget *dialog = gtk_message_dialog_new(virt_viewer_window_get_window(main_window),
+-                                                           GTK_DIALOG_DESTROY_WITH_PARENT,
+-                                                           GTK_MESSAGE_ERROR,
+-                                                           GTK_BUTTONS_CLOSE,
+-                                                           "Failed to connect: %s",
+-                                                           error->message);
+-                gtk_dialog_run(GTK_DIALOG(dialog));
+-                gtk_widget_destroy(GTK_WIDGET(dialog));
+-            }
+-            g_propagate_error(err, error);
+-        }
++        g_propagate_prefixed_error(err, error, _("Failed to connect: "));
+         return -1;
+     }
+ 

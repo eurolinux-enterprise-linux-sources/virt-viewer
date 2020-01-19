@@ -1,0 +1,37 @@
+From 5abecdf6cfbce8a757e31e01e46f07d46d400931 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabiano=20Fid=C3=AAncio?= <fidencio@redhat.com>
+Date: Wed, 21 Oct 2015 14:12:48 +0200
+Subject: [PATCH] session: Only create a hashtable if apply_monitor_geometry
+ vfunc exists
+
+Creating the monitors hashtable only after checking for the existence of
+apply_monitor_geometry vfunc avoids leaking the hashtable in the case
+where the vfunc doesn't exist.
+
+Related: rhbz#1267184
+(cherry picked from commit 73b55b3e1b09c81cf72082b4ec49d66c79ba7dc7)
+---
+ src/virt-viewer-session.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/virt-viewer-session.c b/src/virt-viewer-session.c
+index eb7fbcd..fdd90c6 100644
+--- a/src/virt-viewer-session.c
++++ b/src/virt-viewer-session.c
+@@ -346,13 +346,15 @@ virt_viewer_session_on_monitor_geometry_changed(VirtViewerSession* self,
+     VirtViewerSessionClass *klass;
+     gboolean all_fullscreen = TRUE;
+     /* GHashTable<gint, GdkRectangle*> */
+-    GHashTable *monitors = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
++    GHashTable *monitors;
+     GList *l;
+ 
+     klass = VIRT_VIEWER_SESSION_GET_CLASS(self);
+     if (!klass->apply_monitor_geometry)
+         return;
+ 
++    monitors = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
++
+     for (l = self->priv->displays; l; l = l->next) {
+         VirtViewerDisplay *d = VIRT_VIEWER_DISPLAY(l->data);
+         guint nth = 0;

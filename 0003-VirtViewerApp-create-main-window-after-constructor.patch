@@ -1,0 +1,83 @@
+From ab33ebf46c2f8d53a8a0a89d240c744fc70fa633 Mon Sep 17 00:00:00 2001
+From: Jonathon Jongsma <jjongsma@redhat.com>
+Date: Thu, 19 Mar 2015 10:15:08 -0500
+Subject: [PATCH] VirtViewerApp: create main window after constructor
+
+When using the configuration file to specify which remote monitors
+should be enabled when using the --full-screen option, it sometimes left
+additional displays enabled, or didn't place the displays on the right
+monitor, or didn't fullscreen them.
+
+Part of the problem was that we were creating the first display window before
+loading the monitor mapping configuration from the settings file. So even if
+the first display was disabled in the configuration, the first window will
+still be created with an id of 0, and therefore didn't get set to fullscreen.
+Moving the main window creation to the 'constructor' vfunc instead of the
+object init func ensures that the configuration is all loaded before we attempt
+to do any fullscreen autoconf.
+
+Related: rhbz#1200750
+(cherry picked from commit 3b8be76459518b8b3f730e8acf4798154d51b253)
+---
+ src/virt-viewer-app.c | 27 ++++++++++++++++++++++-----
+ 1 file changed, 22 insertions(+), 5 deletions(-)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index 2315167..431f897 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -308,6 +308,22 @@ gint virt_viewer_app_get_n_initial_displays(VirtViewerApp* self)
+     return gdk_screen_get_n_monitors(gdk_screen_get_default());
+ }
+ 
++static gint virt_viewer_app_get_first_monitor(VirtViewerApp *self)
++{
++    if (self->priv->fullscreen && self->priv->initial_display_map) {
++        gint first = G_MAXINT;
++        GHashTableIter iter;
++        gpointer key, value;
++        g_hash_table_iter_init(&iter, self->priv->initial_display_map);
++        while (g_hash_table_iter_next(&iter, &key, &value)) {
++            gint monitor = GPOINTER_TO_INT(key);
++            first = MIN(first, monitor);
++        }
++        return first;
++    }
++    return 0;
++}
++
+ gint virt_viewer_app_get_initial_monitor_for_display(VirtViewerApp* self, gint display)
+ {
+     gint monitor = display;
+@@ -1718,9 +1734,6 @@ virt_viewer_app_init (VirtViewerApp *self)
+     self->priv->config = g_key_file_new();
+     self->priv->config_file = g_build_filename(g_get_user_config_dir(),
+                                                "virt-viewer", "settings", NULL);
+-    self->priv->main_window = virt_viewer_app_window_new(self, 0);
+-    self->priv->main_notebook = GTK_WIDGET(virt_viewer_window_get_notebook(self->priv->main_window));
+-
+     g_key_file_load_from_file(self->priv->config, self->priv->config_file,
+                     G_KEY_FILE_KEEP_COMMENTS|G_KEY_FILE_KEEP_TRANSLATIONS, &error);
+ 
+@@ -1742,8 +1755,6 @@ virt_viewer_app_init (VirtViewerApp *self)
+     g_signal_connect(self, "notify::guest-name", G_CALLBACK(title_maybe_changed), NULL);
+     g_signal_connect(self, "notify::title", G_CALLBACK(title_maybe_changed), NULL);
+     g_signal_connect(self, "notify::guri", G_CALLBACK(title_maybe_changed), NULL);
+-
+-    virt_viewer_window_set_zoom_level(self->priv->main_window, opt_zoom);
+ }
+ 
+ static void
+@@ -1809,6 +1820,12 @@ virt_viewer_app_constructor (GType gtype,
+     obj = G_OBJECT_CLASS (virt_viewer_app_parent_class)->constructor (gtype, n_properties, properties);
+     self = VIRT_VIEWER_APP(obj);
+ 
++    self->priv->main_window = virt_viewer_app_window_new(self,
++                                                         virt_viewer_app_get_first_monitor(self));
++    self->priv->main_notebook = GTK_WIDGET(virt_viewer_window_get_notebook(self->priv->main_window));
++
++    virt_viewer_window_set_zoom_level(self->priv->main_window, opt_zoom);
++
+     virt_viewer_set_insert_smartcard_accel(self, GDK_F8, GDK_SHIFT_MASK);
+     virt_viewer_set_remove_smartcard_accel(self, GDK_F9, GDK_SHIFT_MASK);
+     gtk_accel_map_add_entry("<virt-viewer>/view/toggle-fullscreen", GDK_F11, 0);

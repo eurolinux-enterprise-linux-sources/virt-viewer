@@ -1,0 +1,73 @@
+From ddaedb4ff2ef7e35d943b3ccccccaaaa132b799e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabiano=20Fid=C3=AAncio?= <fidencio@redhat.com>
+Date: Fri, 3 Apr 2015 00:51:40 +0200
+Subject: [PATCH] Fix crash when disabling last enabled display
+
+Using virt_viewer_signal_connect_object() instead of g_signal_connect()
+ensures that menu_display_visible_toggled_cb() won't be executed after
+the display object be disposed.
+
+Backtrace for the crash:
+
+ #0  0x00007ffff070592b in g_type_check_instance_is_a (type_instance=0x8851f0, iface_type=<optimized out>) at gtype.c:4016
+ #1  0x000000000041ee06 in virt_viewer_display_get_session (self=0x8851f0) at ../../src/virt-viewer-display.c:702
+ #2  0x0000000000417be7 in menu_display_visible_toggled_cb (checkmenuitem=0x93f790 [GtkCheckMenuItem], display=0x8851f0) at ../../src/virt-viewer-app.c:2187
+ #6  0x00007ffff06fe29f in <emit signal ??? on instance 0x93f790 [GtkCheckMenuItem]> (instance=instance@entry=0x93f790, signal_id=<optimized out>, detail=detail@entry=0) at gsignal.c:3361
+ #3  0x00007ffff06e3b9f in g_closure_invoke (closure=0x93faa0, return_value=return_value@entry=0x0, n_param_values=1, param_values=param_values@entry=0x7fffffffc230, invocation_hint=invocation_hint@entry=0x7fffffffc1b0) at gclosure.c:768
+ #4  0x00007ffff06f54c9 in signal_emit_unlocked_R (node=node@entry=0x6d73e0, detail=detail@entry=0, instance=instance@entry=0x93f790, emission_return=emission_return@entry=0x0, instance_and_params=instance_and_params@entry=0x7fffffffc230) at gsignal.c:3549
+ #5  0x00007ffff06fded0 in g_signal_emit_valist (instance=<optimized out>, signal_id=<optimized out>, detail=<optimized out>, var_args=var_args@entry=0x7fffffffc3f0) at gsignal.c:3305
+ #7  0x00007ffff5eb6158 in gtk_check_menu_item_activate (check_menu_item=0x93f790 [GtkCheckMenuItem]) at gtkcheckmenuitem.c:299
+ #8  0x00007ffff5eb6158 in gtk_check_menu_item_activate (menu_item=0x93f790 [GtkCheckMenuItem]) at gtkcheckmenuitem.c:419
+ #12 0x00007ffff06fe29f in <emit signal ??? on instance 0x93f790 [GtkCheckMenuItem]> (instance=<optimized out>, signal_id=<optimized out>, detail=<optimized out>) at gsignal.c:3361
+ #9  0x00007ffff06e3b9f in g_closure_invoke (closure=closure@entry=0x6d5aa0, return_value=return_value@entry=0x0, n_param_values=1, param_values=param_values@entry=0x7fffffffc6b0, invocation_hint=invocation_hint@entry=0x7fffffffc630) at gclosure.c:768
+ #10 0x00007ffff06f51bd in signal_emit_unlocked_R (node=node@entry=0x6d5ba0, detail=detail@entry=0, instance=instance@entry=0x93f790, emission_return=emission_return@entry=0x0, instance_and_params=instance_and_params@entry=0x7fffffffc6b0) at gsignal.c:3479
+ #11 0x00007ffff06fded0 in g_signal_emit_valist (instance=<optimized out>, signal_id=<optimized out>, detail=<optimized out>, var_args=var_args@entry=0x7fffffffc870) at gsignal.c:3305
+ #13 0x0000000000417c5e in menu_display_visible_toggled_cb (checkmenuitem=0x93f790 [GtkCheckMenuItem], display=0x8851f0) at ../../src/virt-viewer-app.c:2200
+ #17 0x00007ffff06fe29f in <emit signal ??? on instance 0x93f790 [GtkCheckMenuItem]> (instance=instance@entry=0x93f790, signal_id=<optimized out>, detail=detail@entry=0) at gsignal.c:3361
+ #14 0x00007ffff06e3c45 in g_closure_invoke (closure=0x93faa0, return_value=return_value@entry=0x0, n_param_values=1, param_values=param_values@entry=0x7fffffffcb50, invocation_hint=invocation_hint@entry=0x7fffffffcad0) at gclosure.c:768
+ #15 0x00007ffff06f54c9 in signal_emit_unlocked_R (node=node@entry=0x6d73e0, detail=detail@entry=0, instance=instance@entry=0x93f790, emission_return=emission_return@entry=0x0, instance_and_params=instance_and_params@entry=0x7fffffffcb50) at gsignal.c:3549
+ #16 0x00007ffff06fded0 in g_signal_emit_valist (instance=<optimized out>, signal_id=<optimized out>, detail=<optimized out>, var_args=var_args@entry=0x7fffffffcd10) at gsignal.c:3305
+ #18 0x00007ffff5eb6158 in gtk_check_menu_item_activate (check_menu_item=0x93f790 [GtkCheckMenuItem]) at gtkcheckmenuitem.c:299
+ #19 0x00007ffff5eb6158 in gtk_check_menu_item_activate (menu_item=0x93f790 [GtkCheckMenuItem]) at gtkcheckmenuitem.c:419
+ #23 0x00007ffff06fe29f in <emit signal ??? on instance 0x93f790 [GtkCheckMenuItem]> (instance=instance@entry=0x93f790, signal_id=<optimized out>, detail=detail@entry=0) at gsignal.c:3361
+ #20 0x00007ffff06e3c45 in g_closure_invoke (closure=closure@entry=0x6d5aa0, return_value=return_value@entry=0x0, n_param_values=1, param_values=param_values@entry=0x7fffffffcfd0, invocation_hint=invocation_hint@entry=0x7fffffffcf50) at gclosure.c:768
+ #21 0x00007ffff06f51bd in signal_emit_unlocked_R (node=node@entry=0x6d5ba0, detail=detail@entry=0, instance=instance@entry=0x93f790, emission_return=emission_return@entry=0x0, instance_and_params=instance_and_params@entry=0x7fffffffcfd0) at gsignal.c:3479
+ #22 0x00007ffff06fded0 in g_signal_emit_valist (instance=<optimized out>, signal_id=<optimized out>, detail=<optimized out>, var_args=var_args@entry=0x7fffffffd190) at gsignal.c:3305
+ #24 0x00007ffff608648e in IA__gtk_widget_activate (widget=widget@entry=0x93f790 [GtkCheckMenuItem]) at gtkwidget.c:5048
+ #25 0x00007ffff5f6cacd in IA__gtk_menu_shell_activate_item (menu_shell=0x70ece0 [GtkMenu], menu_item=0x93f790 [GtkCheckMenuItem], force_deactivate=<optimized out>) at gtkmenushell.c:1303
+ #26 0x00007ffff5f6ce96 in gtk_menu_shell_button_release (widget=0x70ece0 [GtkMenu], event=<optimized out>) at gtkmenushell.c:730
+ #31 0x00007ffff06fe29f in <emit signal ??? on instance 0x70ece0 [GtkMenu]> (instance=instance@entry=0x70ece0, signal_id=<optimized out>, detail=detail@entry=0) at gsignal.c:3361
+ #27 0x00007ffff5f578ad in _gtk_marshal_BOOLEAN__BOXED (closure=0x6c7180, return_value=0x7fffffffd4e0, n_param_values=<optimized out>, param_values=0x7fffffffd540, invocation_hint=<optimized out>, marshal_data=<optimized out>) at gtkmarshalers.c:86
+ #28 0x00007ffff06e3c45 in g_closure_invoke (closure=closure@entry=0x6c7180, return_value=return_value@entry=0x7fffffffd4e0, n_param_values=2, param_values=param_values@entry=0x7fffffffd540, invocation_hint=invocation_hint@entry=0x7fffffffd4c0) at gclosure.c:768
+ #29 0x00007ffff06f5cef in signal_emit_unlocked_R (node=node@entry=0x6c73f0, detail=detail@entry=0, instance=instance@entry=0x70ece0, emission_return=emission_return@entry=0x7fffffffd660, instance_and_params=instance_and_params@entry=0x7fffffffd540) at gsignal.c:3587
+ #30 0x00007ffff06fdac2 in g_signal_emit_valist (instance=<optimized out>, signal_id=<optimized out>, detail=<optimized out>, var_args=var_args@entry=0x7fffffffd710) at gsignal.c:3315
+ #32 0x00007ffff608790c in gtk_widget_event_internal (widget=widget@entry=0x70ece0 [GtkMenu], event=event@entry=0x944f90) at gtkwidget.c:5017
+ #33 0x00007ffff6087be7 in IA__gtk_widget_event (widget=widget@entry=0x70ece0 [GtkMenu], event=event@entry=0x944f90) at gtkwidget.c:4814
+ #34 0x00007ffff5f55b94 in IA__gtk_propagate_event (widget=0x70ece0 [GtkMenu], event=0x944f90) at gtkmain.c:2501
+ #35 0x00007ffff5f55f5b in IA__gtk_main_do_event (event=0x944f90) at gtkmain.c:1696
+ #36 0x00007ffff5bae7dc in gdk_event_dispatch (source=<optimized out>, callback=<optimized out>, user_data=<optimized out>) at gdkevents-x11.c:2425
+ #37 0x00007ffff03e40ba in g_main_context_dispatch (context=0x693d50) at gmain.c:3122
+ #38 0x00007ffff03e40ba in g_main_context_dispatch (context=context@entry=0x693d50) at gmain.c:3737
+ #39 0x00007ffff03e4450 in g_main_context_iterate (context=0x693d50, block=block@entry=1, dispatch=dispatch@entry=1, self=<optimized out>) at gmain.c:3808
+ #40 0x00007ffff03e4772 in g_main_loop_run (loop=0x748980) at gmain.c:4002
+
+(cherry picked from commit 26c2eccd96995231bbe82ee7d1164b704072b1f1)
+---
+ src/virt-viewer-app.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index b7b702a..2481a1f 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -2303,8 +2303,8 @@ window_update_menu_displays_cb(gpointer value,
+         }
+         gtk_widget_set_sensitive(item, sensitive);
+ 
+-        g_signal_connect(G_OBJECT(item),
+-                         "toggled", G_CALLBACK(menu_display_visible_toggled_cb), display);
++        virt_viewer_signal_connect_object(G_OBJECT(item), "toggled",
++                                          G_CALLBACK(menu_display_visible_toggled_cb), display, 0);
+         gtk_menu_shell_append(submenu, item);
+         tmp = tmp->next;
+     }

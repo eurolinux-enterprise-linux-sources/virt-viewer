@@ -1,0 +1,441 @@
+From d0202bad05d3e50e074fbf6d7fd966aa5de6713c Mon Sep 17 00:00:00 2001
+From: Jonathon Jongsma <jjongsma@redhat.com>
+Date: Fri, 8 Apr 2016 10:26:32 -0500
+Subject: [PATCH] Add file transfer dialog
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This dialog will show the progress of files being transferred from the
+client to the guest and allows the user to cancel ongoing file transfer
+tasks.  The user can cancel each transfer individually, or cancel all
+ongoing transfers at once.
+
+Resolves: rhbz#1332180, rhbz#1324521
+Signed-off-by: Jonathon Jongsma <jjongsma@redhat.com>
+Acked-by: Fabiano Fidêncio <fidencio@redhat.com>
+(cherry picked from commit 0856067d79db02db86227d2f1beb0b03859613d5)
+---
+ po/POTFILES.in                         |   1 +
+ src/Makefile.am                        |   1 +
+ src/virt-viewer-file-transfer-dialog.c | 215 +++++++++++++++++++++++++++++++++
+ src/virt-viewer-file-transfer-dialog.h |  61 ++++++++++
+ src/virt-viewer-session-spice.c        |  43 +++++--
+ 5 files changed, 310 insertions(+), 11 deletions(-)
+ create mode 100644 src/virt-viewer-file-transfer-dialog.c
+ create mode 100644 src/virt-viewer-file-transfer-dialog.h
+
+diff --git a/po/POTFILES.in b/po/POTFILES.in
+index f270898..e6cc31f 100644
+--- a/po/POTFILES.in
++++ b/po/POTFILES.in
+@@ -8,6 +8,7 @@ src/virt-viewer-app.c
+ src/virt-viewer-auth.c
+ [type: gettext/glade] src/virt-viewer-auth.xml
+ src/virt-viewer-display-vnc.c
++src/virt-viewer-file-transfer-dialog.c
+ src/virt-viewer-main.c
+ src/virt-viewer-session-spice.c
+ src/virt-viewer-session-vnc.c
+diff --git a/src/Makefile.am b/src/Makefile.am
+index b8dbb35..182f58d 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -67,6 +67,7 @@ if HAVE_SPICE_GTK
+ COMMON_SOURCES +=						\
+ 	virt-viewer-session-spice.h virt-viewer-session-spice.c	\
+ 	virt-viewer-display-spice.h virt-viewer-display-spice.c	\
++	virt-viewer-file-transfer-dialog.h virt-viewer-file-transfer-dialog.c \
+ 	$(NULL)
+ endif
+ 
+diff --git a/src/virt-viewer-file-transfer-dialog.c b/src/virt-viewer-file-transfer-dialog.c
+new file mode 100644
+index 0000000..be16518
+--- /dev/null
++++ b/src/virt-viewer-file-transfer-dialog.c
+@@ -0,0 +1,215 @@
++/*
++ * Virt Viewer: A virtual machine console viewer
++ *
++ * Copyright (C) 2016 Red Hat, Inc.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
++#include <config.h>
++
++#include "virt-viewer-file-transfer-dialog.h"
++#include <glib/gi18n.h>
++
++G_DEFINE_TYPE(VirtViewerFileTransferDialog, virt_viewer_file_transfer_dialog, GTK_TYPE_DIALOG)
++
++#define FILE_TRANSFER_DIALOG_PRIVATE(o) \
++        (G_TYPE_INSTANCE_GET_PRIVATE((o), VIRT_VIEWER_TYPE_FILE_TRANSFER_DIALOG, VirtViewerFileTransferDialogPrivate))
++
++struct _VirtViewerFileTransferDialogPrivate
++{
++    /* GHashTable<SpiceFileTransferTask, widgets> */
++    GHashTable *file_transfers;
++};
++
++
++static void
++virt_viewer_file_transfer_dialog_dispose(GObject *object)
++{
++    VirtViewerFileTransferDialog *self = VIRT_VIEWER_FILE_TRANSFER_DIALOG(object);
++
++    g_clear_pointer(&self->priv->file_transfers, g_hash_table_unref);
++
++    G_OBJECT_CLASS(virt_viewer_file_transfer_dialog_parent_class)->dispose(object);
++}
++
++static void
++virt_viewer_file_transfer_dialog_class_init(VirtViewerFileTransferDialogClass *klass)
++{
++    GObjectClass *object_class = G_OBJECT_CLASS(klass);
++
++    g_type_class_add_private(klass, sizeof(VirtViewerFileTransferDialogPrivate));
++
++    object_class->dispose = virt_viewer_file_transfer_dialog_dispose;
++}
++
++static void
++dialog_response(GtkDialog *dialog,
++                gint response_id,
++                gpointer user_data G_GNUC_UNUSED)
++{
++    VirtViewerFileTransferDialog *self = VIRT_VIEWER_FILE_TRANSFER_DIALOG(dialog);
++    GHashTableIter iter;
++    gpointer key, value;
++
++    switch (response_id) {
++        case GTK_RESPONSE_CANCEL:
++            /* cancel all current tasks */
++            g_hash_table_iter_init(&iter, self->priv->file_transfers);
++
++            while (g_hash_table_iter_next(&iter, &key, &value)) {
++                spice_file_transfer_task_cancel(SPICE_FILE_TRANSFER_TASK(key));
++            }
++            break;
++        case GTK_RESPONSE_DELETE_EVENT:
++            /* silently ignore */
++            break;
++        default:
++            g_warn_if_reached();
++    }
++}
++
++static void task_cancel_clicked(GtkButton *button G_GNUC_UNUSED,
++                                gpointer user_data)
++{
++    SpiceFileTransferTask *task = user_data;
++    spice_file_transfer_task_cancel(task);
++}
++
++typedef struct {
++    GtkWidget *vbox;
++    GtkWidget *hbox;
++    GtkWidget *progress;
++    GtkWidget *label;
++    GtkWidget *cancel;
++} TaskWidgets;
++
++static TaskWidgets *task_widgets_new(SpiceFileTransferTask *task)
++{
++    TaskWidgets *w = g_new0(TaskWidgets, 1);
++
++    w->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
++    w->hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 12);
++    w->progress = gtk_progress_bar_new();
++    w->label = gtk_label_new(spice_file_transfer_task_get_filename(task));
++    w->cancel = gtk_button_new_from_icon_name("gtk-cancel", GTK_ICON_SIZE_SMALL_TOOLBAR);
++    gtk_widget_set_hexpand(w->progress, TRUE);
++    gtk_widget_set_valign(w->progress, GTK_ALIGN_CENTER);
++    gtk_widget_set_hexpand(w->label, TRUE);
++    gtk_widget_set_valign(w->label, GTK_ALIGN_END);
++    gtk_widget_set_halign(w->label, GTK_ALIGN_START);
++    gtk_widget_set_hexpand(w->cancel, FALSE);
++    gtk_widget_set_valign(w->cancel, GTK_ALIGN_CENTER);
++
++    g_signal_connect(w->cancel, "clicked",
++                     G_CALLBACK(task_cancel_clicked), task);
++
++    gtk_box_pack_start(GTK_BOX(w->hbox), w->progress, TRUE, TRUE, 0);
++    gtk_box_pack_start(GTK_BOX(w->hbox), w->cancel, FALSE, TRUE, 0);
++    gtk_box_pack_start(GTK_BOX(w->vbox), w->label, TRUE, TRUE, 0);
++    gtk_box_pack_start(GTK_BOX(w->vbox), w->hbox, TRUE, TRUE, 0);
++
++    gtk_widget_show_all(w->vbox);
++    return w;
++}
++
++static gboolean delete_event(GtkWidget *widget,
++                             GdkEvent *event G_GNUC_UNUSED,
++                             gpointer user_data G_GNUC_UNUSED)
++{
++    /* don't allow window to be deleted, just process the response signal,
++     * which may result in the window being hidden */
++    gtk_dialog_response(GTK_DIALOG(widget), GTK_RESPONSE_CANCEL);
++    return TRUE;
++}
++
++static void
++virt_viewer_file_transfer_dialog_init(VirtViewerFileTransferDialog *self)
++{
++    GtkBox *content = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(self)));
++
++    self->priv = FILE_TRANSFER_DIALOG_PRIVATE(self);
++
++    gtk_widget_set_size_request(GTK_WIDGET(content), 400, -1);
++    gtk_container_set_border_width(GTK_CONTAINER(content), 12);
++    self->priv->file_transfers = g_hash_table_new_full(g_direct_hash, g_direct_equal,
++                                                       g_object_unref,
++                                                       (GDestroyNotify)g_free);
++    gtk_dialog_add_button(GTK_DIALOG(self), _("Cancel"), GTK_RESPONSE_CANCEL);
++    gtk_dialog_set_default_response(GTK_DIALOG(self),
++                                    GTK_RESPONSE_CANCEL);
++    g_signal_connect(self, "response", G_CALLBACK(dialog_response), NULL);
++    g_signal_connect(self, "delete-event", G_CALLBACK(delete_event), NULL);
++}
++
++VirtViewerFileTransferDialog *
++virt_viewer_file_transfer_dialog_new(GtkWindow *parent)
++{
++    return g_object_new(VIRT_VIEWER_TYPE_FILE_TRANSFER_DIALOG,
++                        "title", _("File Transfers"),
++                        "transient-for", parent,
++                        "resizable", FALSE,
++                        NULL);
++}
++
++static void task_progress_notify(GObject *object,
++                                 GParamSpec *pspec G_GNUC_UNUSED,
++                                 gpointer user_data)
++{
++    VirtViewerFileTransferDialog *self = VIRT_VIEWER_FILE_TRANSFER_DIALOG(user_data);
++    SpiceFileTransferTask *task = SPICE_FILE_TRANSFER_TASK(object);
++    TaskWidgets *w = g_hash_table_lookup(self->priv->file_transfers, task);
++    g_return_if_fail(w);
++
++    double pct = spice_file_transfer_task_get_progress(task);
++    gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(w->progress), pct);
++}
++
++static void task_finished(SpiceFileTransferTask *task,
++                          GError *error,
++                          gpointer user_data)
++{
++    VirtViewerFileTransferDialog *self = VIRT_VIEWER_FILE_TRANSFER_DIALOG(user_data);
++    TaskWidgets *w = g_hash_table_lookup(self->priv->file_transfers, task);
++
++    if (error && !g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
++        g_warning("File transfer task %p failed: %s", task, error->message);
++
++    g_return_if_fail(w);
++
++    gtk_widget_destroy(w->vbox);
++
++    g_hash_table_remove(self->priv->file_transfers, task);
++
++    /* if this is the last transfer, close the dialog */
++    if (!g_hash_table_size(self->priv->file_transfers))
++        gtk_widget_hide(GTK_WIDGET(self));
++}
++
++void virt_viewer_file_transfer_dialog_add_task(VirtViewerFileTransferDialog *self,
++                                               SpiceFileTransferTask *task)
++{
++    GtkBox *content = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(self)));
++    TaskWidgets *w = task_widgets_new(task);
++
++    gtk_box_pack_start(content,
++                       w->vbox,
++                       TRUE, TRUE, 12);
++    g_hash_table_insert(self->priv->file_transfers, g_object_ref(task), w);
++    g_signal_connect(task, "notify::progress", G_CALLBACK(task_progress_notify), self);
++    g_signal_connect(task, "finished", G_CALLBACK(task_finished), self);
++
++    gtk_widget_show(GTK_WIDGET(self));
++}
+diff --git a/src/virt-viewer-file-transfer-dialog.h b/src/virt-viewer-file-transfer-dialog.h
+new file mode 100644
+index 0000000..8805b14
+--- /dev/null
++++ b/src/virt-viewer-file-transfer-dialog.h
+@@ -0,0 +1,61 @@
++/*
++ * Virt Viewer: A virtual machine console viewer
++ *
++ * Copyright (C) 2016 Red Hat, Inc.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
++#ifndef __VIRT_VIEWER_FILE_TRANSFER_DIALOG_H__
++#define __VIRT_VIEWER_FILE_TRANSFER_DIALOG_H__
++
++#include <gtk/gtk.h>
++#include <spice-client.h>
++
++G_BEGIN_DECLS
++
++#define VIRT_VIEWER_TYPE_FILE_TRANSFER_DIALOG virt_viewer_file_transfer_dialog_get_type()
++
++#define VIRT_VIEWER_FILE_TRANSFER_DIALOG(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), VIRT_VIEWER_TYPE_FILE_TRANSFER_DIALOG, VirtViewerFileTransferDialog))
++#define VIRT_VIEWER_FILE_TRANSFER_DIALOG_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST((klass), VIRT_VIEWER_TYPE_FILE_TRANSFER_DIALOG, VirtViewerFileTransferDialogClass))
++#define VIRT_VIEWER_IS_FILE_TRANSFER_DIALOG(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), VIRT_VIEWER_TYPE_FILE_TRANSFER_DIALOG))
++#define VIRT_VIEWER_IS_FILE_TRANSFER_DIALOG_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass), VIRT_VIEWER_TYPE_FILE_TRANSFER_DIALOG))
++#define VIRT_VIEWER_FILE_TRANSFER_DIALOG_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS((obj), VIRT_VIEWER_TYPE_FILE_TRANSFER_DIALOG, VirtViewerFileTransferDialogClass))
++
++typedef struct _VirtViewerFileTransferDialog VirtViewerFileTransferDialog;
++typedef struct _VirtViewerFileTransferDialogClass VirtViewerFileTransferDialogClass;
++typedef struct _VirtViewerFileTransferDialogPrivate VirtViewerFileTransferDialogPrivate;
++
++struct _VirtViewerFileTransferDialog
++{
++    GtkDialog parent;
++
++    VirtViewerFileTransferDialogPrivate *priv;
++};
++
++struct _VirtViewerFileTransferDialogClass
++{
++    GtkDialogClass parent_class;
++};
++
++GType virt_viewer_file_transfer_dialog_get_type(void) G_GNUC_CONST;
++
++VirtViewerFileTransferDialog *virt_viewer_file_transfer_dialog_new(GtkWindow *parent);
++void virt_viewer_file_transfer_dialog_add_task(VirtViewerFileTransferDialog *self,
++                                               SpiceFileTransferTask *task);
++
++G_END_DECLS
++
++#endif /* __VIRT_VIEWER_FILE_TRANSFER_DIALOG_H__ */
+diff --git a/src/virt-viewer-session-spice.c b/src/virt-viewer-session-spice.c
+index 1f5242c..326336f 100644
+--- a/src/virt-viewer-session-spice.c
++++ b/src/virt-viewer-session-spice.c
+@@ -33,21 +33,13 @@
+ 
+ #include <usb-device-widget.h>
+ #include "virt-viewer-file.h"
++#include "virt-viewer-file-transfer-dialog.h"
+ #include "virt-viewer-util.h"
+ #include "virt-viewer-session-spice.h"
+ #include "virt-viewer-display-spice.h"
+ #include "virt-viewer-auth.h"
+ #include "virt-glib-compat.h"
+ 
+-#if !GLIB_CHECK_VERSION(2, 26, 0)
+-#include "gbinding.h"
+-#include "gbinding.c"
+-#endif
+-
+-#ifndef SPICE_GTK_CHECK_VERSION
+-#define SPICE_GTK_CHECK_VERSION(x, y, z) 0
+-#endif
+-
+ G_DEFINE_TYPE (VirtViewerSessionSpice, virt_viewer_session_spice, VIRT_VIEWER_TYPE_SESSION)
+ 
+ 
+@@ -62,6 +54,8 @@ struct _VirtViewerSessionSpicePrivate {
+     gboolean has_sw_smartcard_reader;
+     guint pass_try;
+     gboolean did_auto_conf;
++    VirtViewerFileTransferDialog *file_transfer_dialog;
++
+ };
+ 
+ #define VIRT_VIEWER_SESSION_SPICE_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE((o), VIRT_VIEWER_TYPE_SESSION_SPICE, VirtViewerSessionSpicePrivate))
+@@ -132,8 +126,11 @@ virt_viewer_session_spice_dispose(GObject *obj)
+ 
+     spice->priv->audio = NULL;
+ 
+-    if (spice->priv->main_window)
+-        g_object_unref(spice->priv->main_window);
++    g_clear_object(&spice->priv->main_window);
++    if (spice->priv->file_transfer_dialog) {
++        gtk_widget_destroy(GTK_WIDGET(spice->priv->file_transfer_dialog));
++        spice->priv->file_transfer_dialog = NULL;
++    }
+ 
+     G_OBJECT_CLASS(virt_viewer_session_spice_parent_class)->dispose(obj);
+ }
+@@ -146,6 +143,17 @@ virt_viewer_session_spice_mime_type(VirtViewerSession *self G_GNUC_UNUSED)
+ }
+ 
+ static void
++virt_viewer_session_spice_constructed(GObject *obj)
++{
++    VirtViewerSessionSpice *self = VIRT_VIEWER_SESSION_SPICE(obj);
++
++    self->priv->file_transfer_dialog =
++        virt_viewer_file_transfer_dialog_new(self->priv->main_window);
++
++    G_OBJECT_CLASS(virt_viewer_session_spice_parent_class)->constructed(obj);
++}
++
++static void
+ virt_viewer_session_spice_class_init(VirtViewerSessionSpiceClass *klass)
+ {
+     VirtViewerSessionClass *dclass = VIRT_VIEWER_SESSION_CLASS(klass);
+@@ -154,6 +162,7 @@ virt_viewer_session_spice_class_init(VirtViewerSessionSpiceClass *klass)
+     oclass->get_property = virt_viewer_session_spice_get_property;
+     oclass->set_property = virt_viewer_session_spice_set_property;
+     oclass->dispose = virt_viewer_session_spice_dispose;
++    oclass->constructed = virt_viewer_session_spice_constructed;
+ 
+     dclass->close = virt_viewer_session_spice_close;
+     dclass->open_fd = virt_viewer_session_spice_open_fd;
+@@ -777,6 +786,16 @@ virt_viewer_session_spice_display_monitors(SpiceChannel *channel,
+ }
+ 
+ static void
++on_new_file_transfer(SpiceMainChannel *channel G_GNUC_UNUSED,
++                     SpiceFileTransferTask *task,
++                     gpointer user_data)
++{
++    VirtViewerSessionSpice *self = VIRT_VIEWER_SESSION_SPICE(user_data);
++    virt_viewer_file_transfer_dialog_add_task(self->priv->file_transfer_dialog,
++                                              task);
++}
++
++static void
+ virt_viewer_session_spice_channel_new(SpiceSession *s,
+                                       SpiceChannel *channel,
+                                       VirtViewerSession *session)
+@@ -808,6 +827,8 @@ virt_viewer_session_spice_channel_new(SpiceSession *s,
+ 
+         virt_viewer_signal_connect_object(channel, "notify::agent-connected",
+                                           G_CALLBACK(agent_connected_changed), self, 0);
++        virt_viewer_signal_connect_object(channel, "new-file-transfer",
++                                          G_CALLBACK(on_new_file_transfer), self, 0);
+     }
+ 
+     if (SPICE_IS_DISPLAY_CHANNEL(channel)) {

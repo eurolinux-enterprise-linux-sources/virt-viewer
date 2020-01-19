@@ -1,0 +1,41 @@
+From 9a291dcbcf8962c29377978fbf6e08ff3b402d85 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabiano=20Fid=C3=AAncio?= <fidencio@redhat.com>
+Date: Mon, 7 Mar 2016 09:25:23 +0100
+Subject: [PATCH] app: monitor-config - do it all or nothing
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Don't keep trying to use a monitor config when it already failed for one
+monitor, otherwise virt-viewer can end up in a situation where none of
+the displays are enabled but the program is still running.
+So, in case of any failure, let's skip the whole monitor config, forcing
+virt-viewer to use the "fallback" one instead.
+
+Resolves: rhbz#1315206
+
+Signed-off-by: Fabiano Fidêncio <fidencio@redhat.com>
+Acked-by: Pavel Grunt <pgrunt@redhat.com>
+(cherry picked from commit 5f269245356b49bcae0da74c33517fd54466490f)
+---
+ src/virt-viewer-app.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/src/virt-viewer-app.c b/src/virt-viewer-app.c
+index 2481a1f..7d9b168 100644
+--- a/src/virt-viewer-app.c
++++ b/src/virt-viewer-app.c
+@@ -407,9 +407,10 @@ virt_viewer_app_parse_monitor_mappings(gchar **mappings, gsize nmappings)
+         }
+         g_strfreev(tokens);
+ 
+-        if (monitor > nmonitors)
+-            g_warning("Initial monitor #%i for display #%i does not exist, skipping...", monitor, display);
+-        else {
++        if (monitor > nmonitors) {
++            g_warning("Invalid monitor-mapping configuration: monitor #%i for display #%i does not exist", monitor, display);
++            goto configerror;
++        } else {
+             /* config file format is 1-based, not 0-based */
+             display--;
+             monitor--;

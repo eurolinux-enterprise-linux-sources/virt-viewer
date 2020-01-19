@@ -1,0 +1,44 @@
+From bca8df0e4bf7d63b5c954ea79e1020407905bbe8 Mon Sep 17 00:00:00 2001
+From: Pavel Grunt <pgrunt@redhat.com>
+Date: Sun, 5 Apr 2015 15:45:01 +0200
+Subject: [PATCH] virt-viewer-window: Return early when zoom of window and zoom
+ of display are same
+
+The zoom level should be changed when zoom levels of the window and
+the display are different. It is wrong to check the previous value of
+the window because it could be set just for the window and not for
+the display (e.g. when setting zoom level using the command line).
+
+Related to: https://bugzilla.redhat.com/show_bug.cgi?id=1206460
+
+(cherry picked from commit 01249f703263ef6a8be59479df5cf6c5e8b1ceb9)
+---
+ src/virt-viewer-window.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/src/virt-viewer-window.c b/src/virt-viewer-window.c
+index f185eb9..6a337da 100644
+--- a/src/virt-viewer-window.c
++++ b/src/virt-viewer-window.c
+@@ -1400,11 +1400,10 @@ void
+ virt_viewer_window_set_zoom_level(VirtViewerWindow *self, gint zoom_level)
+ {
+     VirtViewerWindowPrivate *priv;
+-    gint min_zoom, old_zoom;
++    gint min_zoom;
+ 
+     g_return_if_fail(VIRT_VIEWER_IS_WINDOW(self));
+     priv = self->priv;
+-    old_zoom = priv->zoomlevel;
+ 
+     if (zoom_level < MIN_ZOOM_LEVEL)
+         zoom_level = MIN_ZOOM_LEVEL;
+@@ -1421,7 +1420,7 @@ virt_viewer_window_set_zoom_level(VirtViewerWindow *self, gint zoom_level)
+         priv->zoomlevel = min_zoom;
+     }
+ 
+-    if (priv->zoomlevel == old_zoom) {
++    if (priv->zoomlevel == virt_viewer_display_get_zoom_level(priv->display)) {
+         g_debug("Zoom level not changed, using: %d", priv->zoomlevel);
+         return;
+     }
