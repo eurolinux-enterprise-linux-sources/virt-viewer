@@ -24,7 +24,7 @@
 
 Name: virt-viewer
 Version: 5.0
-Release: 10%{?dist}%{?extra_release}
+Release: 11%{?dist}%{?extra_release}
 Summary: Virtual Machine Viewer
 Group: Applications/System
 License: GPLv2+
@@ -83,12 +83,10 @@ Patch0050: 0050-remote-viewer-Pass-guri-to-remote_viewer_session_con.patch
 Patch0051: 0051-doc-Adjust-reference-to-spice-gtk-man-page.patch
 Patch0052: 0052-doc-Adjust-reference-to-spice-gtk-man-page-for-remot.patch
 Patch0053: 0053-Update-translations-from-zanata.patch
-
+Patch0054: 0054-remote-viewer-remove-spice-controller.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: openssh-clients
-Requires(post):   %{_sbindir}/update-alternatives
-Requires(postun): %{_sbindir}/update-alternatives
 Requires(post): desktop-file-utils
 Requires(postun): desktop-file-utils
 
@@ -106,7 +104,7 @@ BuildRequires: pkgconfig(libvirt-glib-1.0) >= 0.1.8
 BuildRequires: pkgconfig(libxml-2.0) >= 2.6.0
 BuildRequires: pkgconfig(gtk-vnc-2.0) >= 0.4.0
 %if %{with_spice}
-BuildRequires: pkgconfig(spice-client-gtk-3.0) >= 0.33
+BuildRequires: pkgconfig(spice-client-gtk-3.0) >= 0.35
 BuildRequires: pkgconfig(spice-protocol) >= 0.12.12
 %endif
 BuildRequires: /usr/bin/pod2man
@@ -179,6 +177,7 @@ the display, and libvirt for looking up VNC/SPICE server details.
 %patch0051 -p1
 %patch0052 -p1
 %patch0053 -p1
+%patch0054 -p1
 
 %build
 
@@ -203,9 +202,6 @@ autoreconf -if
 %install
 rm -rf $RPM_BUILD_ROOT
 %__make install  DESTDIR=$RPM_BUILD_ROOT
-mkdir -p %{buildroot}%{_libexecdir}
-touch %{buildroot}%{_libexecdir}/spice-xpi-client
-install -m 0755 data/spice-xpi-client-remote-viewer %{buildroot}%{_libexecdir}/
 %find_lang %{name}
 
 %clean
@@ -214,8 +210,6 @@ rm -rf $RPM_BUILD_ROOT
 %post
 /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
 /bin/touch --no-create %{_datadir}/mime/packages &> /dev/null || :
-%{_sbindir}/update-alternatives --install %{_libexecdir}/spice-xpi-client \
-  spice-xpi-client %{_libexecdir}/spice-xpi-client-remote-viewer 25
 %{_bindir}/update-desktop-database -q %{_datadir}/applications
 
 %postun
@@ -223,7 +217,6 @@ if [ $1 -eq 0 ] ; then
   /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null
   %{_bindir}/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
   %{_bindir}/update-mime-database %{_datadir}/mime &> /dev/null || :
-  %{_sbindir}/update-alternatives --remove spice-xpi-client %{_libexecdir}/spice-xpi-client-remote-viewer
 fi
 %{_bindir}/update-desktop-database -q %{_datadir}/applications
 
@@ -241,12 +234,14 @@ fi
 %{_datadir}/applications/remote-viewer.desktop
 %{_datadir}/appdata/remote-viewer.appdata.xml
 %{_datadir}/mime/packages/virt-viewer-mime.xml
-%ghost %{_libexecdir}/spice-xpi-client
-%{_libexecdir}/spice-xpi-client-remote-viewer
 %{_mandir}/man1/virt-viewer.1*
 %{_mandir}/man1/remote-viewer.1*
 
 %changelog
+* Wed Jun 13 2018 Victor Toso <victortoso@redhat.com> - 5.0-11
+- Disable spice-controller in virt-viewer
+  Resolves: rhbz#1590457
+
 * Mon Dec 11 2017 Eduardo Lima (Etrunko) <etrunko@redhat.com> - 5.0-10
 - Adjust reference to spice-gtk man page for remote-viewer
   Resolves: rhbz#1477966
