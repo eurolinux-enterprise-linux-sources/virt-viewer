@@ -1,0 +1,30 @@
+From cb6c7c5003b47eb6b65b3e739a4fb8a464b6075e Mon Sep 17 00:00:00 2001
+From: "Eduardo Lima (Etrunko)" <etrunko@redhat.com>
+Date: Fri, 31 May 2019 12:10:20 -0300
+Subject: [PATCH virt-viewer] configure: Fix check for govirt functions
+
+Use saved CFLAGS and LIBS to avoid errors in the check programs.
+
+Signed-off-by: Eduardo Lima (Etrunko) <etrunko@redhat.com>
+---
+ configure.ac | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index abdbdaf..fcdbdf6 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -182,8 +182,8 @@ AS_IF([test "x$with_ovirt" = "xyes"],
+       [AC_DEFINE([HAVE_OVIRT], 1, [Have libgovirt?])]
+       [SAVED_CFLAGS="$CFLAGS"
+        SAVED_LIBS="$LIBS"
+-       CFLAGS="$OVIRT_CFLAGS"
+-       LIBS="$OVIRT_LIBS"
++       CFLAGS="$SAVED_CFLAGS $OVIRT_CFLAGS"
++       LIBS="$SAVED_LIBS $OVIRT_LIBS"
+        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <govirt/govirt.h>]],
+         [static int err = OVIRT_REST_CALL_ERROR_CANCELLED;
+          void *fun = rest_proxy_auth_cancel;])],
+-- 
+2.21.0
+

@@ -1,0 +1,28 @@
+From 5d80d344729f1edd844dc022e581e9ba27c52f35 Mon Sep 17 00:00:00 2001
+From: Victor Toso <me@victortoso.com>
+Date: Wed, 30 May 2018 14:43:59 +0200
+Subject: [PATCH] remote-viewer-connect: centralize window
+
+Instead of top-left corner.
+
+Resolves: https://bugzilla.redhat.com/show_bug.cgi?id=1508274
+
+Signed-off-by: Victor Toso <victortoso@redhat.com>
+Acked-by: Eduardo Lima (Etrunko) <etrunko@redhat.com>
+(cherry picked from commit c127a80fc6b98404207f8e1874097dfd94d76f4a)
+---
+ src/resources/ui/remote-viewer-connect.ui | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/resources/ui/remote-viewer-connect.ui b/src/resources/ui/remote-viewer-connect.ui
+index 308d121..b2f3f09 100644
+--- a/src/resources/ui/remote-viewer-connect.ui
++++ b/src/resources/ui/remote-viewer-connect.ui
+@@ -4,6 +4,7 @@
+   <object class="GtkWindow" id="remote-viewer-connection-window">
+     <property name="can_focus">False</property>
+     <property name="title" translatable="yes">Connection details</property>
++    <property name="window-position">3</property>
+     <child>
+       <object class="GtkVBox" id="main-box">
+         <property name="visible">True</property>

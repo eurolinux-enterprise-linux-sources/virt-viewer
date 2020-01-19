@@ -24,7 +24,7 @@
 
 Name: virt-viewer
 Version: 5.0
-Release: 11%{?dist}%{?extra_release}
+Release: 15%{?dist}%{?extra_release}
 Summary: Virtual Machine Viewer
 Group: Applications/System
 License: GPLv2+
@@ -84,11 +84,20 @@ Patch0051: 0051-doc-Adjust-reference-to-spice-gtk-man-page.patch
 Patch0052: 0052-doc-Adjust-reference-to-spice-gtk-man-page-for-remot.patch
 Patch0053: 0053-Update-translations-from-zanata.patch
 Patch0054: 0054-remote-viewer-remove-spice-controller.patch
+Patch0055: 0055-remote-viewer-connect-centralize-window.patch
+Patch0056: 0056-app-Always-add-guest-name-comment.patch
+Patch0057: 0057-Mark-PrintScreen-as-translatable.patch
+Patch0058: 0058-ovirt-foreign-menu-Bypass-errors-from-Host-Cluster-D.patch
+Patch0059: 0059-Spice-listen-for-new-SpiceSession-disconnected-signa.patch
+Patch0060: 0060-Fix-a-regression-when-initial-connection-fails.patch
+Patch0061: 0061-configure-Fix-check-for-govirt-functions.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: openssh-clients
 Requires(post): desktop-file-utils
 Requires(postun): desktop-file-utils
+Requires(post): %{_sbindir}/update-alternatives
+Requires(postun): %{_sbindir}/update-alternatives
 
 %if 0%{?enable_autotools}
 BuildRequires: autoconf
@@ -178,6 +187,13 @@ the display, and libvirt for looking up VNC/SPICE server details.
 %patch0052 -p1
 %patch0053 -p1
 %patch0054 -p1
+%patch0055 -p1
+%patch0056 -p1
+%patch0057 -p1
+%patch0058 -p1
+%patch0059 -p1
+%patch0060 -p1
+%patch0061 -p1
 
 %build
 
@@ -211,8 +227,13 @@ rm -rf $RPM_BUILD_ROOT
 /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
 /bin/touch --no-create %{_datadir}/mime/packages &> /dev/null || :
 %{_bindir}/update-desktop-database -q %{_datadir}/applications
+if [ $1 -eq 2 ] ; then
+  # Here due 1658325, postun alone is not enough. Can be removed later on.
+  %{_sbindir}/update-alternatives --remove spice-xpi-client %{_libexecdir}/spice-xpi-client-remote-viewer || :
+fi
 
 %postun
+%{_sbindir}/update-alternatives --remove spice-xpi-client %{_libexecdir}/spice-xpi-client-remote-viewer || :
 if [ $1 -eq 0 ] ; then
   /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null
   %{_bindir}/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
@@ -238,6 +259,28 @@ fi
 %{_mandir}/man1/remote-viewer.1*
 
 %changelog
+* Fri May 31 2019 Eduardo Lima (Etrunko) <etrunko@redhat.com> - 5.0.15
+- Fix check for ovirt functions
+  Related: rhbz#1427467
+
+* Wed May 22 2019 Victor Toso <victortoso@redhat.com> - 5.0-14
+- Listen to SpiceSession::disconnected
+  Resolves: rhbz#1505809
+
+* Wed Apr 10 2019 Eduardo Lima (Etrunko) <etrunko@redhat.com> - 5.0.13
+- Bypass errors from oVirt foreign menu queries
+  Related: rhbz#1428401
+
+* Fri Mar 15 2019 Victor Toso <victortoso@redhat.com> - 5.0-12
+- Centralize recent dialog
+  Resolves: rhbz#1508274
+- Always add guest name as comment
+  Resolves: rhbz#1623756
+- Mark PrintScreen as translatable
+  Resolves: rhbz#1510411
+- Remove symlink to spice-xpi-client-remote-viewer on update (it was dropped)
+  Resolves: rhbz#1658325
+
 * Wed Jun 13 2018 Victor Toso <victortoso@redhat.com> - 5.0-11
 - Disable spice-controller in virt-viewer
   Resolves: rhbz#1590457
